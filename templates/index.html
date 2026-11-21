@@ -6,311 +6,153 @@
     <title>OMAR ASTANA — Мужская одежда и обувь</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>document.documentElement.classList.add('js');</script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --paper: #d8d8d6;
-            --tile: #cbcbc9;
-            --ink: #000000;
-            --muted: #55554f;
-            --line: rgba(0, 0, 0, 0.22);
-            --oxblood: #8a2a25;
-            --dark: #1c1b1a;
-            --pad: clamp(16px, 3.4vw, 48px);
+            --bg: #fafaf8;
+            --surface: #f1f1ee;
+            --ink: #161616;
+            --muted: #77776f;
+            --line: #e2e2dd;
+            --accent: #8a2a25;
+            --ok: #2f6b4a;
+            --ok-bg: #e6f0ea;
+            --wait: #8a5a14;
+            --wait-bg: #f6ecd9;
+            --pad: clamp(18px, 4vw, 56px);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         html { scroll-behavior: smooth; }
 
         body {
             font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
-            background: var(--paper);
+            background: var(--bg);
             color: var(--ink);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            line-height: 1.45;
+            line-height: 1.5;
             -webkit-font-smoothing: antialiased;
         }
 
         a { color: inherit; }
-        img { display: block; }
-
-        :focus-visible { outline: 2px solid var(--oxblood); outline-offset: 3px; }
+        img { display: block; max-width: 100%; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
         /* ---------- Шапка ---------- */
         .site-header {
             position: sticky;
             top: 0;
             z-index: 50;
-            background: var(--paper);
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 24px;
-            padding: 18px var(--pad) 14px;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            line-height: 1.3;
+            padding: 18px var(--pad);
+            background: rgba(250, 250, 248, 0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--line);
+            font-size: 15px;
         }
 
-        .site-header a { text-decoration: none; }
-        .site-header a:hover { text-decoration: underline; text-underline-offset: 4px; }
+        .brand { font-weight: 700; font-size: 17px; letter-spacing: 0.02em; text-decoration: none; }
 
-        .brand-block { min-width: 150px; }
-        .brand { font-weight: 700; display: block; }
-        .clock { display: block; font-weight: 500; color: var(--muted); }
-
-        .nav-col { display: flex; flex-direction: column; }
-        .nav-cta a { display: inline-flex; align-items: center; gap: 8px; }
+        .nav { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+        .nav a { text-decoration: none; color: var(--muted); font-weight: 500; transition: color 0.15s; }
+        .nav a:hover, .nav a.on { color: var(--ink); }
 
         .badge {
-            background: var(--oxblood);
+            background: var(--accent);
             color: #fff;
             font-size: 11px;
-            font-weight: 700;
-            padding: 1px 6px;
+            font-weight: 600;
+            padding: 1px 7px;
+            border-radius: 99px;
             margin-left: 6px;
             vertical-align: 1px;
         }
 
         /* ---------- Уведомления ---------- */
-        .alerts { padding: 0 var(--pad); }
+        .alerts { padding: 20px var(--pad) 0; }
 
         .alert {
-            border-left: 3px solid var(--ink);
-            background: rgba(255, 255, 255, 0.35);
             padding: 12px 16px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-size: 14px;
-            font-weight: 500;
+            background: var(--surface);
+            border-left: 3px solid var(--ink);
         }
 
-        .alert.error { border-left-color: var(--oxblood); color: var(--oxblood); }
+        .alert.error { border-left-color: var(--accent); color: var(--accent); }
+        .alert.success { border-left-color: var(--ok); }
         .alert.info { border-left-color: var(--muted); }
 
-        /* ---------- Главный экран (прокрутка вращает костюм) ---------- */
-        :root { --hdr: 70px; }
+        /* ---------- Вступление каталога ---------- */
+        .intro { padding: clamp(56px, 10vw, 128px) var(--pad) clamp(32px, 5vw, 64px); }
 
-        .hero { position: relative; height: 480vh; }
-
-        .hero-stage {
-            position: sticky;
-            top: var(--hdr);
-            height: calc(100svh - var(--hdr));
-            min-height: 560px;
-            overflow: hidden;
-            background: var(--paper);
-        }
-
-        .wordmark {
-            position: absolute;
-            top: 1.5vh;
-            left: var(--pad);
-            right: var(--pad);
-            z-index: 1;
-            font-size: 31vw;
-            font-weight: 800;
-            letter-spacing: -0.045em;
-            line-height: 0.8;
-            white-space: nowrap;
-        }
-
-        .wordmark span { display: inline-block; margin-left: -0.04em; }
-
-        .suit {
-            position: absolute;
-            left: 50%;
-            bottom: -3%;
-            height: 88%;
-            aspect-ratio: 510 / 900;
-            transform: translateX(-50%);
-            z-index: 2;
-            will-change: transform;
-        }
-
-        .suit-in {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            animation: rise 1.2s cubic-bezier(0.2, 0.7, 0.1, 1) both;
-        }
-
-        .suit .suit-poster {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        /* холст чуть больше костюма: при повороте края в перспективе не обрезаются */
-        .suit canvas {
-            position: absolute;
-            left: -14%;
-            right: -14%;
-            top: -12%;
-            bottom: 0;
-            width: 128%;
-            height: 112%;
-            opacity: 0;
-        }
-
-        .suit.ready canvas { opacity: 1; }
-        .suit.ready .suit-poster { opacity: 0; }
-
-        @keyframes rise {
-            from { clip-path: inset(100% -30% 0 -30%); }
-            to { clip-path: inset(-20% -30% 0 -30%); }
-        }
-
-        .hero-note,
-        .hero-scroll,
-        .cap {
-            position: absolute;
-            z-index: 3;
-            font-size: 14px;
+        .intro h1 {
+            font-size: clamp(2.4rem, 6.5vw, 5rem);
             font-weight: 600;
-            text-transform: uppercase;
-            line-height: 1.3;
+            letter-spacing: -0.035em;
+            line-height: 1.02;
+            max-width: 14ch;
         }
 
-        .hero-note,
-        .hero-scroll { bottom: 26px; }
-
-        .hero-note { left: var(--pad); max-width: 24ch; }
-        .hero-scroll { right: var(--pad); text-decoration: none; }
-
-        .cap { max-width: 24ch; opacity: 0; pointer-events: none; }
-        .cap-0 { left: var(--pad); top: 58%; }
-        .cap-1 { right: var(--pad); top: 66%; text-align: right; }
-        .cap-2 { left: var(--pad); top: 56%; }
-        .cap-3 { right: var(--pad); top: 68%; text-align: right; }
-        .cap-4 { left: var(--pad); bottom: 26px; }
+        .intro p { color: var(--muted); font-size: 17px; margin-top: 20px; max-width: 42ch; }
 
         /* ---------- Каталог ---------- */
-        .collection { padding: clamp(48px, 8vw, 110px) var(--pad) 0; }
-
-        .coll-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 24px;
-            flex-wrap: wrap;
-            border-bottom: 1px solid var(--ink);
-            padding-bottom: 20px;
-            margin-bottom: 40px;
-        }
-
-        .coll-title {
-            font-size: clamp(2.6rem, 7vw, 6.5rem);
-            font-weight: 800;
-            letter-spacing: -0.05em;
-            line-height: 0.9;
-        }
+        .collection { padding: 0 var(--pad); }
 
         .filters {
             display: flex;
-            gap: 6px 22px;
+            gap: 8px 26px;
             flex-wrap: wrap;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
+            padding: 18px 0;
+            border-top: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 40px;
+            font-size: 15px;
         }
 
-        .filters a { text-decoration: none; color: var(--muted); }
+        .filters a { text-decoration: none; color: var(--muted); font-weight: 500; }
         .filters a:hover { color: var(--ink); }
-        .filters a.on {
-            color: var(--ink);
-            text-decoration: underline;
-            text-decoration-thickness: 2px;
-            text-underline-offset: 6px;
-        }
+        .filters a.on { color: var(--ink); text-decoration: underline; text-underline-offset: 7px; text-decoration-thickness: 1.5px; }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
-            gap: 48px 22px;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+            gap: 52px 24px;
         }
 
         .product { display: flex; flex-direction: column; }
 
-        .product-img {
-            aspect-ratio: 4 / 5;
-            background: var(--tile);
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-
+        .product-img { aspect-ratio: 4 / 5; background: var(--surface); overflow: hidden; margin-bottom: 14px; }
         .product-img img { width: 100%; height: 100%; object-fit: cover; }
 
-        .product-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 16px;
-        }
-
-        .product-top h3 { font-size: 17px; font-weight: 600; line-height: 1.25; }
-        .price { font-size: 17px; font-weight: 700; white-space: nowrap; }
+        .product-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+        .product-top h3 { font-size: 16px; font-weight: 600; line-height: 1.3; }
+        .price { font-size: 16px; font-weight: 600; white-space: nowrap; }
         .product-cat { font-size: 13px; color: var(--muted); margin-top: 2px; }
         .product-desc { font-size: 14px; color: var(--muted); margin: 10px 0 18px; flex: 1; }
 
-        .buy {
-            display: grid;
-            grid-template-columns: 110px 1fr;
-            gap: 16px;
-            align-items: end;
-        }
-
+        .buy { display: grid; grid-template-columns: 112px 1fr; gap: 16px; align-items: end; }
         .buy select { margin: 0; }
         .empty { color: var(--muted); padding: 40px 0; }
 
-        .collection {
-            background: var(--dark);
-            --ink: #f2f1ee;
-            --muted: #a8a7a2;
-            --line: rgba(255, 255, 255, 0.22);
-            --tile: #2a2928;
-            color: var(--ink);
-            padding-bottom: clamp(64px, 9vw, 120px);
-        }
-
-        .collection .btn { color: var(--dark); }
-        .collection .btn:hover { color: #fff; }
-
-        .collection select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E");
-        }
-
-        .collection option { color: #000; }
-        .collection + .site-footer { margin-top: 0; border-top: 1px solid rgba(255, 255, 255, 0.14); }
-
-        .js .product {
-            opacity: 0;
-            transform: translateY(32px);
-            transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.1, 1);
-            transition-delay: calc(var(--i, 0) * 90ms);
-        }
-
-        .js .product.in { opacity: 1; transform: none; }
-
         /* ---------- Внутренние страницы ---------- */
-        .page { flex: 1; padding: clamp(28px, 5vw, 64px) var(--pad) 0; }
+        .page { flex: 1; padding: clamp(40px, 6vw, 80px) var(--pad) 0; }
 
         .page-title {
-            font-size: clamp(3rem, 10vw, 9.5rem);
-            font-weight: 800;
-            letter-spacing: -0.05em;
-            line-height: 0.88;
-            margin-bottom: clamp(28px, 4vw, 56px);
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: clamp(24px, 4vw, 48px);
         }
 
-        .sub { color: var(--muted); font-size: 15px; max-width: 44ch; margin-bottom: 28px; }
-        .form-wrap { max-width: 460px; }
+        .sub { color: var(--muted); font-size: 16px; max-width: 44ch; margin-bottom: 28px; }
+        .form-wrap { max-width: 440px; }
         .alt-link { margin-top: 22px; font-size: 14px; color: var(--muted); }
         .alt-link a { color: var(--ink); font-weight: 600; }
 
@@ -318,40 +160,27 @@
         .btn {
             display: inline-block;
             background: var(--ink);
-            color: var(--paper);
+            color: #fff;
             border: 1px solid var(--ink);
-            padding: 15px 26px;
+            border-radius: 2px;
+            padding: 14px 26px;
             font-family: inherit;
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+            font-size: 15px;
+            font-weight: 500;
             text-align: center;
             text-decoration: none;
             cursor: pointer;
-            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
         }
 
-        .btn:hover { background: var(--oxblood); border-color: var(--oxblood); color: #fff; }
-
+        .btn:hover { background: var(--accent); border-color: var(--accent); }
         .btn-outline { background: transparent; color: var(--ink); }
-        .btn-outline:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-
-        .btn-accent { background: var(--oxblood); border-color: var(--oxblood); color: #fff; }
+        .btn-outline:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+        .btn-accent { background: var(--accent); border-color: var(--accent); }
         .btn-accent:hover { background: var(--ink); border-color: var(--ink); }
-
         .btn-block { width: 100%; }
-        .btn-sm { padding: 10px 14px; }
 
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--muted);
-            margin-bottom: 2px;
-        }
+        label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 2px; }
 
         input, select {
             width: 100%;
@@ -370,20 +199,14 @@
 
         select {
             padding-right: 24px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23161616' stroke-width='1.5'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 2px center;
             cursor: pointer;
         }
 
-        input::placeholder { color: #7d7d78; }
-
-        input:focus, select:focus {
-            outline: none;
-            border-bottom: 2px solid var(--oxblood);
-            padding-bottom: 11px;
-        }
-
+        input::placeholder { color: #a3a39b; }
+        input:focus, select:focus { outline: none; border-bottom: 2px solid var(--accent); padding-bottom: 11px; }
         .phone-input { font-variant-numeric: tabular-nums; }
 
         /* ---------- Корзина ---------- */
@@ -392,34 +215,34 @@
             grid-template-columns: 96px 1fr auto;
             gap: 20px;
             align-items: center;
-            padding: 18px 0;
+            padding: 20px 0;
             border-top: 1px solid var(--line);
         }
 
-        .cart-row:first-child { border-top: 1px solid var(--ink); }
-        .cart-thumb { width: 96px; height: 96px; object-fit: cover; background: var(--tile); }
-        .cart-title { font-size: 17px; font-weight: 600; }
+        .cart-thumb { width: 96px; height: 96px; object-fit: cover; background: var(--surface); }
+        .cart-title { font-size: 16px; font-weight: 600; }
         .cart-meta { font-size: 14px; color: var(--muted); }
-        .cart-price { font-weight: 700; margin-top: 4px; }
+        .cart-price { font-weight: 600; margin-top: 4px; }
 
         .qty-col { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
         .qty { display: flex; align-items: center; gap: 6px; }
 
         .qty a {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             display: grid;
             place-items: center;
-            border: 1px solid var(--ink);
+            border: 1px solid var(--line);
+            border-radius: 2px;
             text-decoration: none;
             font-size: 18px;
             line-height: 1;
         }
 
-        .qty a:hover { background: var(--ink); color: var(--paper); }
-        .qty b { min-width: 30px; text-align: center; font-weight: 700; }
+        .qty a:hover { border-color: var(--ink); }
+        .qty b { min-width: 30px; text-align: center; font-weight: 600; }
         .remove { font-size: 13px; color: var(--muted); }
-        .remove:hover { color: var(--oxblood); }
+        .remove:hover { color: var(--accent); }
 
         .cart-total {
             display: flex;
@@ -431,8 +254,8 @@
             padding-top: 22px;
         }
 
-        .total-label { font-size: 13px; text-transform: uppercase; font-weight: 600; color: var(--muted); }
-        .total-sum { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+        .total-label { font-size: 14px; color: var(--muted); }
+        .total-sum { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
 
         /* ---------- Оформление заказа ---------- */
         .checkout-grid {
@@ -442,13 +265,12 @@
             align-items: start;
         }
 
-        .note-box { border: 1px solid var(--ink); padding: 14px 16px; font-size: 14px; margin-bottom: 24px; }
+        .note-box { background: var(--surface); padding: 14px 16px; font-size: 14px; margin-bottom: 24px; }
         .note-box input { margin-bottom: 16px; }
-        .note-box label { margin-top: 4px; }
         .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .two-col input { margin-bottom: 0; }
 
-        .summary h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
+        .summary h3 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
 
         .sum-row {
             display: flex;
@@ -459,7 +281,7 @@
             font-size: 15px;
         }
 
-        .sum-row strong { white-space: nowrap; }
+        .sum-row strong { white-space: nowrap; font-weight: 600; }
 
         .sum-total {
             display: flex;
@@ -467,116 +289,131 @@
             align-items: baseline;
             border-top: 1px solid var(--ink);
             padding-top: 16px;
-            font-size: 14px;
-            text-transform: uppercase;
-            font-weight: 600;
+            font-size: 15px;
         }
 
-        .sum-total strong { font-size: 1.8rem; letter-spacing: -0.02em; text-transform: none; }
+        .sum-total strong { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
 
-        /* ---------- Кабинет ---------- */
+        /* ---------- Личный кабинет ---------- */
+        .profile-hero {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            margin-bottom: clamp(28px, 4vw, 48px);
+        }
+
+        .avatar {
+            width: 84px;
+            height: 84px;
+            flex: none;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--ink);
+            color: #fff;
+            font-size: 2.2rem;
+            font-weight: 600;
+            box-shadow: 0 0 0 5px var(--bg), 0 0 0 6px var(--line);
+        }
+
+        .profile-hello h1 {
+            font-size: clamp(1.8rem, 4.5vw, 3rem);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+
+        .profile-hello p { color: var(--muted); font-size: 15px; margin-top: 6px; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: clamp(32px, 5vw, 56px);
+        }
+
+        .stat { background: var(--surface); border-radius: 6px; padding: 20px 22px; }
+        .stat-num { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+        .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
+        .stat.club { background: var(--ink); color: #fff; }
+        .stat.club .stat-label { color: #b5b5ad; }
+
         .profile-grid {
             display: grid;
             grid-template-columns: minmax(260px, 1fr) 2fr;
-            gap: clamp(28px, 6vw, 96px);
+            gap: clamp(28px, 6vw, 88px);
             align-items: start;
         }
 
-        .facts { margin-bottom: 24px; }
+        .card { border: 1px solid var(--line); border-radius: 6px; padding: 22px; background: #fff; }
+        .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+
         .facts div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
-        .facts div:first-child { border-top: 1px solid var(--ink); }
+        .facts div:first-child { border-top: 0; padding-top: 0; }
         .facts dt { color: var(--muted); }
-        .facts dd { font-weight: 600; text-align: right; }
+        .facts dd { font-weight: 500; text-align: right; }
 
-        .bonus { border: 1px solid var(--ink); padding: 14px 16px; font-size: 14px; margin-bottom: 22px; }
-        .section-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; margin-bottom: 14px; }
+        .card .btn { margin-top: 18px; }
+        .section-title { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 16px; }
 
-        .order { border-top: 1px solid var(--ink); padding: 18px 0 22px; }
-        .order-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; font-weight: 600; }
-        .tag { border: 1px solid var(--ink); padding: 3px 10px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .order { border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; background: #fff; }
+        .order-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+        .order-no { font-weight: 600; }
+        .order-date { color: var(--muted); font-size: 13px; font-weight: 400; margin-left: 8px; }
+
+        .tag { font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: var(--wait-bg); color: var(--wait); }
+        .tag.paid { background: var(--ok-bg); color: var(--ok); }
+
         .order p { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
-        .order p b { color: var(--ink); font-weight: 600; }
-        .order-sum { margin-top: 10px; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+        .order p b { color: var(--ink); font-weight: 500; }
+        .order-sum { margin-top: 10px; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+
+        .empty-box { text-align: center; border: 1px dashed var(--line); border-radius: 6px; padding: 44px 20px; }
+        .empty-box p { color: var(--muted); margin-bottom: 18px; }
 
         /* ---------- Подвал ---------- */
         .site-footer {
-            background: var(--dark);
-            color: #b9b8b4;
-            margin-top: clamp(64px, 9vw, 120px);
-            padding: 48px var(--pad) 36px;
+            margin-top: clamp(72px, 10vw, 128px);
+            padding: 44px var(--pad) 36px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
             font-size: 14px;
         }
 
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 32px;
-        }
-
-        .site-footer h4 { color: #fff; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
-        .site-footer p { margin-bottom: 6px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
+        .site-footer h4 { color: var(--ink); font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+        .site-footer p { margin-bottom: 5px; }
 
         /* ---------- Мобильная версия ---------- */
         @media (max-width: 720px) {
-            .site-header { flex-wrap: wrap; gap: 10px 22px; font-size: 12.5px; }
-            .brand-block { flex-basis: 100%; display: flex; justify-content: space-between; }
-            .brand-block .clock { display: inline; }
-
-            .hero { height: 420vh; }
-            .suit { height: 64%; bottom: 72px; }
-            .hero-note, .hero-scroll { bottom: 20px; font-size: 12.5px; }
-            .hero-note { max-width: 20ch; }
-            .cap { font-size: 12.5px; max-width: none; }
-            .cap-0, .cap-1, .cap-2, .cap-3, .cap-4 { left: var(--pad); right: var(--pad); top: auto; bottom: 20px; text-align: left; }
-
+            .site-header { flex-wrap: wrap; gap: 10px 20px; font-size: 14px; }
+            .nav { gap: 18px; }
             .checkout-grid, .profile-grid { grid-template-columns: 1fr; }
             .cart-row { grid-template-columns: 72px 1fr; }
             .cart-thumb { width: 72px; height: 72px; }
             .qty-col { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            .suit-in { animation: none; }
-            .js .product { opacity: 1; transform: none; transition: none; }
+            .stats { grid-template-columns: 1fr; }
+            .avatar { width: 68px; height: 68px; font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
     <header class="site-header">
-        <div class="brand-block">
-            <a href="{{ url_for('index') }}" class="brand">OMAR ASTANA</a>
-            <span class="clock" id="clock"></span>
-        </div>
+        <a href="{{ url_for('index') }}" class="brand">OMAR ASTANA</a>
 
-        <nav class="nav-col" aria-label="Основное меню">
-            <a href="{{ url_for('index') }}">Каталог</a>
+        <nav class="nav" aria-label="Основное меню">
+            <a href="{{ url_for('index') }}" class="{% if page == 'catalog' %}on{% endif %}">Каталог</a>
             {% if current_user %}
-                <a href="{{ url_for('cart') }}">Корзина{% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}</a>
-            {% endif %}
-        </nav>
-
-        <nav class="nav-col" aria-label="Аккаунт">
-            {% if current_user %}
-                <a href="{{ url_for('profile') }}">Кабинет ({{ current_user['name'] }})</a>
+                <a href="{{ url_for('cart') }}" class="{% if page == 'cart' %}on{% endif %}">Корзина{% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}</a>
+                <a href="{{ url_for('profile') }}" class="{% if page == 'profile' %}on{% endif %}">Кабинет</a>
                 <a href="{{ url_for('logout') }}">Выйти</a>
             {% else %}
-                <a href="{{ url_for('login') }}">Войти</a>
+                <a href="{{ url_for('login') }}" class="{% if page == 'login' %}on{% endif %}">Войти</a>
+                <a href="{{ url_for('register') }}" class="{% if page == 'register' %}on{% endif %}">Регистрация</a>
             {% endif %}
         </nav>
-
-        <div class="nav-cta">
-            {% if current_user %}
-                <a href="{{ url_for('index') }}#collection">Коллекция
-                    <svg width="11" height="11" viewBox="0 0 11 11" aria-hidden="true"><path d="M1 10L10 1M3 1h7v7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                </a>
-            {% else %}
-                <a href="{{ url_for('register') }}">Регистрация
-                    <svg width="11" height="11" viewBox="0 0 11 11" aria-hidden="true"><path d="M1 10L10 1M3 1h7v7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                </a>
-            {% endif %}
-        </div>
     </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -591,49 +428,23 @@
 
     {% if page == 'catalog' %}
 
-        <!-- 1. ГЛАВНЫЙ ЭКРАН + КАТАЛОГ -->
-        <section class="hero" id="hero">
-            <div class="hero-stage">
-                <h1 class="wordmark" aria-label="OMAR ASTANA"><span id="wordmark">OMAR</span></h1>
-
-                {# 4 ракурса: спереди → слева → сзади → справа → снова спереди #}
-                <div class="suit" id="suit"
-                     data-front="{{ url_for('static', filename='suit-front.webp') }}"
-                     data-left="{{ url_for('static', filename='suit-left.webp') }}"
-                     data-back="{{ url_for('static', filename='suit-back.webp') }}"
-                     data-right="{{ url_for('static', filename='suit-right.webp') }}">
-                    <div class="suit-in">
-                        <img class="suit-poster" src="{{ url_for('static', filename='suit-front.webp') }}" alt="Чёрный двубортный костюм с красным галстуком" fetchpriority="high">
-                        <canvas id="suit-canvas" aria-hidden="true"></canvas>
-                    </div>
-                </div>
-
-                <p class="hero-note">OMAR ASTANA, мужская одежда и обувь.<br>4 филиала в Астане</p>
-                <a class="hero-scroll" href="#collection">Листайте вниз</a>
-
-                <!-- подписи: появляются по очереди, пока костюм поворачивается (data-from / data-to — доля прокрутки 0…1) -->
-                <p class="cap cap-0" data-from="0.06" data-to="0.21">Двубортный пиджак<br>с пиковыми лацканами</p>
-                <p class="cap cap-1" data-from="0.26" data-to="0.41">Три ленты на талии<br>подчёркивают силуэт</p>
-                <p class="cap cap-2" data-from="0.46" data-to="0.61">Чистая спинка<br>без лишних деталей</p>
-                <p class="cap cap-3" data-from="0.66" data-to="0.81">Классический чёрный:<br>на каждый день и на выход</p>
-                <p class="cap cap-4" data-from="0.88" data-to="9">Вся коллекция ниже</p>
-            </div>
+        <!-- КАТАЛОГ -->
+        <section class="intro">
+            <h1>Мужская одежда и обувь</h1>
+            <p>Casual и smart casual. Четыре филиала в Астане, доставка по городу.</p>
         </section>
 
         <section class="collection" id="collection">
-            <div class="coll-head">
-                <h2 class="coll-title">Коллекция</h2>
-                <nav class="filters" aria-label="Категории">
-                    {% for cat in categories %}
-                        <a href="{{ url_for('index', category=cat) }}#collection" class="{% if active_category == cat %}on{% endif %}">{{ cat }}</a>
-                    {% endfor %}
-                </nav>
-            </div>
+            <nav class="filters" aria-label="Категории">
+                {% for cat in categories %}
+                    <a href="{{ url_for('index', category=cat) }}#collection" class="{% if active_category == cat %}on{% endif %}">{{ cat }}</a>
+                {% endfor %}
+            </nav>
 
             {% if products %}
             <div class="grid">
                 {% for product in products %}
-                <article class="product" style="--i: {{ loop.index0 % 4 }}">
+                <article class="product">
                     <div class="product-img">
                         <img src="{{ product['image_url'] }}" alt="{{ product['title'] }}" loading="lazy">
                     </div>
@@ -662,7 +473,7 @@
     {% else %}
     <main class="page">
 
-        <!-- 2. РЕГИСТРАЦИЯ -->
+        <!-- РЕГИСТРАЦИЯ -->
         {% if page == 'register' %}
             <h1 class="page-title">Регистрация</h1>
             <div class="form-wrap">
@@ -682,7 +493,7 @@
                 <p class="alt-link">Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
             </div>
 
-        <!-- 3. АВТОРИЗАЦИЯ -->
+        <!-- ВХОД -->
         {% elif page == 'login' %}
             <h1 class="page-title">Вход</h1>
             <div class="form-wrap">
@@ -699,7 +510,7 @@
                 <p class="alt-link">Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
             </div>
 
-        <!-- 4. КОРЗИНА -->
+        <!-- КОРЗИНА -->
         {% elif page == 'cart' %}
             <h1 class="page-title">Корзина</h1>
             {% if cart_items %}
@@ -736,7 +547,7 @@
                 <a href="{{ url_for('index') }}#collection" class="btn">Перейти в каталог</a>
             {% endif %}
 
-        <!-- 5. ОФОРМЛЕНИЕ И ОПЛАТА -->
+        <!-- ОФОРМЛЕНИЕ И ОПЛАТА -->
         {% elif page == 'checkout' %}
             <h1 class="page-title">Оформление</h1>
             <div class="checkout-grid">
@@ -800,28 +611,55 @@
                 </div>
             </div>
 
-        <!-- 6. ЛИЧНЫЙ КАБИНЕТ -->
+        <!-- ЛИЧНЫЙ КАБИНЕТ -->
         {% elif page == 'profile' %}
-            <h1 class="page-title">Кабинет</h1>
-            <div class="profile-grid">
-                <div>
-                    <dl class="facts">
-                        <div><dt>Имя</dt><dd>{{ current_user['name'] }}</dd></div>
-                        <div><dt>Телефон</dt><dd>{{ current_user['phone'] }}</dd></div>
-                        <div><dt>Регистрация</dt><dd>{{ current_user['created_at'] }}</dd></div>
-                    </dl>
-                    <p class="bonus">Бонусный статус: <strong>участник клуба OMAR, кэшбэк 5%</strong></p>
-                    <a href="{{ url_for('index') }}#collection" class="btn btn-block">Перейти к покупкам</a>
-                </div>
+            {% set spent = orders|sum(attribute='total_amount') %}
+            {% set cashback = (spent * 0.05)|int %}
 
-                <div>
-                    <h2 class="section-label">История заказов</h2>
+            <div class="profile-hero">
+                <div class="avatar" aria-hidden="true">{{ current_user['name'][:1]|upper }}</div>
+                <div class="profile-hello">
+                    <h1>Здравствуйте, {{ current_user['name'].split()[0] }}</h1>
+                    <p>В клубе OMAR с {{ current_user['created_at'][:10] }}</p>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-num">{{ orders|length }}</div>
+                    <div class="stat-label">Заказов оформлено</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">{{ "{:,}".format(spent).replace(',', ' ') }} ₸</div>
+                    <div class="stat-label">Покупок на сумму</div>
+                </div>
+                <div class="stat club">
+                    <div class="stat-num">{{ "{:,}".format(cashback).replace(',', ' ') }} ₸</div>
+                    <div class="stat-label">Кэшбэк 5% в клубе OMAR</div>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                <aside>
+                    <div class="card">
+                        <h2>Мои данные</h2>
+                        <dl class="facts">
+                            <div><dt>Имя</dt><dd>{{ current_user['name'] }}</dd></div>
+                            <div><dt>Телефон</dt><dd>{{ current_user['phone'] }}</dd></div>
+                            <div><dt>Регистрация</dt><dd>{{ current_user['created_at'] }}</dd></div>
+                        </dl>
+                        <a href="{{ url_for('index') }}#collection" class="btn btn-block">Перейти к покупкам</a>
+                    </div>
+                </aside>
+
+                <section>
+                    <h2 class="section-title">История заказов</h2>
                     {% if orders %}
                         {% for order in orders %}
                         <div class="order">
                             <div class="order-head">
-                                <span>Заказ №{{ order['id'] }} от {{ order['created_at'] }}</span>
-                                <span class="tag">{{ order['status'] }}</span>
+                                <span class="order-no">Заказ №{{ order['id'] }}<span class="order-date">{{ order['created_at'] }}</span></span>
+                                <span class="tag {% if order['status'] == 'Оплачен онлайн' %}paid{% endif %}">{{ order['status'] }}</span>
                             </div>
                             <p><b>Состав:</b> {{ order['items_summary'] }}</p>
                             <p><b>Получение:</b> {{ order['address_or_branch'] }}</p>
@@ -830,9 +668,12 @@
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p class="empty">У вас пока нет оформленных заказов.</p>
+                        <div class="empty-box">
+                            <p>Здесь появятся ваши заказы.</p>
+                            <a href="{{ url_for('index') }}#collection" class="btn btn-outline">Выбрать одежду</a>
+                        </div>
                     {% endif %}
-                </div>
+                </section>
             </div>
         {% endif %}
 
@@ -863,206 +704,6 @@
     </footer>
 
     <script>
-        // Время в Астане (в шапке)
-        (function () {
-            const el = document.getElementById('clock');
-            if (!el) return;
-            const fmt = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' });
-            const tick = () => { el.textContent = fmt.format(new Date()) + ', Астана'; };
-            tick();
-            setInterval(tick, 30000);
-        })();
-
-        // Высота шапки (для липкого главного экрана)
-        (function () {
-            const header = document.querySelector('.site-header');
-            const set = () => document.documentElement.style.setProperty('--hdr', header.offsetHeight + 'px');
-            set();
-            window.addEventListener('resize', set);
-        })();
-
-        // Огромное слово OMAR на всю ширину экрана
-        (function () {
-            const word = document.getElementById('wordmark');
-            if (!word) return;
-            const box = word.parentElement;
-            const fit = () => {
-                box.style.fontSize = '100px';
-                const pad = parseFloat(getComputedStyle(box).left || 0);
-                const avail = box.parentElement.clientWidth - 2 * pad;
-                box.style.fontSize = (100 * avail / word.getBoundingClientRect().width) + 'px';
-            };
-            (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fit);
-            window.addEventListener('resize', fit);
-        })();
-
-        // Костюм вращается при прокрутке, подписи появляются по очереди
-        (function () {
-            const hero = document.getElementById('hero');
-            if (!hero) return;
-
-            const stage = hero.querySelector('.hero-stage');
-            const suit = document.getElementById('suit');
-            const canvas = document.getElementById('suit-canvas');
-            const ctx = canvas.getContext('2d');
-            const VIEWS = ['front', 'left', 'back', 'right'].map((k) => suit.dataset[k]);
-            const imgs = new Array(VIEWS.length).fill(null);
-            let dpr = 1, cw = 0, ch = 0;
-
-            function sizeCanvas() {
-                dpr = Math.min(window.devicePixelRatio || 1, 2);
-                const r = canvas.getBoundingClientRect();
-                cw = Math.round(r.width * dpr); ch = Math.round(r.height * dpr);
-                if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
-            }
-
-            // Плоскость с фото костюма, повёрнутая вокруг вертикальной оси на угол ang (с перспективой).
-            // Рисуется вертикальными полосками: ближний край крупнее, дальний мельче.
-            function drawPlane(img, ang, alpha) {
-                if (!img || alpha <= 0.002) return;
-                const iw = img.naturalWidth, ih = img.naturalHeight;
-                const s = Math.min((cw / 1.28) / iw, (ch / 1.12) / ih);
-                const w = iw * s, h = ih * s;
-                const cx = cw / 2, top = ch - h;
-                ctx.globalAlpha = alpha;
-                if (Math.abs(ang) < 1e-3) { ctx.drawImage(img, cx - w / 2, top, w, h); return; }
-
-                const c = Math.cos(ang), sn = Math.sin(ang);
-                const D = w * 4;                 // «расстояние до камеры»: чем больше, тем слабее перспектива
-                const yA = ch - h * 0.22;        // линия, относительно которой сжимается высота
-                const proj = (dx) => { const p = D / (D + (-dx * sn)); return [dx * c * p, p]; };
-
-                const N = Math.max(60, Math.round(w / 2.5));
-                // границы полосок ложатся на целые пиксели, иначе между ними видны светлые швы
-                let [x0, p0] = proj(-w / 2);
-                let px = Math.round(cx + x0);
-                for (let i = 0; i < N; i++) {
-                    const [x1, p1] = proj(-w / 2 + (i + 1) * w / N);
-                    const nx = Math.round(cx + x1);
-                    if (nx > px) {
-                        const pm = (p0 + p1) / 2;
-                        const yT = yA + (top - yA) * pm, yB = yA + (ch - yA) * pm;
-                        ctx.drawImage(img, i * iw / N, 0, iw / N, ih, px, yT, nx - px, yB - yT);
-                        px = nx;
-                    }
-                    x0 = x1; p0 = p1;
-                }
-            }
-
-            // pos: 0 — спереди, 1 — слева, 2 — сзади, 3 — справа, 4 — снова спереди
-            function drawRotation(pos) {
-                if (!cw) sizeCanvas();
-                const n = VIEWS.length;
-                const k = Math.min(n - 1, Math.floor(pos));
-                const f = pos >= n ? 1 : pos - k;
-                ctx.clearRect(0, 0, cw, ch);
-                const A = imgs[k] || imgs[0], B = imgs[(k + 1) % n] || imgs[0];
-                const theta = f * Math.PI / 2;
-                if (f < 0.001) drawPlane(A, 0, 1);
-                else if (f > 0.999) drawPlane(B, 0, 1);
-                else {
-                    // следующий ракурс «довращивается» из -90° в 0°, текущий уходит из 0° в 90°
-                    drawPlane(B, theta - Math.PI / 2, sstep(0, 0.35, f));
-                    drawPlane(A, theta, 1 - sstep(0.45, 0.85, f));
-                }
-                ctx.globalAlpha = 1;
-            }
-
-            // Какой ракурс показывать при данной прокрутке: удержание → плавный поворот → удержание…
-            const HOLD0 = 0.14, GAP = 0.2, TURN = 0.11;
-            function viewPos(p) {
-                for (let k = 0; k < 4; k++) {
-                    const a = HOLD0 + k * GAP + (GAP - TURN) / 2, b = a + TURN;
-                    if (p < a) return k;
-                    if (p < b) return k + sstep(0, 1, (p - a) / TURN);
-                }
-                return 4;
-            }
-
-            function loadAll() {
-                VIEWS.forEach((src, i) => {
-                    const img = new Image();
-                    img.decoding = 'async';
-                    img.onload = () => {
-                        (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(() => {
-                            imgs[i] = img;
-                            if (i === 0 && !suit.classList.contains('ready')) { sizeCanvas(); suit.classList.add('ready'); }
-                            render(cur);
-                        });
-                    };
-                    img.src = src;
-                });
-            }
-
-            const caps = Array.from(hero.querySelectorAll('.cap'));
-            const intro = Array.from(hero.querySelectorAll('.hero-note, .hero-scroll'));
-            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-            const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-            const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
-
-            let target = 0, cur = 0, running = false;
-
-            function measure() {
-                const hdr = document.querySelector('.site-header').offsetHeight;
-                const total = hero.offsetHeight - stage.offsetHeight;
-                target = clamp((hdr - hero.getBoundingClientRect().top) / total);
-            }
-
-            function render(p) {
-                // 4 ракурса, между ними — плавный поворот в перспективе
-                if (suit.classList.contains('ready')) drawRotation(viewPos(p));
-
-                // подписи
-                caps.forEach((c) => {
-                    const from = parseFloat(c.dataset.from), to = parseFloat(c.dataset.to);
-                    const o = sstep(from, from + 0.04, p) * (1 - sstep(to - 0.04, to, p));
-                    c.style.opacity = o;
-                    c.style.transform = 'translateY(' + (16 * (1 - sstep(from, from + 0.04, p)) - 16 * sstep(to - 0.04, to, p)) + 'px)';
-                });
-
-                intro.forEach((el) => { el.style.opacity = 1 - sstep(0, 0.05, p); });
-
-                // выход: костюм уходит вниз, пока снизу поднимается каталог
-                const e = sstep(0.9, 1, p);
-                suit.style.transform = 'translateX(-50%) translateY(' + (e * 14) + '%) scale(' + (1 - 0.06 * e) + ')';
-            }
-
-            let last = 0;
-            function loop(now) {
-                const dt = Math.min(0.05, (now - (last || now)) / 1000);
-                last = now;
-                // сглаживание не зависит от частоты кадров экрана (60 / 120 Гц)
-                cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt * 10));
-                if (Math.abs(target - cur) < 0.00005) cur = target;
-                render(cur);
-                if (cur !== target) requestAnimationFrame(loop); else { running = false; last = 0; }
-            }
-
-            function onScroll() {
-                measure();
-                if (!running) { running = true; requestAnimationFrame(loop); }
-            }
-
-            window.addEventListener('scroll', onScroll, { passive: true });
-            window.addEventListener('resize', () => { sizeCanvas(); onScroll(); render(cur); });
-            measure(); cur = target; render(cur);
-            loadAll();
-        })();
-
-        // Плавное появление карточек каталога
-        (function () {
-            const items = document.querySelectorAll('.product');
-            if (!items.length) return;
-            if (!('IntersectionObserver' in window)) { items.forEach((i) => i.classList.add('in')); return; }
-            const io = new IntersectionObserver((entries) => {
-                entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
-            }, { threshold: 0.12 });
-            items.forEach((i) => io.observe(i));
-        })();
-
         function toggleDelivery() {
             const method = document.getElementById('delivery_method').value;
             document.getElementById('branch_block').style.display = (method === 'Самовывоз из филиала') ? 'block' : 'none';
@@ -1078,35 +719,25 @@
         function formatKzPhone(rawValue) {
             let digits = rawValue.replace(/\D/g, '');
 
-            // Если начали вводить 8 или 7 как код страны, убираем первую цифру, так как префикс +7 уже фиксирован
+            // Префикс +7 уже фиксирован, поэтому первую 7 или 8 убираем
             if (digits.startsWith('8') || digits.startsWith('7')) {
                 digits = digits.slice(1);
             }
 
             digits = digits.slice(0, 10);
 
-            if (digits.length === 0) {
-                return '+7 ';
-            }
+            if (digits.length === 0) return '+7 ';
 
             let formatted = '+7 ' + digits.slice(0, 3);
-            if (digits.length > 3) {
-                formatted += ' ' + digits.slice(3, 6);
-            }
-            if (digits.length > 6) {
-                formatted += ' ' + digits.slice(6, 8);
-            }
-            if (digits.length > 8) {
-                formatted += '-' + digits.slice(8, 10);
-            }
+            if (digits.length > 3) formatted += ' ' + digits.slice(3, 6);
+            if (digits.length > 6) formatted += ' ' + digits.slice(6, 8);
+            if (digits.length > 8) formatted += '-' + digits.slice(8, 10);
             return formatted;
         }
 
         document.querySelectorAll('.phone-input').forEach((input) => {
             input.addEventListener('focus', () => {
-                if (!input.value.trim()) {
-                    input.value = '+7 ';
-                }
+                if (!input.value.trim()) input.value = '+7 ';
             });
 
             input.addEventListener('input', () => {
@@ -1121,9 +752,7 @@
             });
 
             input.addEventListener('blur', () => {
-                if (input.value.trim() === '+7') {
-                    input.value = '';
-                }
+                if (input.value.trim() === '+7') input.value = '';
             });
         });
     </script>
