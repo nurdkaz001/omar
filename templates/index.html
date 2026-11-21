@@ -139,16 +139,18 @@
             animation: rise 1.2s cubic-bezier(0.2, 0.7, 0.1, 1) both;
         }
 
-        .suit img {
+        .suit canvas,
+        .suit .suit-poster {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
-            opacity: 0;
-            will-change: opacity, transform;
         }
 
-        .suit img:first-child { opacity: 1; }
+        .suit .suit-poster { object-fit: contain; }
+        .suit canvas { opacity: 0; }
+        .suit.ready canvas { opacity: 1; }
+        .suit.ready .suit-poster { opacity: 0; }
 
         @keyframes rise {
             from { clip-path: inset(100% 0 0 0); }
@@ -584,11 +586,16 @@
             <div class="hero-stage">
                 <h1 class="wordmark" aria-label="OMAR ASTANA"><span id="wordmark">OMAR</span></h1>
 
-                <div class="suit" id="suit">
+                {# Кадры костюма: SUIT_FRAMES — сколько кадров в static/. #}
+                {# 8 кадров: static/suit-0.webp … suit-7.webp (как сейчас). #}
+                {# Больше кадров (рекомендуется 36 или 72): static/suit/000.webp, 001.webp … — см. SUIT_FRAMES ниже #}
+                <div class="suit" id="suit"
+                     data-count="{{ suit_frames|default(8) }}"
+                     data-pattern="{{ suit_pattern|default(url_for('static', filename='suit-{n}.webp')) }}"
+                     data-pad="{{ suit_pad|default(0) }}">
                     <div class="suit-in">
-                        {% for n in range(8) %}
-                        <img src="{{ url_for('static', filename='suit-%d.webp' % n) }}" {% if loop.first %}alt="Чёрный двубортный костюм с красным галстуком"{% else %}alt="" aria-hidden="true"{% endif %}>
-                        {% endfor %}
+                        <img class="suit-poster" src="{{ url_for('static', filename='suit-0.webp') }}" alt="Чёрный двубортный костюм с красным галстуком" fetchpriority="high">
+                        <canvas id="suit-canvas" aria-hidden="true"></canvas>
                     </div>
                 </div>
 
@@ -887,7 +894,83 @@
 
             const stage = hero.querySelector('.hero-stage');
             const suit = document.getElementById('suit');
-            const views = Array.from(suit.querySelectorAll('img')); // 8 ракурсов: 0°, 45°, 90° … 315°
+            const canvas = document.getElementById('suit-canvas');
+            const ctx = canvas.getContext('2d');
+            const COUNT = Math.max(2, parseInt(suit.dataset.count, 10) || 8); // кадров на полный оборот 360°
+            const PATTERN = suit.dataset.pattern;                            // шаблон пути, {n} — номер кадра
+            const PAD = parseInt(suit.dataset.pad, 10) || 0;                 // 0 → 0,1,2…; 3 → 000,001,002…
+            const frames = new Array(COUNT).fill(null);
+            let loadedCount = 0, dpr = 1, cw = 0, ch = 0;
+
+            const frameUrl = (i) => PATTERN.replace('{n}', PAD ? String(i).padStart(PAD, '0') : String(i));
+
+            function sizeCanvas() {
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                const r = canvas.getBoundingClientRect();
+                cw = Math.round(r.width * dpr); ch = Math.round(r.height * dpr);
+                if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+            }
+
+            function nearest(i) {
+                if (frames[i]) return frames[i];
+                for (let d = 1; d < COUNT; d++) {
+                    const a = frames[(i + d) % COUNT], b = frames[(i - d + COUNT) % COUNT];
+                    if (b) return b;
+                    if (a) return a;
+                }
+                return null;
+            }
+
+            function drawFrame(img, alpha) {
+                if (!img || alpha <= 0) return;
+                const s = Math.min(cw / img.naturalWidth, ch / img.naturalHeight);
+                const w = img.naturalWidth * s, h = img.naturalHeight * s;
+                ctx.globalAlpha = alpha;
+                ctx.drawImage(img, (cw - w) / 2, ch - h, w, h);
+            }
+
+            function drawRotation(pos) {
+                if (!cw) sizeCanvas();
+                const k = Math.floor(pos) % COUNT;
+                const t = pos - Math.floor(pos);
+                const e = t * t * (3 - 2 * t); // мягкое перетекание между соседними кадрами
+                ctx.clearRect(0, 0, cw, ch);
+                drawFrame(nearest(k), 1);
+                if (t > 0.002) drawFrame(nearest((k + 1) % COUNT), e);
+                ctx.globalAlpha = 1;
+            }
+
+            // Загрузка: сначала каждый 4-й кадр (быстро получаем полный оборот), потом остальные
+            function loadAll() {
+                const order = [];
+                for (let step of [COUNT >= 24 ? 6 : 1, 3, 1]) {
+                    for (let i = 0; i < COUNT; i += step) if (!order.includes(i)) order.push(i);
+                }
+                let idx = 0, active = 0;
+                const MAX = 6;
+                const next = () => {
+                    while (active < MAX && idx < order.length) {
+                        const i = order[idx++];
+                        active++;
+                        const img = new Image();
+                        img.decoding = 'async';
+                        img.onload = () => {
+                            const done = () => {
+                                frames[i] = img; loadedCount++; active--;
+                                if (!suit.classList.contains('ready') && frames[0]) { sizeCanvas(); suit.classList.add('ready'); }
+                                render(cur); next();
+                            };
+                            (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(done);
+                        };
+                        img.onerror = () => { active--; next(); };
+                        img.src = frameUrl(i);
+                    }
+                };
+                next();
+            }
+
             const caps = Array.from(hero.querySelectorAll('.cap'));
             const intro = Array.from(hero.querySelectorAll('.hero-note, .hero-scroll'));
             const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -905,20 +988,9 @@
             }
 
             function render(p) {
-                // поворот: N ракурсов (по 45°), новый проявляется поверх предыдущего
-                const N = views.length;
+                // поворот на полный оборот: COUNT кадров, соседние кадры плавно перетекают друг в друга
                 const u = clamp((p - ROT_START) / (ROT_END - ROT_START));
-                const pos = u * N;
-                const k = Math.min(N - 1, Math.floor(pos));
-                const t = u >= 1 ? 1 : pos - k;
-                const next = (k + 1) % N;
-
-                views.forEach((img, i) => {
-                    let o = 0;
-                    if (i === k) o = t < 0.999 ? 1 : 0;
-                    if (i === next) o = sstep(0.05, 0.95, t);
-                    img.style.opacity = o;
-                });
+                if (suit.classList.contains('ready')) drawRotation(u * COUNT % COUNT);
 
                 // подписи
                 caps.forEach((c) => {
@@ -935,11 +1007,15 @@
                 suit.style.transform = 'translateX(-50%) translateY(' + (e * 14) + '%) scale(' + (1 - 0.06 * e) + ')';
             }
 
-            function loop() {
-                cur += (target - cur) * (reduce ? 1 : 0.12);
-                if (Math.abs(target - cur) < 0.0003) cur = target;
+            let last = 0;
+            function loop(now) {
+                const dt = Math.min(0.05, (now - (last || now)) / 1000);
+                last = now;
+                // сглаживание не зависит от частоты кадров экрана (60 / 120 Гц)
+                cur += (target - cur) * (reduce ? 1 : 1 - Math.exp(-dt * 10));
+                if (Math.abs(target - cur) < 0.00005) cur = target;
                 render(cur);
-                if (cur !== target) requestAnimationFrame(loop); else running = false;
+                if (cur !== target) requestAnimationFrame(loop); else { running = false; last = 0; }
             }
 
             function onScroll() {
@@ -948,8 +1024,9 @@
             }
 
             window.addEventListener('scroll', onScroll, { passive: true });
-            window.addEventListener('resize', onScroll);
+            window.addEventListener('resize', () => { sizeCanvas(); onScroll(); render(cur); });
             measure(); cur = target; render(cur);
+            loadAll();
         })();
 
         // Плавное появление карточек каталога
