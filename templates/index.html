@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>document.documentElement.classList.add('js');</script>
     <style>
         :root {
             --paper: #d8d8d6;
@@ -91,12 +92,18 @@
         .alert.error { border-left-color: var(--oxblood); color: var(--oxblood); }
         .alert.info { border-left-color: var(--muted); }
 
-        /* ---------- Главный экран ---------- */
-        .hero {
-            position: relative;
+        /* ---------- Главный экран (прокрутка вращает костюм) ---------- */
+        :root { --hdr: 70px; }
+
+        .hero { position: relative; height: 480vh; }
+
+        .hero-stage {
+            position: sticky;
+            top: var(--hdr);
+            height: calc(100svh - var(--hdr));
+            min-height: 560px;
             overflow: hidden;
-            height: calc(100svh - 76px);
-            min-height: 600px;
+            background: var(--paper);
         }
 
         .wordmark {
@@ -114,17 +121,34 @@
 
         .wordmark span { display: inline-block; margin-left: -0.04em; }
 
-        .hero-photo {
+        .suit {
             position: absolute;
             left: 50%;
-            bottom: -6%;
-            height: 74%;
+            bottom: -3%;
+            height: 88%;
+            aspect-ratio: 510 / 900;
             transform: translateX(-50%);
             z-index: 2;
+            will-change: transform;
+        }
+
+        .suit-in {
+            position: relative;
+            width: 100%;
+            height: 100%;
             animation: rise 1.2s cubic-bezier(0.2, 0.7, 0.1, 1) both;
         }
 
-        .hero-photo img { height: 100%; width: auto; }
+        .suit img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+
+        .suit img:first-child { opacity: 1; }
 
         @keyframes rise {
             from { clip-path: inset(100% 0 0 0); }
@@ -132,9 +156,9 @@
         }
 
         .hero-note,
-        .hero-scroll {
+        .hero-scroll,
+        .cap {
             position: absolute;
-            bottom: 26px;
             z-index: 3;
             font-size: 14px;
             font-weight: 600;
@@ -142,9 +166,18 @@
             line-height: 1.3;
         }
 
+        .hero-note,
+        .hero-scroll { bottom: 26px; }
+
         .hero-note { left: var(--pad); max-width: 24ch; }
         .hero-scroll { right: var(--pad); text-decoration: none; }
-        .hero-scroll:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+        .cap { max-width: 24ch; opacity: 0; pointer-events: none; }
+        .cap-0 { left: var(--pad); top: 58%; }
+        .cap-1 { right: var(--pad); top: 66%; text-align: right; }
+        .cap-2 { left: var(--pad); top: 56%; }
+        .cap-3 { right: var(--pad); top: 68%; text-align: right; }
+        .cap-4 { left: var(--pad); bottom: 26px; }
 
         /* ---------- Каталог ---------- */
         .collection { padding: clamp(48px, 8vw, 110px) var(--pad) 0; }
@@ -223,6 +256,35 @@
 
         .buy select { margin: 0; }
         .empty { color: var(--muted); padding: 40px 0; }
+
+        .collection {
+            background: var(--dark);
+            --ink: #f2f1ee;
+            --muted: #a8a7a2;
+            --line: rgba(255, 255, 255, 0.22);
+            --tile: #2a2928;
+            color: var(--ink);
+            padding-bottom: clamp(64px, 9vw, 120px);
+        }
+
+        .collection .btn { color: var(--dark); }
+        .collection .btn:hover { color: #fff; }
+
+        .collection select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E");
+        }
+
+        .collection option { color: #000; }
+        .collection + .site-footer { margin-top: 0; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+
+        .js .product {
+            opacity: 0;
+            transform: translateY(32px);
+            transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.2, 0.7, 0.1, 1);
+            transition-delay: calc(var(--i, 0) * 90ms);
+        }
+
+        .js .product.in { opacity: 1; transform: none; }
 
         /* ---------- Внутренние страницы ---------- */
         .page { flex: 1; padding: clamp(28px, 5vw, 64px) var(--pad) 0; }
@@ -448,13 +510,12 @@
             .brand-block { flex-basis: 100%; display: flex; justify-content: space-between; }
             .brand-block .clock { display: inline; }
 
-            .hero { height: auto; min-height: 0; padding-bottom: 20px; }
-            .wordmark { position: relative; top: auto; left: auto; right: auto; margin: 6px var(--pad) 0; }
-            .hero-photo { position: relative; left: auto; bottom: auto; transform: none; width: 74%; height: auto; margin: -1vw auto 0; }
-            .hero-photo img { width: 100%; height: auto; }
-            .hero-note, .hero-scroll { position: static; display: inline-block; margin: 18px var(--pad) 0; font-size: 12.5px; }
+            .hero { height: 420vh; }
+            .suit { height: 64%; bottom: 72px; }
+            .hero-note, .hero-scroll { bottom: 20px; font-size: 12.5px; }
             .hero-note { max-width: 20ch; }
-            .hero-scroll { float: right; }
+            .cap { font-size: 12.5px; max-width: none; }
+            .cap-0, .cap-1, .cap-2, .cap-3, .cap-4 { left: var(--pad); right: var(--pad); top: auto; bottom: 20px; text-align: left; }
 
             .checkout-grid, .profile-grid { grid-template-columns: 1fr; }
             .cart-row { grid-template-columns: 72px 1fr; }
@@ -464,7 +525,8 @@
 
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            .hero-photo { animation: none; }
+            .suit-in { animation: none; }
+            .js .product { opacity: 1; transform: none; transition: none; }
         }
     </style>
 </head>
@@ -518,13 +580,29 @@
     {% if page == 'catalog' %}
 
         <!-- 1. ГЛАВНЫЙ ЭКРАН + КАТАЛОГ -->
-        <section class="hero">
-            <h1 class="wordmark" aria-label="OMAR ASTANA"><span id="wordmark">OMAR</span></h1>
-            <figure class="hero-photo">
-                <img src="{{ url_for('static', filename='suit.jpg') }}" alt="Чёрный двубортный костюм с красным галстуком на манекене">
-            </figure>
-            <p class="hero-note">OMAR ASTANA, мужская одежда и обувь.<br>4 филиала в Астане</p>
-            <a class="hero-scroll" href="#collection">Листайте вниз</a>
+        <section class="hero" id="hero">
+            <div class="hero-stage">
+                <h1 class="wordmark" aria-label="OMAR ASTANA"><span id="wordmark">OMAR</span></h1>
+
+                <div class="suit" id="suit">
+                    <div class="suit-in">
+                        <img src="{{ url_for('static', filename='suit-front.webp') }}" alt="Чёрный двубортный костюм с красным галстуком, вид спереди">
+                        <img src="{{ url_for('static', filename='suit-left.webp') }}" alt="" aria-hidden="true">
+                        <img src="{{ url_for('static', filename='suit-back.webp') }}" alt="" aria-hidden="true">
+                        <img src="{{ url_for('static', filename='suit-right.webp') }}" alt="" aria-hidden="true">
+                    </div>
+                </div>
+
+                <p class="hero-note">OMAR ASTANA, мужская одежда и обувь.<br>4 филиала в Астане</p>
+                <a class="hero-scroll" href="#collection">Листайте вниз</a>
+
+                <!-- подписи: появляются по очереди, пока костюм поворачивается (data-from / data-to — доля прокрутки 0…1) -->
+                <p class="cap cap-0" data-from="0.06" data-to="0.21">Двубортный пиджак<br>с пиковыми лацканами</p>
+                <p class="cap cap-1" data-from="0.26" data-to="0.41">Три ленты на талии<br>подчёркивают силуэт</p>
+                <p class="cap cap-2" data-from="0.46" data-to="0.61">Чистая спинка<br>без лишних деталей</p>
+                <p class="cap cap-3" data-from="0.66" data-to="0.81">Классический чёрный:<br>на каждый день и на выход</p>
+                <p class="cap cap-4" data-from="0.88" data-to="9">Вся коллекция ниже</p>
+            </div>
         </section>
 
         <section class="collection" id="collection">
@@ -540,7 +618,7 @@
             {% if products %}
             <div class="grid">
                 {% for product in products %}
-                <article class="product">
+                <article class="product" style="--i: {{ loop.index0 % 4 }}">
                     <div class="product-img">
                         <img src="{{ product['image_url'] }}" alt="{{ product['title'] }}" loading="lazy">
                     </div>
@@ -780,24 +858,113 @@
             setInterval(tick, 30000);
         })();
 
+        // Высота шапки (для липкого главного экрана)
+        (function () {
+            const header = document.querySelector('.site-header');
+            const set = () => document.documentElement.style.setProperty('--hdr', header.offsetHeight + 'px');
+            set();
+            window.addEventListener('resize', set);
+        })();
+
         // Огромное слово OMAR на всю ширину экрана
         (function () {
             const word = document.getElementById('wordmark');
             if (!word) return;
             const box = word.parentElement;
             const fit = () => {
-                if (window.innerWidth <= 720) {
-                    box.style.fontSize = '';
-                }
                 box.style.fontSize = '100px';
-                const avail = box.parentElement.clientWidth - 2 * parseFloat(getComputedStyle(box).left || 0);
-                const target = window.innerWidth <= 720
-                    ? box.parentElement.clientWidth - 2 * parseFloat(getComputedStyle(box).marginLeft || 0)
-                    : avail;
-                box.style.fontSize = (100 * target / word.getBoundingClientRect().width) + 'px';
+                const pad = parseFloat(getComputedStyle(box).left || 0);
+                const avail = box.parentElement.clientWidth - 2 * pad;
+                box.style.fontSize = (100 * avail / word.getBoundingClientRect().width) + 'px';
             };
             (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fit);
             window.addEventListener('resize', fit);
+        })();
+
+        // Костюм вращается при прокрутке, подписи появляются по очереди
+        (function () {
+            const hero = document.getElementById('hero');
+            if (!hero) return;
+
+            const stage = hero.querySelector('.hero-stage');
+            const suit = document.getElementById('suit');
+            const views = Array.from(suit.querySelectorAll('img')); // спереди, слева, сзади, справа
+            const caps = Array.from(hero.querySelectorAll('.cap'));
+            const intro = Array.from(hero.querySelectorAll('.hero-note, .hero-scroll'));
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+            const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+
+            const ROT_START = 0.04, ROT_END = 0.84;
+            let target = 0, cur = 0, running = false;
+
+            function measure() {
+                const hdr = document.querySelector('.site-header').offsetHeight;
+                const total = hero.offsetHeight - stage.offsetHeight;
+                target = clamp((hdr - hero.getBoundingClientRect().top) / total);
+            }
+
+            function render(p) {
+                // поворот: 4 ракурса, между ними плавный переход с лёгким сужением силуэта
+                const u = clamp((p - ROT_START) / (ROT_END - ROT_START));
+                const pos = u * 4;
+                const k = Math.min(3, Math.floor(pos));
+                const t = u >= 1 ? 1 : pos - k;
+                const r = sstep(0.18, 0.82, t);
+                const next = (k + 1) % 4;
+                const squeeze = 1 - 0.2 * Math.sin(Math.PI * r);
+
+                views.forEach((img, i) => {
+                    let o = 0;
+                    // уходящий ракурс остаётся непрозрачным, пока новый проявляется поверх него (без «призрака»)
+                    if (i === k) o = r < 0.7 ? 1 : 0;
+                    if (i === next) o = sstep(0.3, 0.7, r);
+                    img.style.opacity = o;
+                    img.style.transform = o > 0 ? 'scaleX(' + squeeze + ')' : '';
+                });
+
+                // подписи
+                caps.forEach((c) => {
+                    const from = parseFloat(c.dataset.from), to = parseFloat(c.dataset.to);
+                    const o = sstep(from, from + 0.04, p) * (1 - sstep(to - 0.04, to, p));
+                    c.style.opacity = o;
+                    c.style.transform = 'translateY(' + (16 * (1 - sstep(from, from + 0.04, p)) - 16 * sstep(to - 0.04, to, p)) + 'px)';
+                });
+
+                intro.forEach((el) => { el.style.opacity = 1 - sstep(0, 0.05, p); });
+
+                // выход: костюм уходит вниз, пока снизу поднимается каталог
+                const e = sstep(0.9, 1, p);
+                suit.style.transform = 'translateX(-50%) translateY(' + (e * 14) + '%) scale(' + (1 - 0.06 * e) + ')';
+            }
+
+            function loop() {
+                cur += (target - cur) * (reduce ? 1 : 0.12);
+                if (Math.abs(target - cur) < 0.0003) cur = target;
+                render(cur);
+                if (cur !== target) requestAnimationFrame(loop); else running = false;
+            }
+
+            function onScroll() {
+                measure();
+                if (!running) { running = true; requestAnimationFrame(loop); }
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
+            measure(); cur = target; render(cur);
+        })();
+
+        // Плавное появление карточек каталога
+        (function () {
+            const items = document.querySelectorAll('.product');
+            if (!items.length) return;
+            if (!('IntersectionObserver' in window)) { items.forEach((i) => i.classList.add('in')); return; }
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+            }, { threshold: 0.12 });
+            items.forEach((i) => io.observe(i));
         })();
 
         function toggleDelivery() {
