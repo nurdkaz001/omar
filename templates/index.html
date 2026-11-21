@@ -126,7 +126,7 @@
             left: 50%;
             bottom: -3%;
             height: 88%;
-            aspect-ratio: 510 / 900;
+            aspect-ratio: 474 / 760;
             transform: translateX(-50%);
             z-index: 2;
             will-change: transform;
@@ -586,10 +586,9 @@
 
                 <div class="suit" id="suit">
                     <div class="suit-in">
-                        <img src="{{ url_for('static', filename='suit-front.webp') }}" alt="Чёрный двубортный костюм с красным галстуком, вид спереди">
-                        <img src="{{ url_for('static', filename='suit-left.webp') }}" alt="" aria-hidden="true">
-                        <img src="{{ url_for('static', filename='suit-back.webp') }}" alt="" aria-hidden="true">
-                        <img src="{{ url_for('static', filename='suit-right.webp') }}" alt="" aria-hidden="true">
+                        {% for n in range(8) %}
+                        <img src="{{ url_for('static', filename='suit-%d.webp' % n) }}" {% if loop.first %}alt="Чёрный двубортный костюм с красным галстуком"{% else %}alt="" aria-hidden="true"{% endif %}>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -888,7 +887,7 @@
 
             const stage = hero.querySelector('.hero-stage');
             const suit = document.getElementById('suit');
-            const views = Array.from(suit.querySelectorAll('img')); // спереди, слева, сзади, справа
+            const views = Array.from(suit.querySelectorAll('img')); // 8 ракурсов: 0°, 45°, 90° … 315°
             const caps = Array.from(hero.querySelectorAll('.cap'));
             const intro = Array.from(hero.querySelectorAll('.hero-note, .hero-scroll'));
             const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -906,22 +905,19 @@
             }
 
             function render(p) {
-                // поворот: 4 ракурса, между ними плавный переход с лёгким сужением силуэта
+                // поворот: N ракурсов (по 45°), новый проявляется поверх предыдущего
+                const N = views.length;
                 const u = clamp((p - ROT_START) / (ROT_END - ROT_START));
-                const pos = u * 4;
-                const k = Math.min(3, Math.floor(pos));
+                const pos = u * N;
+                const k = Math.min(N - 1, Math.floor(pos));
                 const t = u >= 1 ? 1 : pos - k;
-                const r = sstep(0.18, 0.82, t);
-                const next = (k + 1) % 4;
-                const squeeze = 1 - 0.2 * Math.sin(Math.PI * r);
+                const next = (k + 1) % N;
 
                 views.forEach((img, i) => {
                     let o = 0;
-                    // уходящий ракурс остаётся непрозрачным, пока новый проявляется поверх него (без «призрака»)
-                    if (i === k) o = r < 0.7 ? 1 : 0;
-                    if (i === next) o = sstep(0.3, 0.7, r);
+                    if (i === k) o = t < 0.999 ? 1 : 0;
+                    if (i === next) o = sstep(0.05, 0.95, t);
                     img.style.opacity = o;
-                    img.style.transform = o > 0 ? 'scaleX(' + squeeze + ')' : '';
                 });
 
                 // подписи
