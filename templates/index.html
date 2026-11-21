@@ -6,45 +6,250 @@
     <title>OMAR ASTANA — Мужская одежда и обувь</title>
     <style>
         :root {
-            --bg: #f6f6f6;
+            --bg: #f4f5f7;
             --surface: #ffffff;
-            --primary: #141414;
-            --accent: #b8860b;
-            --text: #222222;
-            --muted: #666666;
-            --border: #e2e2e2;
+            --surface-soft: #fafafa;
+            --primary: #111214;
+            --primary-hover: #25272b;
+            --accent: #c59b27;
+            --accent-hover: #ab841c;
+            --text: #18191c;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --ring: rgba(197, 155, 39, 0.22);
+            --radius: 14px;
+            --shadow: 0 12px 32px rgba(17, 18, 20, 0.06);
+            --shadow-sm: 0 4px 14px rgba(17, 18, 20, 0.04);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
 
-        header { background: var(--primary); color: #fff; padding: 16px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #fff; text-decoration: none; }
-        .logo span { color: var(--accent); font-size: 0.8rem; letter-spacing: 1px; display: block; font-weight: 400; }
-        nav { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
-        nav a { color: #fff; text-decoration: none; font-size: 0.95rem; transition: 0.2s; }
-        nav a:hover { color: var(--accent); }
-        .badge { background: var(--accent); color: #fff; padding: 2px 7px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+        }
 
-        .container { width: 90%; max-width: 1200px; margin: 30px auto; flex: 1; }
-        .alert { padding: 12px 18px; border-radius: 6px; margin-bottom: 20px; font-size: 0.95rem; }
-        .alert.success { background: #e6f4ea; color: #1e7e34; border: 1px solid #b7e1cd; }
-        .alert.error { background: #fce8e6; color: #c5221f; border: 1px solid #f6aea9; }
-        .alert.info { background: #e8f0fe; color: #1967d2; border: 1px solid #aecbfa; }
+        body {
+            background: radial-gradient(circle at top, #fbfbfc 0%, var(--bg) 55%);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
 
-        .btn { display: inline-block; background: var(--primary); color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: 0.2s; text-align: center; }
-        .btn:hover { background: #333; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
-        .btn-outline:hover { background: var(--primary); color: #fff; }
-        .btn-accent { background: var(--accent); color: #fff; }
-        .btn-accent:hover { background: #9a7009; }
+        /* Шапка */
+        header {
+            background: rgba(17, 18, 20, 0.96);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            padding: 16px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
 
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-top: 6px; margin-bottom: 16px; font-size: 0.95rem; }
-        label { font-weight: 600; font-size: 0.9rem; }
+        .logo {
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #fff;
+            text-decoration: none;
+            line-height: 1.1;
+        }
 
-        footer { background: var(--primary); color: #aaa; padding: 30px 5%; margin-top: 50px; font-size: 0.85rem; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-        footer h4 { color: #fff; margin-bottom: 10px; }
+        .logo span {
+            color: var(--accent);
+            font-size: 0.72rem;
+            letter-spacing: 2px;
+            display: block;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: color 0.2s ease, opacity 0.2s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #111214;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 4px;
+        }
+
+        /* Контейнер и уведомления */
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 36px auto;
+            flex: 1;
+        }
+
+        .alert {
+            padding: 13px 18px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+
+        /* Кнопки, карточки и формы */
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            padding: 11px 20px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.94rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: #111214;
+        }
+
+        .btn-accent:hover {
+            background: var(--accent-hover);
+            color: #111214;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-card {
+            max-width: 430px;
+            margin: 24px auto;
+            padding: 32px;
+        }
+
+        .auth-card h2 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .auth-subtitle {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.86rem;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 0.96rem;
+            color: var(--text);
+            background: var(--surface);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--ring);
+        }
+
+        .phone-input {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.4px;
+        }
+
+        /* Подвал */
+        footer {
+            background: var(--primary);
+            color: #9ca3af;
+            padding: 36px 5%;
+            margin-top: 60px;
+            font-size: 0.86rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        footer h4 {
+            color: #fff;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            letter-spacing: 0.4px;
+        }
+
+        footer p {
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
@@ -56,10 +261,10 @@
             {% if current_user %}
                 <a href="{{ url_for('cart') }}">Корзина <span class="badge">{{ cart_count }}</span></a>
                 <a href="{{ url_for('profile') }}">Кабинет ({{ current_user['name'] }})</a>
-                <a href="{{ url_for('logout') }}" style="color: #aaa;">Выйти</a>
+                <a href="{{ url_for('logout') }}" style="color: #9ca3af;">Выйти</a>
             {% else %}
                 <a href="{{ url_for('login') }}">Войти</a>
-                <a href="{{ url_for('register') }}" class="btn btn-accent" style="padding: 6px 14px;">Регистрация</a>
+                <a href="{{ url_for('register') }}" class="btn btn-accent" style="padding: 8px 16px; font-size: 0.88rem;">Регистрация</a>
             {% endif %}
         </nav>
     </header>
@@ -75,13 +280,16 @@
 
         <!-- 1. КАТАЛОГ ТОВАРОВ -->
         {% if page == 'catalog' %}
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
-                <h1>Коллекция OMAR</h1>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 26px;">
+                <div>
+                    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Коллекция OMAR</h1>
+                    <p style="color: var(--muted); font-size: 0.92rem;">Мужская одежда и обувь • Астана</p>
+                </div>
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     {% for cat in categories %}
                         <a href="{{ url_for('index', category=cat) }}"
                            class="btn {% if active_category != cat %}btn-outline{% endif %}"
-                           style="padding: 7px 14px; font-size: 0.85rem;">
+                           style="padding: 8px 15px; font-size: 0.86rem;">
                             {{ cat }}
                         </a>
                     {% endfor %}
@@ -92,11 +300,11 @@
                 {% for product in products %}
                 <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
                     <img src="{{ product['image_url'] }}" alt="{{ product['title'] }}" style="width: 100%; height: 280px; object-fit: cover;">
-                    <div style="padding: 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                         <div>
-                            <span style="font-size: 0.75rem; color: var(--accent); font-weight: bold; text-transform: uppercase;">{{ product['category'] }}</span>
-                            <h3 style="margin: 6px 0; font-size: 1.1rem;">{{ product['title'] }}</h3>
-                            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 12px;">{{ product['description'] }}</p>
+                            <span style="font-size: 0.72rem; color: var(--accent-hover); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">{{ product['category'] }}</span>
+                            <h3 style="margin: 6px 0; font-size: 1.1rem; font-weight: 700;">{{ product['title'] }}</h3>
+                            <p style="font-size: 0.86rem; color: var(--muted); margin-bottom: 14px;">{{ product['description'] }}</p>
                         </div>
                         <div>
                             <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 12px;">{{ "{:,}".format(product['price']).replace(',', ' ') }} ₸</div>
@@ -116,69 +324,71 @@
 
         <!-- 2. РЕГИСТРАЦИЯ -->
         {% elif page == 'register' %}
-            <div class="card" style="max-width: 420px; margin: 30px auto;">
-                <h2 style="margin-bottom: 18px;">Регистрация</h2>
+            <div class="card auth-card">
+                <h2>Регистрация</h2>
+                <p class="auth-subtitle">Создайте аккаунт для покупок и бонусов OMAR</p>
                 <form method="POST">
                     <label>Ваше имя</label>
                     <input type="text" name="name" placeholder="Например, Арман" required>
 
                     <label>Номер телефона</label>
-                    <input type="text" name="phone" placeholder="+7 (700) 000-00-00" required>
+                    <input type="tel" name="phone" class="phone-input" placeholder="+7 700 222 22-22" inputmode="numeric" required>
 
                     <label>Пароль</label>
                     <input type="password" name="password" placeholder="Придумайте пароль" required>
 
-                    <button type="submit" class="btn" style="width: 100%;">Создать аккаунт</button>
+                    <button type="submit" class="btn" style="width: 100%; padding: 12px;">Создать аккаунт</button>
                 </form>
-                <p style="margin-top: 15px; font-size: 0.9rem; text-align: center;">
-                    Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a>
+                <p style="margin-top: 18px; font-size: 0.9rem; color: var(--muted); text-align: center;">
+                    Уже есть аккаунт? <a href="{{ url_for('login') }}" style="color: var(--text); font-weight: 600;">Войти</a>
                 </p>
             </div>
 
         <!-- 3. АВТОРИЗАЦИЯ -->
         {% elif page == 'login' %}
-            <div class="card" style="max-width: 420px; margin: 30px auto;">
-                <h2 style="margin-bottom: 18px;">Вход в личный кабинет</h2>
+            <div class="card auth-card">
+                <h2>Вход в личный кабинет</h2>
+                <p class="auth-subtitle">Введите номер телефона и пароль</p>
                 <form method="POST">
                     <label>Номер телефона</label>
-                    <input type="text" name="phone" placeholder="+7 (700) 000-00-00" required>
+                    <input type="tel" name="phone" class="phone-input" placeholder="+7 700 222 22-22" inputmode="numeric" required>
 
                     <label>Пароль</label>
                     <input type="password" name="password" placeholder="Введите пароль" required>
 
-                    <button type="submit" class="btn" style="width: 100%;">Войти</button>
+                    <button type="submit" class="btn" style="width: 100%; padding: 12px;">Войти</button>
                 </form>
-                <p style="margin-top: 15px; font-size: 0.9rem; text-align: center;">
-                    Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрироваться</a>
+                <p style="margin-top: 18px; font-size: 0.9rem; color: var(--muted); text-align: center;">
+                    Нет аккаунта? <a href="{{ url_for('register') }}" style="color: var(--text); font-weight: 600;">Зарегистрироваться</a>
                 </p>
             </div>
 
         <!-- 4. КОРЗИНА -->
         {% elif page == 'cart' %}
-            <h1 style="margin-bottom: 20px;">Корзина</h1>
+            <h1 style="font-size: 1.7rem; font-weight: 800; margin-bottom: 20px;">Корзина</h1>
             {% if cart_items %}
             <div class="card">
                 {% for item in cart_items %}
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 15px 0; flex-wrap: wrap; gap: 15px;">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <img src="{{ item['image_url'] }}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 16px 0; flex-wrap: wrap; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <img src="{{ item['image_url'] }}" style="width: 72px; height: 72px; object-fit: cover; border-radius: 10px;">
                         <div>
-                            <h4>{{ item['title'] }}</h4>
+                            <h4 style="font-size: 1rem;">{{ item['title'] }}</h4>
                             <p style="font-size: 0.85rem; color: var(--muted);">Размер: <strong>{{ item['size'] }}</strong></p>
-                            <p style="font-size: 0.9rem; font-weight: bold;">{{ "{:,}".format(item['price']).replace(',', ' ') }} ₸</p>
+                            <p style="font-size: 0.95rem; font-weight: 700; margin-top: 2px;">{{ "{:,}".format(item['price']).replace(',', ' ') }} ₸</p>
                         </div>
                     </div>
 
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='minus') }}" class="btn btn-outline" style="padding: 4px 10px;">−</a>
-                        <span style="font-weight: bold;">{{ item['quantity'] }}</span>
-                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='plus') }}" class="btn btn-outline" style="padding: 4px 10px;">+</a>
-                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='delete') }}" style="color: #c5221f; margin-left: 10px; font-size: 0.85rem; text-decoration: none;">Удалить</a>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='minus') }}" class="btn btn-outline" style="padding: 5px 12px;">−</a>
+                        <span style="font-weight: 700; min-width: 20px; text-align: center;">{{ item['quantity'] }}</span>
+                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='plus') }}" class="btn btn-outline" style="padding: 5px 12px;">+</a>
+                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='delete') }}" style="color: #dc2626; margin-left: 10px; font-size: 0.86rem; font-weight: 500; text-decoration: none;">Удалить</a>
                     </div>
                 </div>
                 {% endfor %}
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 15px;">
                     <div style="font-size: 1.3rem;">
                         Итого: <strong>{{ "{:,}".format(total_price).replace(',', ' ') }} ₸</strong>
                     </div>
@@ -187,14 +397,14 @@
             </div>
             {% else %}
             <div class="card" style="text-align: center; padding: 50px;">
-                <p style="color: var(--muted); margin-bottom: 15px;">Ваша корзина пока пуста.</p>
+                <p style="color: var(--muted); margin-bottom: 16px;">Ваша корзина пока пуста.</p>
                 <a href="{{ url_for('index') }}" class="btn">Перейти в каталог</a>
             </div>
             {% endif %}
 
         <!-- 5. ОФОРМЛЕНИЕ И ОПЛАТА -->
         {% elif page == 'checkout' %}
-            <h1 style="margin-bottom: 20px;">Оформление заказа и оплата</h1>
+            <h1 style="font-size: 1.7rem; font-weight: 800; margin-bottom: 20px;">Оформление заказа и оплата</h1>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
                 <div class="card">
                     <form method="POST">
@@ -226,11 +436,11 @@
                             <option value="При получении">Картой или наличными при получении</option>
                         </select>
 
-                        <div id="kaspi_box" style="background: #fff8e7; border: 1px solid #f0d58c; padding: 14px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem;">
+                        <div id="kaspi_box" style="background: #fffbeb; border: 1px solid #fde68a; padding: 14px; border-radius: 10px; margin-bottom: 18px; font-size: 0.9rem;">
                             <strong>Оплата через Kaspi:</strong> после нажатия кнопки «Оплатить» счет на сумму <strong>{{ "{:,}".format(total_price).replace(',', ' ') }} ₸</strong> будет выставлен на ваш номер <strong>{{ current_user['phone'] }}</strong>.
                         </div>
 
-                        <div id="card_box" style="display: none; background: #f9f9f9; border: 1px solid var(--border); padding: 14px; border-radius: 6px; margin-bottom: 16px;">
+                        <div id="card_box" style="display: none; background: var(--surface-soft); border: 1px solid var(--border); padding: 14px; border-radius: 10px; margin-bottom: 18px;">
                             <label>Номер карты</label>
                             <input type="text" placeholder="4400 4301 0000 0000" maxlength="19">
                             <div style="display: flex; gap: 10px;">
@@ -246,9 +456,9 @@
                 </div>
 
                 <div class="card" style="height: fit-content;">
-                    <h3 style="margin-bottom: 15px;">Ваш заказ</h3>
+                    <h3 style="margin-bottom: 15px; font-weight: 700;">Ваш заказ</h3>
                     {% for item in cart_items %}
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
                             <span>{{ item['title'] }} ({{ item['size'] }}) × {{ item['quantity'] }}</span>
                             <strong>{{ "{:,}".format(item['price'] * item['quantity']).replace(',', ' ') }} ₸</strong>
                         </div>
@@ -264,24 +474,24 @@
         {% elif page == 'profile' %}
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
                 <div class="card" style="height: fit-content;">
-                    <h2 style="margin-bottom: 12px;">Личный кабинет</h2>
+                    <h2 style="margin-bottom: 14px; font-weight: 700;">Личный кабинет</h2>
                     <p style="margin-bottom: 8px;"><strong>Имя:</strong> {{ current_user['name'] }}</p>
                     <p style="margin-bottom: 8px;"><strong>Телефон:</strong> {{ current_user['phone'] }}</p>
                     <p style="margin-bottom: 16px; font-size: 0.85rem; color: var(--muted);">Дата регистрации: {{ current_user['created_at'] }}</p>
-                    <div style="background: #f4f1ea; padding: 12px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 16px;">
+                    <div style="background: #fdf8eb; border: 1px solid #f3e5ab; padding: 12px 14px; border-radius: 10px; font-size: 0.9rem; margin-bottom: 18px;">
                         🎁 Бонусный статус: <strong>Участник клуба OMAR (5% кэшбэк)</strong>
                     </div>
                     <a href="{{ url_for('index') }}" class="btn" style="width: 100%;">Перейти к покупкам</a>
                 </div>
 
                 <div class="card" style="grid-column: span 2;">
-                    <h2 style="margin-bottom: 16px;">История заказов</h2>
+                    <h2 style="margin-bottom: 16px; font-weight: 700;">История заказов</h2>
                     {% if orders %}
                         {% for order in orders %}
-                        <div style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 15px;">
+                        <div style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 15px; background: var(--surface-soft);">
                             <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
                                 <strong>Заказ №{{ order['id'] }} от {{ order['created_at'] }}</strong>
-                                <span style="background: #e6f4ea; color: #1e7e34; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">
+                                <span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 3px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 700;">
                                     {{ order['status'] }}
                                 </span>
                             </div>
@@ -304,7 +514,7 @@
             <div>
                 <h4>OMAR ASTANA</h4>
                 <p>Мужская одежда и обувь в стиле casual и smart casual.</p>
-                <p style="margin-top:8px;">Instagram: @omar.astana</p>
+                <p style="margin-top: 8px;">Instagram: @omar.astana</p>
             </div>
             <div>
                 <h4>Филиалы в Астане</h4>
@@ -328,11 +538,64 @@
             document.getElementById('branch_block').style.display = (method === 'Самовывоз из филиала') ? 'block' : 'none';
             document.getElementById('address_block').style.display = (method === 'Курьерская доставка') ? 'block' : 'none';
         }
+
         function togglePayment() {
             const pay = document.getElementById('payment_method').value;
             document.getElementById('kaspi_box').style.display = (pay === 'Kaspi QR / Перевод') ? 'block' : 'none';
             document.getElementById('card_box').style.display = (pay === 'Банковская карта') ? 'block' : 'none';
         }
+
+        function formatKzPhone(rawValue) {
+            let digits = rawValue.replace(/\D/g, '');
+
+            // Если начали вводить 8 или 7 как код страны, убираем первую цифру, так как префикс +7 уже фиксирован
+            if (digits.startsWith('8') || digits.startsWith('7')) {
+                digits = digits.slice(1);
+            }
+
+            digits = digits.slice(0, 10);
+
+            if (digits.length === 0) {
+                return '+7 ';
+            }
+
+            let formatted = '+7 ' + digits.slice(0, 3);
+            if (digits.length > 3) {
+                formatted += ' ' + digits.slice(3, 6);
+            }
+            if (digits.length > 6) {
+                formatted += ' ' + digits.slice(6, 8);
+            }
+            if (digits.length > 8) {
+                formatted += '-' + digits.slice(8, 10);
+            }
+            return formatted;
+        }
+
+        document.querySelectorAll('.phone-input').forEach((input) => {
+            input.addEventListener('focus', () => {
+                if (!input.value.trim()) {
+                    input.value = '+7 ';
+                }
+            });
+
+            input.addEventListener('input', () => {
+                input.value = formatKzPhone(input.value);
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if ((e.key === 'Backspace' || e.key === 'Delete') && input.selectionStart <= 3 && input.selectionEnd <= 3) {
+                    e.preventDefault();
+                    input.value = '+7 ';
+                }
+            });
+
+            input.addEventListener('blur', () => {
+                if (input.value.trim() === '+7') {
+                    input.value = '';
+                }
+            });
+        });
     </script>
 </body>
 </html>
