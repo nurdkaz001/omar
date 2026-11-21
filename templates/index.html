@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>OMAR ASTANA — Мужская одежда и обувь</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -476,6 +476,105 @@
             .tools input { flex: 1; width: auto; min-width: 0; }
         }
 
+        /* ---------- Нижняя панель (только телефон) ---------- */
+        .tabbar { display: none; }
+
+        @media (max-width: 720px) {
+            :root { --hdr: 56px; --tab: 64px; }
+
+            body { padding-bottom: calc(var(--tab) + env(safe-area-inset-bottom, 0px)); }
+
+            /* Шапка: логотип и пара ссылок. Разделы и корзина теперь внизу */
+            .site-header { flex-wrap: nowrap; padding-top: 0; padding-bottom: 0; min-height: var(--hdr); }
+            .nav-cats, .hide-m { display: none; }
+            .nav { gap: 18px; }
+
+            .tabbar {
+                display: flex;
+                position: fixed;
+                left: 0; right: 0; bottom: 0;
+                z-index: 60;
+                padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+                background: rgba(255, 253, 249, 0.96);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid var(--line);
+            }
+            .tabbar a { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 4px; border-radius: 14px; font-size: 11.5px; font-weight: 500; color: var(--muted); text-decoration: none; }
+            .tabbar a.on { color: var(--accent); background: var(--accent-soft); }
+            .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+            .tabbar .badge { position: absolute; top: 1px; left: calc(50% + 4px); margin: 0; }
+
+            /* Крупные зоны нажатия */
+            .btn { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; }
+            .alerts { padding-top: 14px; }
+
+            /* Главная */
+            .hero { min-height: calc(100svh - var(--hdr) - var(--tab)); padding-bottom: 72px; }
+            .hero-actions { width: 100%; max-width: 340px; flex-direction: column; }
+            .hero-actions .btn { width: 100%; min-width: 0; }
+            .section { padding-top: 48px; }
+            .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .tile { border-radius: var(--r-md); }
+            .tile-text { left: 14px; right: 14px; bottom: 14px; }
+            .tile-name { font-size: 1.15rem; }
+            .perks { gap: 22px; }
+
+            /* Каталог */
+            .catalog-head { padding-top: 24px; }
+            .toolbar { gap: 12px; padding-top: 16px; }
+            .filters { flex-wrap: nowrap; overflow-x: auto; width: calc(100% + 2 * var(--pad)); margin: 0 calc(var(--pad) * -1); padding: 2px var(--pad); scrollbar-width: none; }
+            .filters::-webkit-scrollbar { display: none; }
+            .chip { flex: none; white-space: nowrap; padding: 10px 18px; }
+            .tools { flex-wrap: wrap; gap: 10px; }
+            .tools input, .tools select { flex: 1 1 100%; width: 100%; font-size: 16px; padding: 12px 18px; }
+            .tools select { padding-right: 38px; }
+
+            .grid-wrap { padding-top: 22px; }
+            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 12px; }
+            .product-img { border-radius: var(--r-sm); margin-bottom: 10px; }
+            .product-top { flex-direction: column; gap: 2px; }
+            .product-top h3 { font-size: 14px; }
+            .price { font-size: 15px; }
+            .product-sizes { display: none; }
+
+            /* Страница товара */
+            .crumbs { padding-top: 14px; font-size: 13px; }
+            .pdp { padding-top: 12px; gap: 20px; }
+            .main-img { border-radius: var(--r-md); }
+            .thumbs { overflow-x: auto; scrollbar-width: none; }
+            .thumb { flex: none; width: 60px; }
+            .pdp-title { font-size: 1.7rem; }
+            .size span { min-width: 56px; height: 50px; }
+            #buyBtn {
+                position: sticky;
+                bottom: calc(var(--tab) + env(safe-area-inset-bottom, 0px) + 10px);
+                z-index: 5;
+                box-shadow: 0 8px 24px rgba(60, 40, 20, 0.22);
+            }
+            .store { padding: 12px 0; }
+
+            /* Корзина */
+            .cart-row { grid-template-columns: 76px 1fr; gap: 14px; }
+            .cart-thumb { width: 76px; height: 76px; }
+            .qty a { width: 42px; height: 42px; }
+            .remove { padding: 8px 0; }
+            .cart-total { flex-direction: column; align-items: stretch; }
+            .cart-total .btn { width: 100%; }
+
+            /* Оформление */
+            .summary { order: -1; background: var(--surface); border-radius: var(--r-md); padding: 18px; }
+            .sum-row { border-top-color: #ddd5c8; }
+            .summary .sum-total { border-top-color: var(--ink); }
+
+            /* Кабинет */
+            .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat { padding: 16px 18px; }
+            .stat.club { grid-column: 1 / -1; }
+            .order { padding: 16px 18px; }
+
+            .site-footer { margin-top: 56px; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
             .rise, .scroll-hint { animation: none; }
@@ -496,12 +595,12 @@
 
         <nav class="nav" aria-label="Аккаунт">
             {% if current_user %}
-                <a href="{{ url_for('cart') }}" class="{% if page == 'cart' %}on{% endif %}">Корзина{% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}</a>
+                <a href="{{ url_for('cart') }}" class="hide-m {% if page == 'cart' %}on{% endif %}">Корзина{% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}</a>
                 {% if current_user['is_admin'] %}<a href="{{ url_for('admin_orders') }}">Админка</a>{% endif %}
-                <a href="{{ url_for('profile') }}" class="{% if page == 'profile' %}on{% endif %}">Кабинет</a>
+                <a href="{{ url_for('profile') }}" class="hide-m {% if page == 'profile' %}on{% endif %}">Кабинет</a>
                 <a href="{{ url_for('logout') }}">Выйти</a>
             {% else %}
-                <a href="{{ url_for('login') }}" class="{% if page == 'login' %}on{% endif %}">Войти</a>
+                <a href="{{ url_for('login') }}" class="hide-m {% if page == 'login' %}on{% endif %}">Войти</a>
                 <a href="{{ url_for('register') }}" class="{% if page == 'register' %}on{% endif %}">Регистрация</a>
             {% endif %}
         </nav>
@@ -962,6 +1061,33 @@
             </div>
         </div>
     </footer>
+
+    <nav class="tabbar" aria-label="Быстрая навигация">
+        <a href="{{ url_for('index') }}" class="{% if page == 'home' %}on{% endif %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+            <span>Главная</span>
+        </a>
+        <a href="{{ url_for('catalog') }}" class="{% if page in ['catalog', 'product'] %}on{% endif %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>
+            <span>Каталог</span>
+        </a>
+        <a href="{{ url_for('cart') }}" class="{% if page in ['cart', 'checkout'] %}on{% endif %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+            <span>Корзина</span>
+            {% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}
+        </a>
+        {% if current_user %}
+        <a href="{{ url_for('profile') }}" class="{% if page == 'profile' %}on{% endif %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            <span>Кабинет</span>
+        </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="{% if page in ['login', 'register'] %}on{% endif %}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+            <span>Войти</span>
+        </a>
+        {% endif %}
+    </nav>
 
     <script>
         function toggleDelivery() {
