@@ -1,9 +1,10 @@
 import os
-import sqlite3
 from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 load_dotenv()
 
@@ -11,27 +12,35 @@ secret_key = os.environ.get('SECRET_KEY')
 if not secret_key:
     raise RuntimeError('Не задана переменная окружения SECRET_KEY')
 
+database_url = os.environ.get('DATABASE_URL')
+if not database_url:
+    raise RuntimeError('Не задана переменная окружения DATABASE_URL')
+
+# Опциональные переменные Supabase, если понадобятся в будущем (Storage / Auth / API)
+supabase_url = os.environ.get('SUPABASE_URL', '')
+supabase_key = os.environ.get('SUPABASE_KEY', '')
+
 app = Flask(__name__)
 app.secret_key = secret_key
-DB_NAME = os.environ.get('DB_PATH', 'omar_store.db')
 
 
 def get_db():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return psycopg2.connect(database_url, cursor_factory=RealDictCursor)
 
 
 def init_db():
     conn = get_db()
+    cur = conn.cursor()
     with open('schema.sql', 'r', encoding='utf-8') as f:
-        conn.executescript(f.read())
+        cur.execute(f.read())
     conn.commit()
+    cur.close()
     conn.close()
 
 
 def render_page(page_name, **kwargs):
     conn = get_db()
+    cur = conn.cursor()
     user = None
     cart_items = []
     cart_count = 0
@@ -40,18 +49,27 @@ def render_page(page_name, **kwargs):
 
     if 'user_id' in session:
         uid = session['user_id']
-        user = conn.execute('SELECT * FROM users WHERE id = ?', (uid,)).fetchone()
-        cart_items = conn.execute('''
+        cur.execute('SELECT * FROM users WHERE id = %s', (uid,))
+        user = cur.fetchone()
+
+        cur.execute('''
             SELECT c.id AS cart_id, c.size, c.quantity, p.title, p.price, p.image_url
             FROM cart c
             JOIN products p ON c.product_id = p.id
-            WHERE c.user_id = ?
-        ''', (uid,)).fetchall()
+            WHERE c.user_id = %s
+            ORDER BY c.id ASC
+        ''', (uid,))
+        cart_items = cur.fetchall()
+
         cart_count = sum(i['quantity'] for i in cart_items)
         total_price = sum(i['price'] * i['quantity'] for i in cart_items)
-        orders = conn.execute('SELECT * FROM orders WHERE user_id = ? ORDER BY id DESC', (uid,)).fetchall()
 
+        cur.execute('SELECT * FROM orders WHERE user_id = %s ORDER BY id DESC', (uid,))
+        orders = cur.fetchall()
+
+    cur.close()
     conn.close()
+
     return render_template(
         'index.html',
         page=page_name,
@@ -68,11 +86,15 @@ def render_page(page_name, **kwargs):
 def index():
     category = request.args.get('category', 'Все')
     conn = get_db()
+    cur = conn.cursor()
     if category == 'Все':
-        products = conn.execute('SELECT * FROM products').fetchall()
+        cur.execute('SELECT * FROM products ORDER BY id ASC')
     else:
-        products = conn.execute('SELECT * FROM products WHERE category = ?', (category,)).fetchall()
+        cur.execute('SELECT * FROM products WHERE category = %s ORDER BY id ASC', (category,))
+    products = cur.fetchall()
+    cur.close()
     conn.close()
+
     categories = ['Все', 'Верхняя одежда', 'Брюки', 'Трикотаж', 'Обувь']
     return render_page('catalog', products=products, categories=categories, active_category=category)
 
@@ -85,19 +107,28 @@ def register():
         password = request.form['password']
 
         conn = get_db()
-        if conn.execute('SELECT id FROM users WHERE phone = ?', (phone,)).fetchone():
+        cur = conn.cursor()
+        cur.execute('SELECT id FROM users WHERE phone = %s', (phone,))
+        if cur.fetchone():
+            cur.close()
             conn.close()
             flash('Пользователь с таким номером телефона уже зарегистрирован.', 'error')
             return redirect(url_for('register'))
 
-        cursor = conn.cursor()
-        cursor.execute(
-            'INSERT INTO users (name, phone, password_hash, created_at) VALUES (?, ?, ?, ?)',
+        cur.execute(
+            '''
+            INSERT INTO users (name, phone, password_hash, created_at)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id
+            ''',
             (name, phone, generate_password_hash(password), datetime.now().strftime('%d.%m.%Y %H:%M'))
         )
+        new_user_id = cur.fetchone()['id']
         conn.commit()
-        session['user_id'] = cursor.lastrowid
+        cur.close()
         conn.close()
+
+        session['user_id'] = new_user_id
         flash('Добро пожаловать в OMAR ASTANA!', 'success')
         return redirect(url_for('profile'))
 
@@ -111,7 +142,10 @@ def login():
         password = request.form['password']
 
         conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE phone = ?', (phone,)).fetchone()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM users WHERE phone = %s', (phone,))
+        user = cur.fetchone()
+        cur.close()
         conn.close()
 
         if user and check_password_hash(user['password_hash'], password):
@@ -138,21 +172,26 @@ def add_to_cart(product_id):
 
     size = request.form.get('size', 'Стандарт')
     uid = session['user_id']
+
     conn = get_db()
-    existing = conn.execute(
-        'SELECT * FROM cart WHERE user_id = ? AND product_id = ? AND size = ?',
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT * FROM cart WHERE user_id = %s AND product_id = %s AND size = %s',
         (uid, product_id, size)
-    ).fetchone()
+    )
+    existing = cur.fetchone()
 
     if existing:
-        conn.execute('UPDATE cart SET quantity = quantity + 1 WHERE id = ?', (existing['id'],))
+        cur.execute('UPDATE cart SET quantity = quantity + 1 WHERE id = %s', (existing['id'],))
     else:
-        conn.execute(
-            'INSERT INTO cart (user_id, product_id, size, quantity) VALUES (?, ?, ?, 1)',
+        cur.execute(
+            'INSERT INTO cart (user_id, product_id, size, quantity) VALUES (%s, %s, %s, 1)',
             (uid, product_id, size)
         )
     conn.commit()
+    cur.close()
     conn.close()
+
     flash('Товар добавлен в корзину.', 'success')
     return redirect(request.referrer or url_for('index'))
 
@@ -170,18 +209,23 @@ def update_cart(cart_id, action):
         return redirect(url_for('login'))
 
     conn = get_db()
-    item = conn.execute('SELECT * FROM cart WHERE id = ? AND user_id = ?', (cart_id, session['user_id'])).fetchone()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM cart WHERE id = %s AND user_id = %s', (cart_id, session['user_id']))
+    item = cur.fetchone()
+
     if item:
         if action == 'plus':
-            conn.execute('UPDATE cart SET quantity = quantity + 1 WHERE id = ?', (cart_id,))
+            cur.execute('UPDATE cart SET quantity = quantity + 1 WHERE id = %s', (cart_id,))
         elif action == 'minus':
             if item['quantity'] > 1:
-                conn.execute('UPDATE cart SET quantity = quantity - 1 WHERE id = ?', (cart_id,))
+                cur.execute('UPDATE cart SET quantity = quantity - 1 WHERE id = %s', (cart_id,))
             else:
-                conn.execute('DELETE FROM cart WHERE id = ?', (cart_id,))
+                cur.execute('DELETE FROM cart WHERE id = %s', (cart_id,))
         elif action == 'delete':
-            conn.execute('DELETE FROM cart WHERE id = ?', (cart_id,))
+            cur.execute('DELETE FROM cart WHERE id = %s', (cart_id,))
         conn.commit()
+
+    cur.close()
     conn.close()
     return redirect(url_for('cart'))
 
@@ -193,15 +237,19 @@ def checkout():
 
     if request.method == 'POST':
         conn = get_db()
+        cur = conn.cursor()
         uid = session['user_id']
-        items = conn.execute('''
+
+        cur.execute('''
             SELECT c.size, c.quantity, p.title, p.price
             FROM cart c
             JOIN products p ON c.product_id = p.id
-            WHERE c.user_id = ?
-        ''', (uid,)).fetchall()
+            WHERE c.user_id = %s
+        ''', (uid,))
+        items = cur.fetchall()
 
         if not items:
+            cur.close()
             conn.close()
             return redirect(url_for('index'))
 
@@ -215,13 +263,14 @@ def checkout():
         items_summary = ', '.join([f"{i['title']} (размер {i['size']}) x{i['quantity']}" for i in items])
         status = 'Оплачен онлайн' if payment_method != 'При получении' else 'Ожидает оплаты при получении'
 
-        conn.execute('''
+        cur.execute('''
             INSERT INTO orders (user_id, total_amount, delivery_method, address_or_branch, payment_method, status, items_summary, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ''', (uid, total_price, delivery_method, location, payment_method, status, items_summary, datetime.now().strftime('%d.%m.%Y %H:%M')))
 
-        conn.execute('DELETE FROM cart WHERE user_id = ?', (uid,))
+        cur.execute('DELETE FROM cart WHERE user_id = %s', (uid,))
         conn.commit()
+        cur.close()
         conn.close()
 
         flash('Заказ успешно оплачен и оформлен!', 'success')
@@ -237,8 +286,10 @@ def profile():
     return render_page('profile')
 
 
-# Инициализация БД при старте (в том числе при запуске через gunicorn на Render)
-init_db()
+try:
+    init_db()
+except Exception as e:
+    print(f'Предупреждение при инициализации БД: {e}')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
