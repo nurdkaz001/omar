@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админка — OMAR ASTANA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f7f4ef; --surface: #ece7df; --card: #fffdf9; --ink: #2a2622; --muted: #7d766c;
+            --line: #e3ddd2; --accent: #a8453b; --accent-soft: #f3e1dd;
+            --ok: #3a7a58; --ok-bg: #e3f0e8; --wait: #9a6416; --wait-bg: #f8ecd3;
+            --r-sm: 10px; --r-md: 16px; --shadow: 0 6px 24px rgba(60, 40, 20, 0.07);
+            --pad: clamp(16px, 4vw, 48px);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Inter Tight", Arial, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+        a { color: inherit; }
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+        .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px var(--pad); background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+        .top b { font-weight: 700; letter-spacing: .02em; }
+        .top nav { display: flex; flex-wrap: wrap; gap: 6px; }
+        .top nav a { text-decoration: none; padding: 8px 16px; border-radius: 99px; font-size: 14px; color: var(--muted); font-weight: 500; }
+        .top nav a:hover { background: var(--surface); color: var(--ink); }
+        .top nav a.on { background: var(--ink); color: #fff; }
+        .pill { background: var(--accent); color: #fff; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 99px; margin-left: 6px; }
+        .top .back { font-size: 14px; color: var(--muted); text-decoration: none; }
+
+        main { padding: clamp(20px, 3vw, 40px) var(--pad) 72px; max-width: 1180px; margin: 0 auto; }
+        h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
+        .head { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+        .hint { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+        .alert { padding: 12px 16px; margin-bottom: 14px; font-size: 14px; background: var(--surface); border-left: 4px solid var(--ink); border-radius: var(--r-sm); }
+        .alert.error { border-left-color: var(--accent); color: var(--accent); }
+        .alert.success { border-left-color: var(--ok); }
+
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+        .stat { background: var(--surface); border-radius: var(--r-md); padding: 16px 20px; }
+        .stat b { display: block; font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+        .stat span { font-size: 13px; color: var(--muted); }
+        .stat.warn { background: var(--wait-bg); }
+        .stat.warn span { color: var(--wait); }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+        .chip { padding: 7px 16px; border: 1px solid var(--line); border-radius: 99px; font-size: 14px; text-decoration: none; color: var(--muted); background: var(--card); }
+        .chip:hover { color: var(--ink); border-color: var(--ink); }
+        .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+        .btn { display: inline-block; background: var(--ink); color: #fff; border: 1px solid var(--ink); border-radius: 99px; padding: 10px 22px; font: inherit; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
+        .btn:hover { background: var(--accent); border-color: var(--accent); }
+        .btn.sm { padding: 7px 16px; font-size: 13px; }
+        .btn.ghost { background: transparent; color: var(--ink); }
+        .btn.ghost:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+        .btn.danger { background: transparent; color: var(--accent); border-color: #e0bdb7; }
+        .btn.danger:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        input, select, textarea { width: 100%; font: inherit; font-size: 15px; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 14px; }
+        textarea { min-height: 96px; resize: vertical; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+        label { display: block; font-size: 13px; color: var(--muted); margin: 0 0 4px; }
+        .field { margin-bottom: 16px; }
+
+        .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 14px; }
+
+        /* Заказы */
+        .order-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+        .order-no { font-weight: 600; font-size: 17px; }
+        .order-no small { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+        .tag { font-size: 12.5px; font-weight: 600; padding: 3px 11px; border-radius: 99px; background: var(--wait-bg); color: var(--wait); white-space: nowrap; }
+        .tag.ok { background: var(--ok-bg); color: var(--ok); }
+        .tag.bad { background: var(--accent-soft); color: var(--accent); }
+        .tag.low { background: var(--wait-bg); color: var(--wait); }
+        .tag.out { background: var(--accent-soft); color: var(--accent); }
+        .order p { font-size: 14px; color: var(--muted); margin-bottom: 3px; }
+        .order p b { color: var(--ink); font-weight: 500; }
+        .order-foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+        .sum { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+        .status-form { display: flex; gap: 8px; align-items: center; }
+        .status-form select { width: auto; padding: 8px 12px; font-size: 14px; }
+
+        /* Таблицы */
+        .table-wrap { overflow-x: auto; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--card); box-shadow: var(--shadow); }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; font-weight: 500; color: var(--muted); font-size: 13px; padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+        tr:last-child td { border-bottom: 0; }
+        .thumb { width: 48px; height: 56px; object-fit: cover; border-radius: 8px; background: var(--surface); display: block; }
+        .prod-cell { display: flex; align-items: center; gap: 12px; min-width: 220px; }
+        .prod-cell b { font-weight: 500; }
+        .prod-cell small { color: var(--muted); display: block; }
+        .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+        .actions form { display: inline; }
+        .num { text-align: right; white-space: nowrap; }
+
+        /* Форма товара */
+        .form-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .stock-grid th, .stock-grid td { padding: 8px 10px; }
+        .stock-grid input { width: 72px; padding: 7px 10px; text-align: center; }
+        .stock-grid td:first-child { font-weight: 600; }
+        .preview { width: 100%; max-width: 200px; aspect-ratio: 4/5; object-fit: cover; border-radius: var(--r-md); background: var(--surface); margin-top: 8px; }
+        .empty { text-align: center; color: var(--muted); padding: 40px 16px; border: 1px dashed #d2c9ba; border-radius: var(--r-md); }
+
+        @media (max-width: 860px) { .form-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<header class="top">
+    <b>OMAR · Админка</b>
+    <nav aria-label="Разделы админки">
+        <a href="{{ url_for('admin_orders') }}" class="{% if section == 'orders' %}on{% endif %}">Заказы{% if new_orders %}<span class="pill">{{ new_orders }}</span>{% endif %}</a>
+        <a href="{{ url_for('admin_products') }}" class="{% if section == 'products' %}on{% endif %}">Товары</a>
+        <a href="{{ url_for('admin_low_stock') }}" class="{% if section == 'low' %}on{% endif %}">Заканчивается{% if low_count %}<span class="pill">{{ low_count }}</span>{% endif %}</a>
+    </nav>
+    <a class="back" href="{{ url_for('index') }}">← На сайт</a>
+</header>
+
+<main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<div class="alert {{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+
+    {% macro money(n) %}{{ "{:,}".format(n or 0).replace(',', ' ') }} ₸{% endmacro %}
+
+    {% if section == 'orders' %}
+        <div class="head">
+            <div><h1>Заказы</h1><p class="hint">Меняйте статус по мере сборки и выдачи заказа.</p></div>
+        </div>
+
+        <div class="stats">
+            <div class="stat {% if new_orders %}warn{% endif %}"><b>{{ new_orders }}</b><span>Ждут обработки</span></div>
+            <div class="stat"><b>{{ total_orders }}</b><span>Всего заказов</span></div>
+            <div class="stat"><b>{{ money(revenue) }}</b><span>Сумма (без отменённых)</span></div>
+            <div class="stat {% if low_count %}warn{% endif %}"><b>{{ low_count }}</b><span>Позиций заканчивается</span></div>
+        </div>
+
+        <nav class="chips" aria-label="Фильтр по статусу">
+            <a class="chip {% if not active_status %}on{% endif %}" href="{{ url_for('admin_orders') }}">Все</a>
+            {% for s in statuses %}
+                <a class="chip {% if active_status == s %}on{% endif %}" href="{{ url_for('admin_orders', status=s) }}">{{ s }}</a>
+            {% endfor %}
+        </nav>
+
+        {% for o in orders %}
+        <article class="card order">
+            <div class="order-top">
+                <span class="order-no">Заказ №{{ o['id'] }}<small>{{ o['created_at'] }}</small></span>
+                <span class="tag {% if o['status'] in ['Выдан', 'Доставлен', 'Оплачен онлайн'] %}ok{% elif o['status'] == 'Отменён' %}bad{% endif %}">{{ o['status'] }}</span>
+            </div>
+            <p><b>Клиент:</b> {{ o['user_name'] }}, <a href="tel:{{ o['user_phone'] }}">{{ o['user_phone'] }}</a></p>
+            <p><b>Состав:</b> {{ o['items_summary'] }}</p>
+            <p><b>Получение:</b> {{ o['delivery_method'] }}. {{ o['address_or_branch'] }}</p>
+            <p><b>Оплата:</b> {{ o['payment_method'] }}</p>
+            <div class="order-foot">
+                <span class="sum">{{ money(o['total_amount']) }}</span>
+                <form class="status-form" method="POST" action="{{ url_for('admin_order_status', order_id=o['id']) }}">
+                    <select name="status" aria-label="Статус заказа №{{ o['id'] }}">
+                        {% for s in statuses %}<option value="{{ s }}" {% if s == o['status'] %}selected{% endif %}>{{ s }}</option>{% endfor %}
+                    </select>
+                    <button class="btn sm" type="submit">Сохранить</button>
+                </form>
+            </div>
+        </article>
+        {% else %}
+            <div class="empty">Заказов с таким статусом нет.</div>
+        {% endfor %}
+
+    {% elif section == 'products' %}
+        <div class="head">
+            <div><h1>Товары</h1><p class="hint">Всего: {{ products|length }}. Остаток считается по всем магазинам.</p></div>
+            <a class="btn" href="{{ url_for('admin_product_new') }}">+ Добавить товар</a>
+        </div>
+
+        {% if products %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Товар</th><th>Раздел</th><th class="num">Цена</th><th class="num">Остаток</th><th></th></tr></thead>
+                <tbody>
+                {% for p in products %}
+                <tr>
+                    <td><div class="prod-cell">
+                        <img class="thumb" src="{{ p['image_url'] or '' }}" alt="" loading="lazy">
+                        <div><b>{{ p['title'] }}</b><small>Размеры: {{ p['sizes'].replace(',', ', ') }}</small></div>
+                    </div></td>
+                    <td>{{ p['category'] }}</td>
+                    <td class="num">{{ money(p['price']) }}</td>
+                    <td class="num">
+                        {% if p['total'] == 0 %}<span class="tag out">Нет в наличии</span>
+                        {% elif p['low_sizes'] %}<span class="tag low">Мало: {{ p['total'] }} шт.</span>
+                        {% else %}{{ p['total'] }} шт.{% endif %}
+                    </td>
+                    <td><div class="actions">
+                        <a class="btn sm ghost" href="{{ url_for('product', product_id=p['id']) }}" target="_blank" rel="noopener">Открыть</a>
+                        <a class="btn sm" href="{{ url_for('admin_product_edit', product_id=p['id']) }}">Изменить</a>
+                    </div></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="empty">Товаров пока нет. Нажмите «Добавить товар».</div>
+        {% endif %}
+
+    {% elif section == 'low' %}
+        <div class="head">
+            <div><h1>Заканчивается</h1><p class="hint">Размеры, которых осталось {{ low_limit }} шт. и меньше по всем магазинам вместе.</p></div>
+        </div>
+
+        {% if low_items %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Товар</th><th>Размер</th><th class="num">Осталось</th><th></th></tr></thead>
+                <tbody>
+                {% for r in low_items %}
+                <tr>
+                    <td><div class="prod-cell"><img class="thumb" src="{{ r['image_url'] or '' }}" alt="" loading="lazy"><div><b>{{ r['title'] }}</b><small>{{ r['category'] }}</small></div></div></td>
+                    <td>{{ r['size'] }}</td>
+                    <td class="num">{% if r['total'] == 0 %}<span class="tag out">Нет</span>{% else %}<span class="tag low">{{ r['total'] }} шт.</span>{% endif %}</td>
+                    <td><div class="actions"><a class="btn sm" href="{{ url_for('admin_product_edit', product_id=r['id']) }}">Пополнить</a></div></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="empty">Всё в порядке: ничего не заканчивается.</div>
+        {% endif %}
+
+    {% elif section == 'form' %}
+        <div class="head">
+            <div><h1>{% if product %}Изменить товар{% else %}Новый товар{% endif %}</h1>
+            <p class="hint"><a href="{{ url_for('admin_products') }}">← К списку товаров</a></p></div>
+        </div>
+
+        <form method="POST" id="prodForm">
+            <div class="form-grid">
+                <div class="card">
+                    <div class="field"><label for="title">Название</label>
+                        <input id="title" name="title" required value="{{ product['title'] if product else '' }}"></div>
+
+                    <div class="row2">
+                        <div class="field"><label for="category">Раздел</label>
+                            <input id="category" name="category" list="cats" required value="{{ product['category'] if product else '' }}">
+                            <datalist id="cats">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist></div>
+                        <div class="field"><label for="price">Цена, ₸</label>
+                            <input id="price" name="price" type="number" min="0" step="100" required value="{{ product['price'] if product else '' }}"></div>
+                    </div>
+
+                    <div class="field"><label for="sizes">Размеры через запятую</label>
+                        <input id="sizes" name="sizes" required placeholder="48,50,52,54" value="{{ product['sizes'] if product else '' }}"></div>
+
+                    <div class="field"><label for="description">Описание</label>
+                        <textarea id="description" name="description">{{ product['description'] if product and product['description'] else '' }}</textarea></div>
+
+                    <div class="field"><label for="image_url">Ссылка на главное фото</label>
+                        <input id="image_url" name="image_url" type="url" placeholder="https://..." value="{{ product['image_url'] if product and product['image_url'] else '' }}">
+                        <img class="preview" id="preview" alt="" {% if not (product and product['image_url']) %}hidden{% endif %} src="{{ product['image_url'] if product and product['image_url'] else '' }}"></div>
+
+                    <div class="field"><label for="gallery">Дополнительные фото (ссылки через запятую)</label>
+                        <input id="gallery" name="gallery" value="{{ product['gallery'] if product and product['gallery'] else '' }}"></div>
+                </div>
+
+                <div class="card">
+                    <h2 style="font-size:17px;font-weight:600;margin-bottom:4px;">Остатки по магазинам</h2>
+                    <p class="hint" style="margin:0 0 14px;">Сколько штук каждого размера лежит в магазине. «Мало» показывается при {{ low_limit }} шт. и меньше.</p>
+                    <div class="table-wrap" style="box-shadow:none;">
+                        <table class="stock-grid">
+                            <thead><tr><th>Размер</th>{% for s in stores %}<th title="{{ s['address'] }}">{{ s['name'] }}</th>{% endfor %}</tr></thead>
+                            <tbody id="stockBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions" style="justify-content:flex-start; margin-top:6px;">
+                <button class="btn" type="submit">Сохранить</button>
+                <a class="btn ghost" href="{{ url_for('admin_products') }}">Отмена</a>
+            </div>
+        </form>
+
+        {% if product %}
+        <form method="POST" action="{{ url_for('admin_product_delete', product_id=product['id']) }}" style="margin-top:28px;"
+              onsubmit="return confirm('Удалить товар «{{ product['title']|replace("'", "") }}»? Он пропадёт из каталога и корзин.');">
+            <button class="btn danger sm" type="submit">Удалить товар</button>
+        </form>
+        {% endif %}
+
+        <script>
+            (function () {
+                const STORES = {{ stores|map(attribute='id')|list|tojson }};
+                const STOCK = {{ stock|tojson }};
+                const sizesInput = document.getElementById('sizes');
+                const body = document.getElementById('stockBody');
+                const img = document.getElementById('image_url');
+                const prev = document.getElementById('preview');
+
+                // Значения, введённые вручную, запоминаем, чтобы не терять при смене списка размеров
+                const typed = {};
+                function render() {
+                    body.querySelectorAll('input').forEach((i) => { typed[i.name] = i.value; });
+                    const sizes = sizesInput.value.split(',').map((s) => s.trim()).filter(Boolean);
+                    body.innerHTML = '';
+                    sizes.forEach((sz) => {
+                        const tr = document.createElement('tr');
+                        const th = document.createElement('td');
+                        th.textContent = sz;
+                        tr.appendChild(th);
+                        STORES.forEach((sid) => {
+                            const name = 'qty__' + sz + '__' + sid;
+                            const td = document.createElement('td');
+                            const inp = document.createElement('input');
+                            inp.type = 'number'; inp.min = '0'; inp.name = name;
+                            inp.setAttribute('aria-label', 'Размер ' + sz + ', магазин ' + sid);
+                            inp.value = name in typed ? typed[name] : ((STOCK[sz] || {})[sid] ?? 0);
+                            td.appendChild(inp);
+                            tr.appendChild(td);
+                        });
+                        body.appendChild(tr);
+                    });
+                }
+                sizesInput.addEventListener('input', render);
+                img.addEventListener('input', () => { prev.src = img.value; prev.hidden = !img.value; });
+                render();
+            })();
+        </script>
+    {% endif %}
+</main>
+</body>
+</html>
