@@ -1,13 +1,15 @@
 import os
+import time
 import uuid
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, has_app_context
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 import requests
 from psycopg2.extras import RealDictCursor
+from psycopg2.pool import ThreadedConnectionPool
 
 load_dotenv()
 
@@ -32,8 +34,119 @@ app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # общий лимит з�
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
+# ---------- Подключение к базе ----------
+# Раньше на КАЖДЫЙ запрос открывалось новое соединение с Supabase (рукопожатие + SSL
+# = 200-800 мс), а на главной — даже два. Теперь соединения живут в пуле и
+# переиспользуются, а внутри одного запроса используется одно и то же соединение.
+_pool = None
+_last_used = {}
+
+
+def _get_pool():
+    global _pool
+    if _pool is None:
+        _pool = ThreadedConnectionPool(
+            1, int(os.environ.get('DB_POOL_MAX', 6)), database_url,
+            cursor_factory=RealDictCursor,
+            connect_timeout=10,
+            keepalives=1, keepalives_idle=30, keepalives_interval=10, keepalives_count=3,
+        )
+    return _pool
+
+
+def _checkout():
+    pool = _get_pool()
+    conn = pool.getconn()
+    # Если соединение простаивало, проверяем, что сервер его не закрыл
+    if conn.closed or time.time() - _last_used.get(id(conn), 0) > 30:
+        try:
+            if conn.closed:
+                raise psycopg2.OperationalError('closed')
+            cur = conn.cursor()
+            cur.execute('SELECT 1')
+            cur.close()
+            conn.rollback()
+        except Exception:
+            pool.putconn(conn, close=True)
+            conn = pool.getconn()
+    return conn
+
+
+class _RequestConn:
+    """Обёртка: код может по-прежнему вызывать conn.close() — соединение
+    вернётся в пул само, когда запрос закончится."""
+
+    def __init__(self, conn):
+        self._conn = conn
+
+    def cursor(self, *args, **kwargs):
+        return self._conn.cursor(*args, **kwargs)
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        pass
+
+
 def get_db():
-    return psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+    if not has_app_context():
+        # запуск вне запроса (init_db при старте) — обычное соединение
+        return psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+    if 'db_conn' not in g:
+        g.db_conn = _checkout()
+    return _RequestConn(g.db_conn)
+
+
+@app.teardown_appcontext
+def _release_db(_exc):
+    conn = g.pop('db_conn', None)
+    if conn is not None:
+        broken = bool(conn.closed)
+        _last_used[id(conn)] = time.time()
+        try:
+            _get_pool().putconn(conn, close=broken)  # незавершённая транзакция откатится
+        except Exception:
+            pass
+
+
+# ---------- Мини-кэш для данных, которые почти не меняются ----------
+_cache = {}
+
+
+def cached(key, ttl, loader):
+    hit = _cache.get(key)
+    now = time.time()
+    if hit and now - hit[0] < ttl:
+        return hit[1]
+    value = loader()
+    _cache[key] = (now, value)
+    return value
+
+
+def clear_cache():
+    _cache.clear()
+
+
+# Контакты для блока «Контакты» на главной. Меняйте здесь.
+CONTACTS = {
+    'whatsapp': '77081477426',          # только цифры, с кодом страны
+    'phone': '+7 708 147 74-26',
+    'instagram': 'omar.astana',
+    'cities': [
+        {'name': 'Кокшетау', 'instagram': 'omar.kokshetau'},
+        {'name': 'Караганда', 'instagram': 'omar.qaragandy'},
+        {'name': 'Петропавловск', 'instagram': 'omar.petropavl'},
+    ],
+}
+
+
+@app.context_processor
+def inject_contacts():
+    return {'contacts': CONTACTS}
 
 
 def init_db():
@@ -80,15 +193,26 @@ def render_page(page_name, **kwargs):
         cur.execute('SELECT * FROM orders WHERE user_id = %s ORDER BY id DESC', (uid,))
         orders = cur.fetchall()
 
-    # Общие данные для шапки, подвала и оформления заказа
-    cur.execute('SELECT * FROM stores ORDER BY id ASC')
-    stores = cur.fetchall()
-
-    cur.execute('SELECT category FROM products GROUP BY category ORDER BY MIN(id)')
-    nav_categories = [r['category'] for r in cur.fetchall()]
-
     cur.close()
     conn.close()
+
+    # Общие данные для шапки, подвала и оформления заказа (кэш на 30 секунд)
+    def load_stores():
+        c = get_db().cursor()
+        c.execute('SELECT * FROM stores ORDER BY id ASC')
+        rows = c.fetchall()
+        c.close()
+        return rows
+
+    def load_categories():
+        c = get_db().cursor()
+        c.execute('SELECT category FROM products GROUP BY category ORDER BY MIN(id)')
+        rows = [r['category'] for r in c.fetchall()]
+        c.close()
+        return rows
+
+    stores = cached('stores', 30, load_stores)
+    nav_categories = cached('nav_categories', 30, load_categories)
 
     return render_template(
         'index.html',
@@ -731,6 +855,7 @@ def admin_product_new():
         conn.commit()
         cur.close()
         conn.close()
+        clear_cache()
         flash('Товар добавлен.', 'success')
         return redirect(url_for('admin_products'))
     return admin_page('form', **product_form_context())
@@ -772,6 +897,7 @@ def admin_product_edit(product_id):
         conn.commit()
         cur.close()
         conn.close()
+        clear_cache()
         flash('Изменения сохранены.', 'success')
         return redirect(url_for('admin_products'))
 
@@ -789,6 +915,7 @@ def admin_product_delete(product_id):
     conn.commit()
     cur.close()
     conn.close()
+    clear_cache()
     flash('Товар удалён.', 'info')
     return redirect(url_for('admin_products'))
 
