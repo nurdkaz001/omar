@@ -6,7 +6,7 @@
     <title>OMAR ASTANA — Мужская одежда и обувь</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #fafaf8;
@@ -15,11 +15,13 @@
             --muted: #77776f;
             --line: #e2e2dd;
             --accent: #8a2a25;
+            --dark: #141413;
             --ok: #2f6b4a;
             --ok-bg: #e6f0ea;
             --wait: #8a5a14;
             --wait-bg: #f6ecd9;
             --pad: clamp(18px, 4vw, 56px);
+            --hdr: 64px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,6 +40,7 @@
 
         a { color: inherit; }
         img { display: block; max-width: 100%; }
+        button { font-family: inherit; }
         :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
         /* ---------- Шапка ---------- */
@@ -48,19 +51,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 24px;
-            padding: 18px var(--pad);
-            background: rgba(250, 250, 248, 0.92);
+            gap: 20px 32px;
+            padding: 0 var(--pad);
+            min-height: var(--hdr);
+            background: rgba(250, 250, 248, 0.94);
             backdrop-filter: blur(8px);
             border-bottom: 1px solid var(--line);
             font-size: 15px;
         }
 
-        .brand { font-weight: 700; font-size: 17px; letter-spacing: 0.02em; text-decoration: none; }
+        .brand { font-weight: 800; font-size: 18px; letter-spacing: 0.02em; text-decoration: none; white-space: nowrap; }
 
-        .nav { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
-        .nav a { text-decoration: none; color: var(--muted); font-weight: 500; transition: color 0.15s; }
+        .nav { display: flex; align-items: center; gap: 26px; }
+        .nav a { text-decoration: none; color: var(--muted); font-weight: 500; transition: color 0.15s; white-space: nowrap; }
         .nav a:hover, .nav a.on { color: var(--ink); }
+        .nav-cats { flex: 1; justify-content: center; }
 
         .badge {
             background: var(--accent);
@@ -76,81 +81,238 @@
         /* ---------- Уведомления ---------- */
         .alerts { padding: 20px var(--pad) 0; }
 
-        .alert {
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            background: var(--surface);
-            border-left: 3px solid var(--ink);
-        }
-
+        .alert { padding: 12px 16px; margin-bottom: 8px; font-size: 14px; background: var(--surface); border-left: 3px solid var(--ink); }
         .alert.error { border-left-color: var(--accent); color: var(--accent); }
         .alert.success { border-left-color: var(--ok); }
         .alert.info { border-left-color: var(--muted); }
 
-        /* ---------- Вступление каталога ---------- */
-        .intro { padding: clamp(56px, 10vw, 128px) var(--pad) clamp(32px, 5vw, 64px); }
-
-        .intro h1 {
-            font-size: clamp(2.4rem, 6.5vw, 5rem);
-            font-weight: 600;
-            letter-spacing: -0.035em;
-            line-height: 1.02;
-            max-width: 14ch;
+        /* ---------- Первый экран ---------- */
+        .hero {
+            min-height: calc(100svh - var(--hdr));
+            background: var(--dark);
+            color: #f2f1ee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 48px var(--pad) 96px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .intro p { color: var(--muted); font-size: 17px; margin-top: 20px; max-width: 42ch; }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 42%, rgba(138, 42, 37, 0.28), transparent 62%);
+            pointer-events: none;
+        }
+
+        .hero > * { position: relative; }
+
+        .wordmark {
+            font-size: clamp(5.5rem, 27vw, 24rem);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 0.82;
+            padding-top: 0.04em;
+        }
+
+        .wordmark span, .hero-sub, .hero-tag, .hero-actions { display: block; }
+
+        .hero-sub {
+            font-size: clamp(1rem, 3.2vw, 2.4rem);
+            font-weight: 500;
+            letter-spacing: 0.7em;
+            margin: clamp(14px, 2.4vw, 28px) 0 0 0.7em;
+            color: #cfcec9;
+        }
+
+        .hero-tag { font-size: clamp(1rem, 1.6vw, 1.25rem); color: #a8a7a2; margin-top: clamp(28px, 4vw, 48px); max-width: 38ch; }
+
+        .hero-actions { margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .hero-actions .btn { min-width: 190px; }
+
+        .btn-light { background: #f2f1ee; color: var(--dark); border-color: #f2f1ee; }
+        .btn-light:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .btn-ghost { background: transparent; color: #f2f1ee; border-color: rgba(242, 241, 238, 0.4); }
+        .btn-ghost:hover { background: #f2f1ee; color: var(--dark); border-color: #f2f1ee; }
+
+        .scroll-hint {
+            position: absolute !important;
+            bottom: 28px;
+            left: 50%;
+            width: 1px;
+            height: 44px;
+            background: linear-gradient(#f2f1ee, transparent);
+            transform-origin: top;
+            animation: hint 2.2s ease-in-out infinite;
+        }
+
+        @keyframes hint { 0%, 100% { transform: scaleY(0.3); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+
+        /* Единственная анимация загрузки: строки поднимаются по очереди */
+        .rise { animation: rise 1s cubic-bezier(0.2, 0.7, 0.1, 1) both; animation-delay: calc(var(--d, 0) * 130ms); }
+        @keyframes rise { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: none; } }
+
+        /* ---------- Секции главной ---------- */
+        .section { padding: clamp(56px, 8vw, 104px) var(--pad) 0; }
+
+        .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; flex-wrap: wrap; margin-bottom: 28px; }
+        .section-head h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
+        .link-more { font-size: 15px; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); }
+        .link-more:hover { color: var(--ink); border-color: var(--ink); }
+
+        .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 16px; }
+
+        .tile { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: var(--surface); color: #fff; text-decoration: none; }
+        .tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.1, 1); }
+        .tile:hover img { transform: scale(1.05); }
+        .tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.62), transparent 55%); }
+        .tile-text { position: absolute; left: 20px; right: 20px; bottom: 18px; z-index: 1; }
+        .tile-name { display: block; font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+        .tile-cnt { display: block; font-size: 14px; opacity: 0.85; margin-top: 4px; }
+
+        .perks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; border-top: 1px solid var(--line); padding-top: 32px; }
+        .perk h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+        .perk p { color: var(--muted); font-size: 15px; max-width: 34ch; }
+
+        .store-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        .store-card { border: 1px solid var(--line); border-radius: 6px; padding: 20px; background: #fff; }
+        .store-card b { display: block; font-size: 17px; font-weight: 600; }
+        .store-card span { color: var(--muted); font-size: 15px; }
 
         /* ---------- Каталог ---------- */
-        .collection { padding: 0 var(--pad); }
+        .catalog-head { padding: clamp(36px, 5vw, 64px) var(--pad) 0; }
+        .catalog-head h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
+        .catalog-head .count { color: var(--muted); margin-top: 6px; }
 
-        .filters {
-            display: flex;
-            gap: 8px 26px;
-            flex-wrap: wrap;
-            padding: 18px 0;
-            border-top: 1px solid var(--line);
-            border-bottom: 1px solid var(--line);
-            margin-bottom: 40px;
-            font-size: 15px;
+        .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px 28px; flex-wrap: wrap; padding: 22px var(--pad) 0; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .chip { padding: 8px 16px; border: 1px solid var(--line); border-radius: 99px; font-size: 14px; text-decoration: none; color: var(--muted); background: #fff; transition: all 0.15s; }
+        .chip:hover { border-color: var(--ink); color: var(--ink); }
+        .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+        .tools { display: flex; gap: 14px; align-items: center; }
+        .tools input, .tools select {
+            width: auto;
+            margin: 0;
+            padding: 9px 14px;
+            border: 1px solid var(--line);
+            border-radius: 99px;
+            background-color: #fff;
+            font-size: 14px;
         }
+        .tools input { width: 190px; }
+        .tools select { padding-right: 34px; background-position: right 14px center; }
+        .tools input:focus, .tools select:focus { border: 1px solid var(--ink); padding-bottom: 9px; }
 
-        .filters a { text-decoration: none; color: var(--muted); font-weight: 500; }
-        .filters a:hover { color: var(--ink); }
-        .filters a.on { color: var(--ink); text-decoration: underline; text-underline-offset: 7px; text-decoration-thickness: 1.5px; }
+        .grid-wrap { padding: 32px var(--pad) 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 44px 20px; }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
-            gap: 52px 24px;
-        }
+        .product { display: block; text-decoration: none; }
+        .product-img { position: relative; aspect-ratio: 4 / 5; background: var(--surface); overflow: hidden; margin-bottom: 14px; }
+        .product-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s, transform 0.7s cubic-bezier(0.2, 0.7, 0.1, 1); }
+        .product-img .alt { opacity: 0; }
+        .product:hover .product-img .alt { opacity: 1; }
+        .product:hover .product-img img { transform: scale(1.03); }
 
-        .product { display: flex; flex-direction: column; }
-
-        .product-img { aspect-ratio: 4 / 5; background: var(--surface); overflow: hidden; margin-bottom: 14px; }
-        .product-img img { width: 100%; height: 100%; object-fit: cover; }
-
-        .product-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-        .product-top h3 { font-size: 16px; font-weight: 600; line-height: 1.3; }
+        .product-top { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; }
+        .product-top h3 { font-size: 16px; font-weight: 500; line-height: 1.3; }
         .price { font-size: 16px; font-weight: 600; white-space: nowrap; }
         .product-cat { font-size: 13px; color: var(--muted); margin-top: 2px; }
-        .product-desc { font-size: 14px; color: var(--muted); margin: 10px 0 18px; flex: 1; }
-
-        .buy { display: grid; grid-template-columns: 112px 1fr; gap: 16px; align-items: end; }
-        .buy select { margin: 0; }
+        .product-sizes { font-size: 13px; color: var(--muted); margin-top: 6px; }
         .empty { color: var(--muted); padding: 40px 0; }
+
+        /* ---------- Страница товара ---------- */
+        .pdp {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+            gap: clamp(28px, 5vw, 80px);
+            padding: clamp(20px, 3vw, 40px) var(--pad) 0;
+            align-items: start;
+        }
+
+        .crumbs { font-size: 14px; color: var(--muted); padding: 22px var(--pad) 0; }
+        .crumbs a { text-decoration: none; }
+        .crumbs a:hover { color: var(--ink); text-decoration: underline; }
+
+        .gallery { display: grid; grid-template-columns: 76px 1fr; gap: 14px; }
+        .gallery.single { grid-template-columns: 1fr; }
+        .thumbs { display: flex; flex-direction: column; gap: 10px; }
+        .thumb { border: 1px solid transparent; padding: 0; background: var(--surface); cursor: pointer; aspect-ratio: 4 / 5; overflow: hidden; }
+        .thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb.on { border-color: var(--ink); }
+
+        .main-img { background: var(--surface); aspect-ratio: 4 / 5; overflow: hidden; cursor: zoom-in; width: 100%; border: 0; padding: 0; display: block; }
+        .main-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .pdp-info { position: sticky; top: calc(var(--hdr) + 24px); }
+        .pdp-cat { font-size: 14px; color: var(--muted); }
+        .pdp-title { font-size: clamp(1.8rem, 3.4vw, 2.6rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.08; margin: 6px 0 14px; }
+        .pdp-price { font-size: 1.7rem; font-weight: 600; letter-spacing: -0.02em; }
+        .pdp-desc { color: var(--muted); margin-top: 16px; max-width: 52ch; }
+
+        .size-label { display: flex; justify-content: space-between; align-items: baseline; margin: 28px 0 10px; font-size: 14px; color: var(--muted); }
+        .sizes { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .size { position: relative; display: inline-block; margin: 0; color: var(--ink); font-size: 15px; }
+        .size input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; padding: 0; border: 0; }
+        .size span {
+            display: grid;
+            place-items: center;
+            min-width: 54px;
+            height: 48px;
+            padding: 0 14px;
+            border: 1px solid var(--line);
+            border-radius: 2px;
+            background: #fff;
+            cursor: pointer;
+            font-weight: 500;
+            transition: border-color 0.15s, background 0.15s, color 0.15s;
+        }
+        .size:hover span { border-color: var(--ink); }
+        .size input:checked + span { background: var(--ink); border-color: var(--ink); color: #fff; }
+        .size input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .size.off span { color: #b9b9b2; background: var(--surface); cursor: not-allowed; text-decoration: line-through; border-color: var(--line); }
+        .size.off:hover span { border-color: var(--line); }
+
+        .stock-summary { margin: 18px 0 18px; font-size: 15px; font-weight: 500; }
+        #buyBtn { width: 100%; padding: 17px 26px; }
+        #buyBtn:disabled { background: var(--surface); border-color: var(--line); color: var(--muted); cursor: not-allowed; }
+
+        .stores { list-style: none; margin-top: 32px; border-top: 1px solid var(--ink); }
+        .stores-title { font-size: 16px; font-weight: 600; margin-top: 32px; }
+        .store { display: grid; grid-template-columns: 12px 1fr auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+        .store b { font-weight: 500; font-size: 15px; display: block; }
+        .store small { color: var(--muted); font-size: 13px; }
+        .store .st { font-size: 14px; font-weight: 500; text-align: right; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+        .store.ok .dot { background: #3c9a69; }
+        .store.ok .st { color: var(--ok); }
+        .store.low .dot { background: #d9a03a; }
+        .store.low .st { color: var(--wait); }
+        .store.out .st, .store.unk .st { color: var(--muted); }
+        .store.out .dot { background: #cfcfc8; }
+
+        .more { margin-top: 28px; border-top: 1px solid var(--line); }
+        .more details { border-bottom: 1px solid var(--line); }
+        .more summary { list-style: none; cursor: pointer; padding: 16px 0; font-weight: 500; display: flex; justify-content: space-between; }
+        .more summary::-webkit-details-marker { display: none; }
+        .more summary::after { content: "+"; font-size: 20px; line-height: 1; color: var(--muted); }
+        .more details[open] summary::after { content: "−"; }
+        .more details p { color: var(--muted); font-size: 15px; padding: 0 0 16px; max-width: 52ch; }
+
+        .lightbox { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(250, 250, 248, 0.98); place-items: center; padding: 24px; cursor: zoom-out; }
+        .lightbox:not([hidden]) { display: grid; }
+        .lightbox img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        .lb-close { position: absolute; top: 14px; right: 20px; background: none; border: 0; font-size: 38px; line-height: 1; cursor: pointer; color: var(--ink); }
 
         /* ---------- Внутренние страницы ---------- */
         .page { flex: 1; padding: clamp(40px, 6vw, 80px) var(--pad) 0; }
-
-        .page-title {
-            font-size: clamp(2rem, 5vw, 3.4rem);
-            font-weight: 600;
-            letter-spacing: -0.03em;
-            line-height: 1.05;
-            margin-bottom: clamp(24px, 4vw, 48px);
-        }
-
+        .page-title { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: clamp(24px, 4vw, 48px); }
         .sub { color: var(--muted); font-size: 16px; max-width: 44ch; margin-bottom: 28px; }
         .form-wrap { max-width: 440px; }
         .alt-link { margin-top: 22px; font-size: 14px; color: var(--muted); }
@@ -210,15 +372,7 @@
         .phone-input { font-variant-numeric: tabular-nums; }
 
         /* ---------- Корзина ---------- */
-        .cart-row {
-            display: grid;
-            grid-template-columns: 96px 1fr auto;
-            gap: 20px;
-            align-items: center;
-            padding: 20px 0;
-            border-top: 1px solid var(--line);
-        }
-
+        .cart-row { display: grid; grid-template-columns: 96px 1fr auto; gap: 20px; align-items: center; padding: 20px 0; border-top: 1px solid var(--line); }
         .cart-thumb { width: 96px; height: 96px; object-fit: cover; background: var(--surface); }
         .cart-title { font-size: 16px; font-weight: 600; }
         .cart-meta { font-size: 14px; color: var(--muted); }
@@ -226,134 +380,49 @@
 
         .qty-col { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
         .qty { display: flex; align-items: center; gap: 6px; }
-
-        .qty a {
-            width: 34px;
-            height: 34px;
-            display: grid;
-            place-items: center;
-            border: 1px solid var(--line);
-            border-radius: 2px;
-            text-decoration: none;
-            font-size: 18px;
-            line-height: 1;
-        }
-
+        .qty a { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 2px; text-decoration: none; font-size: 18px; line-height: 1; }
         .qty a:hover { border-color: var(--ink); }
         .qty b { min-width: 30px; text-align: center; font-weight: 600; }
         .remove { font-size: 13px; color: var(--muted); }
         .remove:hover { color: var(--accent); }
 
-        .cart-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 20px;
-            flex-wrap: wrap;
-            border-top: 1px solid var(--ink);
-            padding-top: 22px;
-        }
-
+        .cart-total { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; border-top: 1px solid var(--ink); padding-top: 22px; }
         .total-label { font-size: 14px; color: var(--muted); }
         .total-sum { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
 
         /* ---------- Оформление заказа ---------- */
-        .checkout-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-            gap: clamp(28px, 6vw, 96px);
-            align-items: start;
-        }
-
+        .checkout-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(28px, 6vw, 96px); align-items: start; }
         .note-box { background: var(--surface); padding: 14px 16px; font-size: 14px; margin-bottom: 24px; }
         .note-box input { margin-bottom: 16px; }
         .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .two-col input { margin-bottom: 0; }
 
         .summary h3 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
-
-        .sum-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 12px 0;
-            border-top: 1px solid var(--line);
-            font-size: 15px;
-        }
-
+        .sum-row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
         .sum-row strong { white-space: nowrap; font-weight: 600; }
-
-        .sum-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            border-top: 1px solid var(--ink);
-            padding-top: 16px;
-            font-size: 15px;
-        }
-
+        .sum-total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--ink); padding-top: 16px; font-size: 15px; }
         .sum-total strong { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
 
         /* ---------- Личный кабинет ---------- */
-        .profile-hero {
-            display: flex;
-            align-items: center;
-            gap: 22px;
-            flex-wrap: wrap;
-            margin-bottom: clamp(28px, 4vw, 48px);
-        }
-
-        .avatar {
-            width: 84px;
-            height: 84px;
-            flex: none;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            background: var(--ink);
-            color: #fff;
-            font-size: 2.2rem;
-            font-weight: 600;
-            box-shadow: 0 0 0 5px var(--bg), 0 0 0 6px var(--line);
-        }
-
-        .profile-hello h1 {
-            font-size: clamp(1.8rem, 4.5vw, 3rem);
-            font-weight: 600;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-        }
-
+        .profile-hero { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-bottom: clamp(28px, 4vw, 48px); }
+        .avatar { width: 84px; height: 84px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: #fff; font-size: 2.2rem; font-weight: 600; box-shadow: 0 0 0 5px var(--bg), 0 0 0 6px var(--line); }
+        .profile-hello h1 { font-size: clamp(1.8rem, 4.5vw, 3rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
         .profile-hello p { color: var(--muted); font-size: 15px; margin-top: 6px; }
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-            margin-bottom: clamp(32px, 5vw, 56px);
-        }
-
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: clamp(32px, 5vw, 56px); }
         .stat { background: var(--surface); border-radius: 6px; padding: 20px 22px; }
         .stat-num { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
         .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
         .stat.club { background: var(--ink); color: #fff; }
         .stat.club .stat-label { color: #b5b5ad; }
 
-        .profile-grid {
-            display: grid;
-            grid-template-columns: minmax(260px, 1fr) 2fr;
-            gap: clamp(28px, 6vw, 88px);
-            align-items: start;
-        }
-
+        .profile-grid { display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: clamp(28px, 6vw, 88px); align-items: start; }
         .card { border: 1px solid var(--line); border-radius: 6px; padding: 22px; background: #fff; }
         .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
-
         .facts div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
         .facts div:first-child { border-top: 0; padding-top: 0; }
         .facts dt { color: var(--muted); }
         .facts dd { font-weight: 500; text-align: right; }
-
         .card .btn { margin-top: 18px; }
         .section-title { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 16px; }
 
@@ -361,10 +430,8 @@
         .order-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
         .order-no { font-weight: 600; }
         .order-date { color: var(--muted); font-size: 13px; font-weight: 400; margin-left: 8px; }
-
         .tag { font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: var(--wait-bg); color: var(--wait); }
         .tag.paid { background: var(--ok-bg); color: var(--ok); }
-
         .order p { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
         .order p b { color: var(--ink); font-weight: 500; }
         .order-sum { margin-top: 10px; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
@@ -373,21 +440,21 @@
         .empty-box p { color: var(--muted); margin-bottom: 18px; }
 
         /* ---------- Подвал ---------- */
-        .site-footer {
-            margin-top: clamp(72px, 10vw, 128px);
-            padding: 44px var(--pad) 36px;
-            border-top: 1px solid var(--line);
-            color: var(--muted);
-            font-size: 14px;
-        }
-
+        .site-footer { margin-top: clamp(72px, 10vw, 128px); padding: 44px var(--pad) 36px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
         .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
         .site-footer h4 { color: var(--ink); font-size: 14px; font-weight: 600; margin-bottom: 12px; }
         .site-footer p { margin-bottom: 5px; }
 
-        /* ---------- Мобильная версия ---------- */
+        /* ---------- Планшет и мобильная версия ---------- */
+        @media (max-width: 960px) {
+            .pdp { grid-template-columns: 1fr; }
+            .pdp-info { position: static; }
+            .nav-cats { order: 3; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; padding-bottom: 12px; }
+            .site-header { flex-wrap: wrap; padding-top: 12px; }
+        }
+
         @media (max-width: 720px) {
-            .site-header { flex-wrap: wrap; gap: 10px 20px; font-size: 14px; }
+            .site-header { font-size: 14px; }
             .nav { gap: 18px; }
             .checkout-grid, .profile-grid { grid-template-columns: 1fr; }
             .cart-row { grid-template-columns: 72px 1fr; }
@@ -395,6 +462,17 @@
             .qty-col { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
             .stats { grid-template-columns: 1fr; }
             .avatar { width: 68px; height: 68px; font-size: 1.8rem; }
+            .gallery { grid-template-columns: 1fr; }
+            .thumbs { flex-direction: row; order: 2; }
+            .thumb { width: 64px; }
+            .hero-sub { letter-spacing: 0.45em; margin-left: 0.45em; }
+            .tools { width: 100%; }
+            .tools input { flex: 1; width: auto; min-width: 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .rise, .scroll-hint { animation: none; }
         }
     </style>
 </head>
@@ -403,8 +481,14 @@
     <header class="site-header">
         <a href="{{ url_for('index') }}" class="brand">OMAR ASTANA</a>
 
-        <nav class="nav" aria-label="Основное меню">
-            <a href="{{ url_for('index') }}" class="{% if page == 'catalog' %}on{% endif %}">Каталог</a>
+        <nav class="nav nav-cats" aria-label="Разделы">
+            <a href="{{ url_for('catalog') }}" class="{% if page == 'catalog' and active_category == 'Все' %}on{% endif %}">Все товары</a>
+            {% for cat in nav_categories %}
+                <a href="{{ url_for('catalog', category=cat) }}" class="{% if page == 'catalog' and active_category == cat %}on{% endif %}">{{ cat }}</a>
+            {% endfor %}
+        </nav>
+
+        <nav class="nav" aria-label="Аккаунт">
             {% if current_user %}
                 <a href="{{ url_for('cart') }}" class="{% if page == 'cart' %}on{% endif %}">Корзина{% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}</a>
                 <a href="{{ url_for('profile') }}" class="{% if page == 'profile' %}on{% endif %}">Кабинет</a>
@@ -426,49 +510,222 @@
         {% endif %}
     {% endwith %}
 
-    {% if page == 'catalog' %}
+    {# Карточка товара: используется на главной, в каталоге и в блоке «Похожие» #}
+    {% macro product_card(p) %}
+        {% set extra = (p['gallery'] or '').split(',') | map('trim') | select | list %}
+        <a class="product" href="{{ url_for('product', product_id=p['id']) }}">
+            <div class="product-img">
+                <img src="{{ p['image_url'] }}" alt="{{ p['title'] }}" loading="lazy">
+                {% if extra %}<img class="alt" src="{{ extra[0] }}" alt="" loading="lazy">{% endif %}
+            </div>
+            <div class="product-top">
+                <h3>{{ p['title'] }}</h3>
+                <span class="price">{{ "{:,}".format(p['price']).replace(',', ' ') }} ₸</span>
+            </div>
+            <p class="product-cat">{{ p['category'] }}</p>
+            <p class="product-sizes">Размеры: {{ p['sizes'].replace(',', ', ') }}</p>
+        </a>
+    {% endmacro %}
 
-        <!-- КАТАЛОГ -->
-        <section class="intro">
-            <h1>Мужская одежда и обувь</h1>
-            <p>Casual и smart casual. Четыре филиала в Астане, доставка по городу.</p>
+    {% if page == 'home' %}
+
+        <!-- ПЕРВЫЙ ЭКРАН -->
+        <section class="hero">
+            <h1 class="wordmark" aria-label="OMAR ASTANA">
+                <span class="rise" style="--d: 0">OMAR</span>
+                <span class="hero-sub rise" style="--d: 2">ASTANA</span>
+            </h1>
+            <p class="hero-tag rise" style="--d: 4">Мужская одежда и обувь на каждый день. Четыре магазина в Астане, наличие видно по каждому.</p>
+            <div class="hero-actions rise" style="--d: 5">
+                <a href="{{ url_for('catalog') }}" class="btn btn-light">Смотреть каталог</a>
+                <a href="#stores" class="btn btn-ghost">Наши магазины</a>
+            </div>
+            <span class="scroll-hint" aria-hidden="true"></span>
         </section>
 
-        <section class="collection" id="collection">
-            <nav class="filters" aria-label="Категории">
-                {% for cat in categories %}
-                    <a href="{{ url_for('index', category=cat) }}#collection" class="{% if active_category == cat %}on{% endif %}">{{ cat }}</a>
+        <!-- РАЗДЕЛЫ -->
+        <section class="section" id="sections">
+            <div class="section-head">
+                <h2>Разделы</h2>
+                <a class="link-more" href="{{ url_for('catalog') }}">Все товары</a>
+            </div>
+            <div class="tiles">
+                {% for c in categories %}
+                <a class="tile" href="{{ url_for('catalog', category=c['category']) }}">
+                    <img src="{{ c['image_url'] }}" alt="" loading="lazy">
+                    <span class="tile-text">
+                        <span class="tile-name">{{ c['category'] }}</span>
+                        <span class="tile-cnt">Моделей: {{ c['cnt'] }}</span>
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- НОВИНКИ -->
+        <section class="section">
+            <div class="section-head">
+                <h2>Новинки</h2>
+                <a class="link-more" href="{{ url_for('catalog') }}">Весь каталог</a>
+            </div>
+            <div class="grid">
+                {% for p in new_products %}{{ product_card(p) }}{% endfor %}
+            </div>
+        </section>
+
+        <!-- ПРЕИМУЩЕСТВА -->
+        <section class="section">
+            <div class="perks">
+                <div class="perk">
+                    <h3>Наличие в магазинах</h3>
+                    <p>На странице товара видно, в каком магазине и какой размер есть сейчас.</p>
+                </div>
+                <div class="perk">
+                    <h3>Бесплатный самовывоз</h3>
+                    <p>Выберите удобный магазин в Астане и заберите заказ без доплаты.</p>
+                </div>
+                <div class="perk">
+                    <h3>Доставка по Астане</h3>
+                    <p>Курьер привезёт заказ по вашему адресу.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- МАГАЗИНЫ -->
+        <section class="section" id="stores">
+            <div class="section-head"><h2>Магазины в Астане</h2></div>
+            <div class="store-list">
+                {% for s in stores %}
+                <div class="store-card">
+                    <b>{{ s['name'] }}</b>
+                    <span>{{ s['address'] }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    {% elif page == 'catalog' %}
+
+        <!-- КАТАЛОГ -->
+        <div class="catalog-head">
+            <h1>{% if active_category != 'Все' %}{{ active_category }}{% else %}Все товары{% endif %}</h1>
+            <p class="count">{% if q %}По запросу «{{ q }}»: {% endif %}найдено {{ products|length }}</p>
+        </div>
+
+        <div class="toolbar">
+            <nav class="filters" aria-label="Разделы">
+                <a class="chip {% if active_category == 'Все' %}on{% endif %}" href="{{ url_for('catalog', sort=sort, q=q or None) }}">Все</a>
+                {% for cat in nav_categories %}
+                    <a class="chip {% if active_category == cat %}on{% endif %}" href="{{ url_for('catalog', category=cat, sort=sort, q=q or None) }}">{{ cat }}</a>
                 {% endfor %}
             </nav>
 
+            <form class="tools" method="GET" action="{{ url_for('catalog') }}">
+                {% if active_category != 'Все' %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+                <input type="search" name="q" value="{{ q }}" placeholder="Поиск по названию" aria-label="Поиск">
+                <select name="sort" aria-label="Сортировка" onchange="this.form.submit()">
+                    <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
+                    <option value="cheap" {% if sort == 'cheap' %}selected{% endif %}>Сначала дешёвые</option>
+                    <option value="expensive" {% if sort == 'expensive' %}selected{% endif %}>Сначала дорогие</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="grid-wrap">
             {% if products %}
             <div class="grid">
-                {% for product in products %}
-                <article class="product">
-                    <div class="product-img">
-                        <img src="{{ product['image_url'] }}" alt="{{ product['title'] }}" loading="lazy">
-                    </div>
-                    <div class="product-top">
-                        <h3>{{ product['title'] }}</h3>
-                        <span class="price">{{ "{:,}".format(product['price']).replace(',', ' ') }} ₸</span>
-                    </div>
-                    <p class="product-cat">{{ product['category'] }}</p>
-                    <p class="product-desc">{{ product['description'] }}</p>
-                    <form class="buy" action="{{ url_for('add_to_cart', product_id=product['id']) }}" method="POST">
-                        <select name="size" aria-label="Размер">
-                            {% for s in product['sizes'].split(',') %}
-                                <option value="{{ s }}">Размер {{ s }}</option>
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="btn">В корзину</button>
-                    </form>
-                </article>
-                {% endfor %}
+                {% for p in products %}{{ product_card(p) }}{% endfor %}
             </div>
             {% else %}
-                <p class="empty">В этой категории пока нет товаров.</p>
+                <p class="empty">Ничего не найдено. Попробуйте другой раздел или запрос.</p>
             {% endif %}
+        </div>
+
+    {% elif page == 'product' %}
+
+        <!-- СТРАНИЦА ТОВАРА -->
+        <nav class="crumbs" aria-label="Навигация">
+            <a href="{{ url_for('index') }}">Главная</a> /
+            <a href="{{ url_for('catalog', category=product['category']) }}">{{ product['category'] }}</a> /
+            <span>{{ product['title'] }}</span>
+        </nav>
+
+        <section class="pdp">
+            <div class="gallery {% if images|length < 2 %}single{% endif %}">
+                {% if images|length > 1 %}
+                <div class="thumbs">
+                    {% for img in images %}
+                    <button type="button" class="thumb {% if loop.first %}on{% endif %}" data-src="{{ img }}" aria-label="Фото {{ loop.index }}">
+                        <img src="{{ img }}" alt="">
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <button type="button" class="main-img" id="mainBtn" aria-label="Открыть фото на весь экран">
+                    <img id="mainImg" src="{{ images[0] if images else '' }}" alt="{{ product['title'] }}">
+                </button>
+            </div>
+
+            <div class="pdp-info">
+                <p class="pdp-cat">{{ product['category'] }}</p>
+                <h1 class="pdp-title">{{ product['title'] }}</h1>
+                <p class="pdp-price">{{ "{:,}".format(product['price']).replace(',', ' ') }} ₸</p>
+                <p class="pdp-desc">{{ product['description'] }}</p>
+
+                <form id="buyForm" action="{{ url_for('add_to_cart', product_id=product['id']) }}" method="POST">
+                    <div class="size-label"><span>Размер</span></div>
+                    <div class="sizes" role="radiogroup" aria-label="Размер">
+                        {% for s in sizes %}
+                            {% set total = stock.get(s, {}).values() | sum %}
+                            {% set off = stock and total == 0 %}
+                            <label class="size {% if off %}off{% endif %}">
+                                <input type="radio" name="size" value="{{ s }}" {% if off %}disabled{% endif %} required>
+                                <span>{{ s }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+
+                    <p class="stock-summary" id="stockSummary" aria-live="polite"></p>
+                    <button type="submit" class="btn btn-accent" id="buyBtn">В корзину</button>
+                </form>
+
+                <h2 class="stores-title">Наличие в магазинах</h2>
+                <ul class="stores">
+                    {% for s in stores %}
+                    <li class="store unk" data-id="{{ s['id'] }}">
+                        <span class="dot"></span>
+                        <div><b>{{ s['name'] }}</b><small>{{ s['address'] }}</small></div>
+                        <span class="st">Выберите размер</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <div class="more">
+                    <details>
+                        <summary>Получение и доставка</summary>
+                        <p>Самовывоз из магазина в Астане бесплатный. Курьерская доставка возможна по Астане, способ выбирается при оформлении заказа.</p>
+                    </details>
+                    <details>
+                        <summary>Как выбрать размер</summary>
+                        <p>Доступные размеры: {{ sizes|join(', ') }}. Если сомневаетесь, примерьте модель в ближайшем магазине, где она есть в наличии.</p>
+                    </details>
+                </div>
+            </div>
         </section>
+
+        {% if similar %}
+        <section class="section">
+            <div class="section-head"><h2>Похожие товары</h2></div>
+            <div class="grid">
+                {% for p in similar %}{{ product_card(p) }}{% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <div class="lightbox" id="lightbox" hidden>
+            <button type="button" class="lb-close" aria-label="Закрыть">×</button>
+            <img id="lbImg" src="" alt="">
+        </div>
 
     {% else %}
     <main class="page">
@@ -544,7 +801,7 @@
                 </div>
             {% else %}
                 <p class="sub">Ваша корзина пока пуста.</p>
-                <a href="{{ url_for('index') }}#collection" class="btn">Перейти в каталог</a>
+                <a href="{{ url_for('catalog') }}" class="btn">Перейти в каталог</a>
             {% endif %}
 
         <!-- ОФОРМЛЕНИЕ И ОПЛАТА -->
@@ -561,10 +818,9 @@
                     <div id="branch_block">
                         <label for="branch">Филиал OMAR</label>
                         <select name="branch" id="branch">
-                            <option value="пр. Мангилик Ел, 61">пр. Мангилик Ел, 61</option>
-                            <option value="пр. Республики, 18">пр. Республики, 18</option>
-                            <option value="пр. Абая, 61">пр. Абая, 61</option>
-                            <option value="ТРЦ «Аружан», 2 этаж">ТРЦ «Аружан», 2 этаж</option>
+                            {% for s in stores %}
+                            <option value="{{ s['address'] }}">{{ s['address'] }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
@@ -619,7 +875,7 @@
             <div class="profile-hero">
                 <div class="avatar" aria-hidden="true">{{ current_user['name'][:1]|upper }}</div>
                 <div class="profile-hello">
-                    <h1>Здравствуйте, {{ current_user['name'].split()[0] }}</h1>
+                    <h1>Здравствуйте, {{ (current_user['name'].split() or [''])[0] }}</h1>
                     <p>В клубе OMAR с {{ current_user['created_at'][:10] }}</p>
                 </div>
             </div>
@@ -648,7 +904,7 @@
                             <div><dt>Телефон</dt><dd>{{ current_user['phone'] }}</dd></div>
                             <div><dt>Регистрация</dt><dd>{{ current_user['created_at'] }}</dd></div>
                         </dl>
-                        <a href="{{ url_for('index') }}#collection" class="btn btn-block">Перейти к покупкам</a>
+                        <a href="{{ url_for('catalog') }}" class="btn btn-block">Перейти к покупкам</a>
                     </div>
                 </aside>
 
@@ -670,7 +926,7 @@
                     {% else %}
                         <div class="empty-box">
                             <p>Здесь появятся ваши заказы.</p>
-                            <a href="{{ url_for('index') }}#collection" class="btn btn-outline">Выбрать одежду</a>
+                            <a href="{{ url_for('catalog') }}" class="btn btn-outline">Выбрать одежду</a>
                         </div>
                     {% endif %}
                 </section>
@@ -688,11 +944,8 @@
                 <p>Instagram: @omar.astana</p>
             </div>
             <div>
-                <h4>Филиалы в Астане</h4>
-                <p>пр. Мангилик Ел, 61</p>
-                <p>пр. Республики, 18</p>
-                <p>пр. Абая, 61</p>
-                <p>ТРЦ «Аружан», 2 этаж</p>
+                <h4>Магазины в Астане</h4>
+                {% for s in stores %}<p>{{ s['address'] }}</p>{% endfor %}
             </div>
             <div>
                 <h4>Другие города</h4>
@@ -755,6 +1008,76 @@
                 if (input.value.trim() === '+7') input.value = '';
             });
         });
+
+        {% if page == 'product' %}
+        // Страница товара: фото, размеры, наличие по магазинам
+        (function () {
+            const STOCK = {{ stock|tojson }};
+            const hasStock = Object.keys(STOCK).length > 0;
+
+            const mainImg = document.getElementById('mainImg');
+            const thumbs = Array.from(document.querySelectorAll('.thumb'));
+            thumbs.forEach((t) => t.addEventListener('click', () => {
+                mainImg.src = t.dataset.src;
+                thumbs.forEach((x) => x.classList.toggle('on', x === t));
+            }));
+
+            // Фото на весь экран
+            const lb = document.getElementById('lightbox');
+            const lbImg = document.getElementById('lbImg');
+            const closeLb = () => { lb.hidden = true; document.body.style.overflow = ''; };
+            document.getElementById('mainBtn').addEventListener('click', () => {
+                lbImg.src = mainImg.src;
+                lb.hidden = false;
+                document.body.style.overflow = 'hidden';
+            });
+            lb.addEventListener('click', closeLb);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLb(); });
+
+            // Наличие
+            const form = document.getElementById('buyForm');
+            const radios = Array.from(form.querySelectorAll('input[name="size"]'));
+            const rows = Array.from(document.querySelectorAll('.store'));
+            const summary = document.getElementById('stockSummary');
+            const btn = document.getElementById('buyBtn');
+
+            function status(q) {
+                if (q === null) return ['unk', 'Уточняйте в магазине'];
+                if (q <= 0) return ['out', 'Нет в наличии'];
+                if (q <= 2) return ['low', 'Осталось мало'];
+                return ['ok', 'В наличии'];
+            }
+
+            function update() {
+                const sel = radios.find((r) => r.checked);
+                if (!sel) {
+                    summary.textContent = 'Выберите размер, чтобы увидеть наличие';
+                    return;
+                }
+                let available = 0;
+                rows.forEach((row) => {
+                    const q = hasStock ? ((STOCK[sel.value] || {})[row.dataset.id] || 0) : null;
+                    const [cls, text] = status(q);
+                    row.className = 'store ' + cls;
+                    row.querySelector('.st').textContent = text;
+                    if (q !== null && q > 0) available++;
+                });
+                if (!hasStock) {
+                    summary.textContent = 'Наличие по магазинам уточняйте';
+                } else if (available === 0) {
+                    summary.textContent = 'Этого размера сейчас нет ни в одном магазине';
+                } else {
+                    summary.textContent = 'Размер ' + sel.value + ': есть в ' + available + ' из ' + rows.length + ' магазинов';
+                }
+                btn.disabled = hasStock && available === 0;
+            }
+
+            radios.forEach((r) => r.addEventListener('change', update));
+            const first = radios.find((r) => !r.disabled);
+            if (first) first.checked = true;
+            update();
+        })();
+        {% endif %}
     </script>
 </body>
 </html>
