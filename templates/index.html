@@ -9,17 +9,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #fafaf8;
-            --surface: #f1f1ee;
-            --ink: #161616;
-            --muted: #77776f;
-            --line: #e2e2dd;
-            --accent: #8a2a25;
-            --dark: #141413;
-            --ok: #2f6b4a;
-            --ok-bg: #e6f0ea;
-            --wait: #8a5a14;
-            --wait-bg: #f6ecd9;
+            --bg: #f7f4ef;
+            --surface: #ece7df;
+            --ink: #2a2622;
+            --muted: #7d766c;
+            --line: #e3ddd2;
+            --accent: #a8453b;
+            --accent-soft: #f3e1dd;
+            --dark: #2b2521;
+            --ok: #3a7a58;
+            --ok-bg: #e3f0e8;
+            --wait: #9a6416;
+            --wait-bg: #f8ecd3;
+            --r-sm: 10px;
+            --r-md: 16px;
+            --r-lg: 24px;
+            --shadow: 0 6px 24px rgba(60, 40, 20, 0.07);
             --pad: clamp(18px, 4vw, 56px);
             --hdr: 64px;
         }
@@ -54,7 +59,7 @@
             gap: 20px 32px;
             padding: 0 var(--pad);
             min-height: var(--hdr);
-            background: rgba(250, 250, 248, 0.94);
+            background: rgba(247, 244, 239, 0.92);
             backdrop-filter: blur(8px);
             border-bottom: 1px solid var(--line);
             font-size: 15px;
@@ -81,7 +86,7 @@
         /* ---------- Уведомления ---------- */
         .alerts { padding: 20px var(--pad) 0; }
 
-        .alert { padding: 12px 16px; margin-bottom: 8px; font-size: 14px; background: var(--surface); border-left: 3px solid var(--ink); }
+        .alert { padding: 13px 18px; margin-bottom: 8px; font-size: 14px; background: var(--surface); border-left: 4px solid var(--ink); border-radius: var(--r-sm); }
         .alert.error { border-left-color: var(--accent); color: var(--accent); }
         .alert.success { border-left-color: var(--ok); }
         .alert.info { border-left-color: var(--muted); }
@@ -105,7 +110,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at 50% 42%, rgba(138, 42, 37, 0.28), transparent 62%);
+            background: radial-gradient(ellipse at 50% 42%, rgba(200, 110, 90, 0.30), transparent 62%);
             pointer-events: none;
         }
 
@@ -134,7 +139,7 @@
         .hero-actions { margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
         .hero-actions .btn { min-width: 190px; }
 
-        .btn-light { background: #f2f1ee; color: var(--dark); border-color: #f2f1ee; }
+        .btn-light { background: #f7f4ef; color: var(--dark); border-color: #f7f4ef; }
         .btn-light:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
         .btn-ghost { background: transparent; color: #f2f1ee; border-color: rgba(242, 241, 238, 0.4); }
         .btn-ghost:hover { background: #f2f1ee; color: var(--dark); border-color: #f2f1ee; }
@@ -166,7 +171,7 @@
 
         .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 16px; }
 
-        .tile { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; background: var(--surface); color: #fff; text-decoration: none; }
+        .tile { position: relative; display: block; aspect-ratio: 3 / 4; overflow: hidden; border-radius: var(--r-lg); background: var(--surface); color: #fff; text-decoration: none; }
         .tile img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.1, 1); }
         .tile:hover img { transform: scale(1.05); }
         .tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.62), transparent 55%); }
@@ -179,7 +184,7 @@
         .perk p { color: var(--muted); font-size: 15px; max-width: 34ch; }
 
         .store-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-        .store-card { border: 1px solid var(--line); border-radius: 6px; padding: 20px; background: #fff; }
+        .store-card { border: 1px solid var(--line); border-radius: var(--r-md); padding: 22px; background: #fffdf9; box-shadow: var(--shadow); }
         .store-card b { display: block; font-size: 17px; font-weight: 600; }
         .store-card span { color: var(--muted); font-size: 15px; }
 
@@ -191,7 +196,7 @@
         .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px 28px; flex-wrap: wrap; padding: 22px var(--pad) 0; }
         .filters { display: flex; gap: 8px; flex-wrap: wrap; }
 
-        .chip { padding: 8px 16px; border: 1px solid var(--line); border-radius: 99px; font-size: 14px; text-decoration: none; color: var(--muted); background: #fff; transition: all 0.15s; }
+        .chip { padding: 8px 18px; border: 1px solid var(--line); border-radius: 99px; font-size: 14px; text-decoration: none; color: var(--muted); background: #fffdf9; transition: all 0.15s; }
         .chip:hover { border-color: var(--ink); color: var(--ink); }
         .chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 
@@ -199,21 +204,21 @@
         .tools input, .tools select {
             width: auto;
             margin: 0;
-            padding: 9px 14px;
+            padding: 9px 18px;
             border: 1px solid var(--line);
             border-radius: 99px;
-            background-color: #fff;
+            background-color: #fffdf9;
             font-size: 14px;
         }
         .tools input { width: 190px; }
-        .tools select { padding-right: 34px; background-position: right 14px center; }
-        .tools input:focus, .tools select:focus { border: 1px solid var(--ink); padding-bottom: 9px; }
+        .tools select { padding-right: 38px; background-position: right 16px center; }
+        .tools input:focus, .tools select:focus { border-color: var(--accent); }
 
         .grid-wrap { padding: 32px var(--pad) 0; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 44px 20px; }
 
         .product { display: block; text-decoration: none; }
-        .product-img { position: relative; aspect-ratio: 4 / 5; background: var(--surface); overflow: hidden; margin-bottom: 14px; }
+        .product-img { position: relative; aspect-ratio: 4 / 5; background: var(--surface); overflow: hidden; margin-bottom: 14px; border-radius: var(--r-md); }
         .product-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s, transform 0.7s cubic-bezier(0.2, 0.7, 0.1, 1); }
         .product-img .alt { opacity: 0; }
         .product:hover .product-img .alt { opacity: 1; }
@@ -242,11 +247,11 @@
         .gallery { display: grid; grid-template-columns: 76px 1fr; gap: 14px; }
         .gallery.single { grid-template-columns: 1fr; }
         .thumbs { display: flex; flex-direction: column; gap: 10px; }
-        .thumb { border: 1px solid transparent; padding: 0; background: var(--surface); cursor: pointer; aspect-ratio: 4 / 5; overflow: hidden; }
+        .thumb { border-radius: var(--r-sm); border: 2px solid transparent; padding: 0; background: var(--surface); cursor: pointer; aspect-ratio: 4 / 5; overflow: hidden; }
         .thumb img { width: 100%; height: 100%; object-fit: cover; }
         .thumb.on { border-color: var(--ink); }
 
-        .main-img { background: var(--surface); aspect-ratio: 4 / 5; overflow: hidden; cursor: zoom-in; width: 100%; border: 0; padding: 0; display: block; }
+        .main-img { border-radius: var(--r-lg); background: var(--surface); aspect-ratio: 4 / 5; overflow: hidden; cursor: zoom-in; width: 100%; border: 0; padding: 0; display: block; }
         .main-img img { width: 100%; height: 100%; object-fit: cover; }
 
         .pdp-info { position: sticky; top: calc(var(--hdr) + 24px); }
@@ -267,8 +272,8 @@
             height: 48px;
             padding: 0 14px;
             border: 1px solid var(--line);
-            border-radius: 2px;
-            background: #fff;
+            border-radius: 12px;
+            background: #fffdf9;
             cursor: pointer;
             font-weight: 500;
             transition: border-color 0.15s, background 0.15s, color 0.15s;
@@ -305,7 +310,7 @@
         .more details[open] summary::after { content: "−"; }
         .more details p { color: var(--muted); font-size: 15px; padding: 0 0 16px; max-width: 52ch; }
 
-        .lightbox { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(250, 250, 248, 0.98); place-items: center; padding: 24px; cursor: zoom-out; }
+        .lightbox { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(247, 244, 239, 0.98); place-items: center; padding: 24px; cursor: zoom-out; }
         .lightbox:not([hidden]) { display: grid; }
         .lightbox img { max-height: 100%; max-width: 100%; object-fit: contain; }
         .lb-close { position: absolute; top: 14px; right: 20px; background: none; border: 0; font-size: 38px; line-height: 1; cursor: pointer; color: var(--ink); }
@@ -324,7 +329,7 @@
             background: var(--ink);
             color: #fff;
             border: 1px solid var(--ink);
-            border-radius: 2px;
+            border-radius: 99px;
             padding: 14px 26px;
             font-family: inherit;
             font-size: 15px;
@@ -346,11 +351,10 @@
 
         input, select {
             width: 100%;
-            padding: 12px 0;
-            border: 0;
-            border-bottom: 1px solid var(--ink);
-            border-radius: 0;
-            background: transparent;
+            padding: 13px 16px;
+            border: 1px solid var(--line);
+            border-radius: var(--r-sm);
+            background: #fffdf9;
             font: inherit;
             font-size: 16px;
             color: var(--ink);
@@ -360,27 +364,27 @@
         }
 
         select {
-            padding-right: 24px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23161616' stroke-width='1.5'/%3E%3C/svg%3E");
+            padding-right: 40px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%232a2622' stroke-width='1.5'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 2px center;
+            background-position: right 16px center;
             cursor: pointer;
         }
 
         input::placeholder { color: #a3a39b; }
-        input:focus, select:focus { outline: none; border-bottom: 2px solid var(--accent); padding-bottom: 11px; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
         .phone-input { font-variant-numeric: tabular-nums; }
 
         /* ---------- Корзина ---------- */
         .cart-row { display: grid; grid-template-columns: 96px 1fr auto; gap: 20px; align-items: center; padding: 20px 0; border-top: 1px solid var(--line); }
-        .cart-thumb { width: 96px; height: 96px; object-fit: cover; background: var(--surface); }
+        .cart-thumb { border-radius: var(--r-md); width: 96px; height: 96px; object-fit: cover; background: var(--surface); }
         .cart-title { font-size: 16px; font-weight: 600; }
         .cart-meta { font-size: 14px; color: var(--muted); }
         .cart-price { font-weight: 600; margin-top: 4px; }
 
         .qty-col { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
         .qty { display: flex; align-items: center; gap: 6px; }
-        .qty a { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 2px; text-decoration: none; font-size: 18px; line-height: 1; }
+        .qty a { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; text-decoration: none; font-size: 18px; line-height: 1; }
         .qty a:hover { border-color: var(--ink); }
         .qty b { min-width: 30px; text-align: center; font-weight: 600; }
         .remove { font-size: 13px; color: var(--muted); }
@@ -392,10 +396,11 @@
 
         /* ---------- Оформление заказа ---------- */
         .checkout-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(28px, 6vw, 96px); align-items: start; }
-        .note-box { background: var(--surface); padding: 14px 16px; font-size: 14px; margin-bottom: 24px; }
+        .note-box { background: var(--surface); border-radius: var(--r-md); padding: 16px 18px; font-size: 14px; margin-bottom: 24px; }
         .note-box input { margin-bottom: 16px; }
         .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .two-col input { margin-bottom: 0; }
+        .note-box input { background: #fff; }
 
         .summary h3 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
         .sum-row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
@@ -410,14 +415,14 @@
         .profile-hello p { color: var(--muted); font-size: 15px; margin-top: 6px; }
 
         .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: clamp(32px, 5vw, 56px); }
-        .stat { background: var(--surface); border-radius: 6px; padding: 20px 22px; }
+        .stat { background: var(--surface); border-radius: var(--r-md); padding: 22px 24px; }
         .stat-num { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
         .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
         .stat.club { background: var(--ink); color: #fff; }
         .stat.club .stat-label { color: #b5b5ad; }
 
         .profile-grid { display: grid; grid-template-columns: minmax(260px, 1fr) 2fr; gap: clamp(28px, 6vw, 88px); align-items: start; }
-        .card { border: 1px solid var(--line); border-radius: 6px; padding: 22px; background: #fff; }
+        .card { border: 1px solid var(--line); border-radius: var(--r-md); padding: 24px; background: #fffdf9; box-shadow: var(--shadow); }
         .card h2 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
         .facts div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
         .facts div:first-child { border-top: 0; padding-top: 0; }
@@ -426,17 +431,18 @@
         .card .btn { margin-top: 18px; }
         .section-title { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 16px; }
 
-        .order { border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; margin-bottom: 12px; background: #fff; }
+        .order { border: 1px solid var(--line); border-radius: var(--r-md); padding: 20px 22px; margin-bottom: 14px; background: #fffdf9; box-shadow: var(--shadow); }
         .order-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
         .order-no { font-weight: 600; }
         .order-date { color: var(--muted); font-size: 13px; font-weight: 400; margin-left: 8px; }
         .tag { font-size: 12.5px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: var(--wait-bg); color: var(--wait); }
         .tag.paid { background: var(--ok-bg); color: var(--ok); }
+        .tag.bad { background: var(--accent-soft); color: var(--accent); }
         .order p { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
         .order p b { color: var(--ink); font-weight: 500; }
         .order-sum { margin-top: 10px; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
 
-        .empty-box { text-align: center; border: 1px dashed var(--line); border-radius: 6px; padding: 44px 20px; }
+        .empty-box { text-align: center; border: 1px dashed #d2c9ba; border-radius: var(--r-md); padding: 44px 20px; }
         .empty-box p { color: var(--muted); margin-bottom: 18px; }
 
         /* ---------- Подвал ---------- */
@@ -491,6 +497,7 @@
         <nav class="nav" aria-label="Аккаунт">
             {% if current_user %}
                 <a href="{{ url_for('cart') }}" class="{% if page == 'cart' %}on{% endif %}">Корзина{% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}</a>
+                {% if current_user['is_admin'] %}<a href="{{ url_for('admin_orders') }}">Админка</a>{% endif %}
                 <a href="{{ url_for('profile') }}" class="{% if page == 'profile' %}on{% endif %}">Кабинет</a>
                 <a href="{{ url_for('logout') }}">Выйти</a>
             {% else %}
@@ -915,7 +922,7 @@
                         <div class="order">
                             <div class="order-head">
                                 <span class="order-no">Заказ №{{ order['id'] }}<span class="order-date">{{ order['created_at'] }}</span></span>
-                                <span class="tag {% if order['status'] == 'Оплачен онлайн' %}paid{% endif %}">{{ order['status'] }}</span>
+                                <span class="tag {% if order['status'] in ['Оплачен онлайн', 'Выдан', 'Доставлен'] %}paid{% elif order['status'] == 'Отменён' %}bad{% endif %}">{{ order['status'] }}</span>
                             </div>
                             <p><b>Состав:</b> {{ order['items_summary'] }}</p>
                             <p><b>Получение:</b> {{ order['address_or_branch'] }}</p>
