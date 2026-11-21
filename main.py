@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -22,6 +23,8 @@ supabase_key = os.environ.get('SUPABASE_KEY', '')
 
 app = Flask(__name__)
 app.secret_key = secret_key
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -395,6 +398,290 @@ def profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_page('profile')
+
+
+
+# =====================================================================
+#                           АДМИН-ПАНЕЛЬ
+# =====================================================================
+ORDER_STATUSES = [
+    'Оплачен онлайн',
+    'Ожидает оплаты при получении',
+    'Собран',
+    'Передан курьеру',
+    'Выдан',
+    'Отменён',
+]
+NEW_STATUSES = ('Оплачен онлайн', 'Ожидает оплаты при получении')
+LOW_LIMIT = 3  # «мало»: столько штук размера и меньше по всем магазинам вместе
+
+
+def admin_required(view):
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Войдите в аккаунт администратора.', 'error')
+            return redirect(url_for('login'))
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('SELECT is_admin FROM users WHERE id = %s', (session['user_id'],))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        if not row or not row['is_admin']:
+            abort(403)
+        return view(*args, **kwargs)
+    return wrapper
+
+
+def admin_page(section, **kwargs):
+    """Общие данные шапки админки + рендер admin.html"""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT COUNT(*) AS n FROM orders WHERE status = ANY(%s)', (list(NEW_STATUSES),))
+    new_orders = cur.fetchone()['n']
+    cur.execute(
+        'SELECT COUNT(*) AS n FROM ('
+        ' SELECT product_id, size FROM stock GROUP BY product_id, size HAVING SUM(qty) <= %s'
+        ') t',
+        (LOW_LIMIT,)
+    )
+    low_count = cur.fetchone()['n']
+    cur.close()
+    conn.close()
+    return render_template('admin.html', section=section, new_orders=new_orders,
+                           low_count=low_count, low_limit=LOW_LIMIT, statuses=ORDER_STATUSES, **kwargs)
+
+
+def to_int(value, default=0, minimum=0):
+    try:
+        return max(minimum, int(str(value).strip()))
+    except (ValueError, TypeError):
+        return default
+
+
+@app.route('/admin')
+@admin_required
+def admin_home():
+    return redirect(url_for('admin_orders'))
+
+
+# ---------- Заказы ----------
+@app.route('/admin/orders')
+@admin_required
+def admin_orders():
+    status = request.args.get('status', '').strip()
+    conn = get_db()
+    cur = conn.cursor()
+
+    sql = (
+        'SELECT o.*, u.name AS user_name, u.phone AS user_phone '
+        'FROM orders o JOIN users u ON u.id = o.user_id'
+    )
+    params = []
+    if status in ORDER_STATUSES:
+        sql += ' WHERE o.status = %s'
+        params.append(status)
+    else:
+        status = ''
+    sql += ' ORDER BY o.id DESC'
+    cur.execute(sql, params)
+    orders = cur.fetchall()
+
+    cur.execute(
+        "SELECT COUNT(*) AS n, "
+        "COALESCE(SUM(total_amount) FILTER (WHERE status <> 'Отменён'), 0) AS rev FROM orders"
+    )
+    agg = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    return admin_page('orders', orders=orders, active_status=status,
+                      total_orders=agg['n'], revenue=int(agg['rev']))
+
+
+@app.route('/admin/orders/<int:order_id>/status', methods=['POST'])
+@admin_required
+def admin_order_status(order_id):
+    status = request.form.get('status', '')
+    if status not in ORDER_STATUSES:
+        abort(400)
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('UPDATE orders SET status = %s WHERE id = %s', (status, order_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+    flash(f'Заказ №{order_id}: статус «{status}».', 'success')
+    return redirect(request.referrer or url_for('admin_orders'))
+
+
+# ---------- Товары ----------
+@app.route('/admin/products')
+@admin_required
+def admin_products():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT p.*, '
+        '  COALESCE((SELECT SUM(qty) FROM stock s WHERE s.product_id = p.id), 0) AS total, '
+        '  EXISTS (SELECT 1 FROM stock s WHERE s.product_id = p.id '
+        '          GROUP BY s.size HAVING SUM(s.qty) <= %s) AS low_sizes '
+        'FROM products p ORDER BY p.id DESC',
+        (LOW_LIMIT,)
+    )
+    products = cur.fetchall()
+    cur.close()
+    conn.close()
+    return admin_page('products', products=products)
+
+
+@app.route('/admin/low-stock')
+@admin_required
+def admin_low_stock():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        'SELECT p.id, p.title, p.category, p.image_url, s.size, SUM(s.qty) AS total '
+        'FROM stock s JOIN products p ON p.id = s.product_id '
+        'GROUP BY p.id, p.title, p.category, p.image_url, s.size '
+        'HAVING SUM(s.qty) <= %s '
+        'ORDER BY SUM(s.qty) ASC, p.title ASC',
+        (LOW_LIMIT,)
+    )
+    items = cur.fetchall()
+    cur.close()
+    conn.close()
+    return admin_page('low', low_items=items)
+
+
+def read_product_form():
+    f = request.form
+    return {
+        'title': f.get('title', '').strip(),
+        'category': f.get('category', '').strip(),
+        'price': to_int(f.get('price')),
+        'sizes': ','.join(split_list(f.get('sizes'))),
+        'description': f.get('description', '').strip(),
+        'image_url': f.get('image_url', '').strip(),
+        'gallery': ','.join(split_list(f.get('gallery'))),
+    }
+
+
+def save_stock(cur, product_id, sizes):
+    """Остатки из полей qty__<размер>__<id магазина>. Размеры, которых больше нет, удаляются."""
+    cur.execute('SELECT id FROM stores')
+    store_ids = [r['id'] for r in cur.fetchall()]
+    cur.execute('DELETE FROM stock WHERE product_id = %s AND NOT (size = ANY(%s))', (product_id, sizes))
+    for size in sizes:
+        for sid in store_ids:
+            qty = to_int(request.form.get(f'qty__{size}__{sid}'), 0)
+            cur.execute(
+                'INSERT INTO stock (product_id, store_id, size, qty) VALUES (%s, %s, %s, %s) '
+                'ON CONFLICT (product_id, store_id, size) DO UPDATE SET qty = EXCLUDED.qty',
+                (product_id, sid, size, qty)
+            )
+
+
+def product_form_context(product=None):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM stores ORDER BY id')
+    stores = cur.fetchall()
+    cur.execute('SELECT DISTINCT category FROM products ORDER BY category')
+    categories = [r['category'] for r in cur.fetchall()]
+    stock = {}
+    if product:
+        cur.execute('SELECT store_id, size, qty FROM stock WHERE product_id = %s', (product['id'],))
+        for r in cur.fetchall():
+            stock.setdefault(r['size'], {})[r['store_id']] = r['qty']
+    cur.close()
+    conn.close()
+    return dict(product=product, stores=stores, categories=categories, stock=stock)
+
+
+@app.route('/admin/products/new', methods=['GET', 'POST'])
+@admin_required
+def admin_product_new():
+    if request.method == 'POST':
+        d = read_product_form()
+        sizes = split_list(d['sizes'])
+        if not d['title'] or not d['category'] or not sizes:
+            flash('Заполните название, раздел и размеры.', 'error')
+            return redirect(url_for('admin_product_new'))
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute(
+            'INSERT INTO products (title, category, price, sizes, description, image_url, gallery) '
+            'VALUES (%(title)s, %(category)s, %(price)s, %(sizes)s, %(description)s, %(image_url)s, %(gallery)s) '
+            'RETURNING id',
+            d
+        )
+        pid = cur.fetchone()['id']
+        save_stock(cur, pid, sizes)
+        conn.commit()
+        cur.close()
+        conn.close()
+        flash('Товар добавлен.', 'success')
+        return redirect(url_for('admin_products'))
+    return admin_page('form', **product_form_context())
+
+
+@app.route('/admin/products/<int:product_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def admin_product_edit(product_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM products WHERE id = %s', (product_id,))
+    item = cur.fetchone()
+    if not item:
+        cur.close()
+        conn.close()
+        abort(404)
+
+    if request.method == 'POST':
+        d = read_product_form()
+        sizes = split_list(d['sizes'])
+        if not d['title'] or not d['category'] or not sizes:
+            cur.close()
+            conn.close()
+            flash('Заполните название, раздел и размеры.', 'error')
+            return redirect(url_for('admin_product_edit', product_id=product_id))
+        d['id'] = product_id
+        cur.execute(
+            'UPDATE products SET title=%(title)s, category=%(category)s, price=%(price)s, sizes=%(sizes)s, '
+            'description=%(description)s, image_url=%(image_url)s, gallery=%(gallery)s WHERE id=%(id)s',
+            d
+        )
+        save_stock(cur, product_id, sizes)
+        conn.commit()
+        cur.close()
+        conn.close()
+        flash('Изменения сохранены.', 'success')
+        return redirect(url_for('admin_products'))
+
+    cur.close()
+    conn.close()
+    return admin_page('form', **product_form_context(item))
+
+
+@app.route('/admin/products/<int:product_id>/delete', methods=['POST'])
+@admin_required
+def admin_product_delete(product_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM products WHERE id = %s', (product_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    flash('Товар удалён.', 'info')
+    return redirect(url_for('admin_products'))
+
+
+@app.errorhandler(403)
+def forbidden(_e):
+    flash('Нет доступа к админ-панели.', 'error')
+    return redirect(url_for('index'))
 
 
 try:
