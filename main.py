@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -23,6 +23,8 @@ supabase_key = os.environ.get('SUPABASE_KEY', '')
 app = Flask(__name__)
 app.secret_key = secret_key
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def get_db():
     return psycopg2.connect(database_url, cursor_factory=RealDictCursor)
@@ -31,11 +33,16 @@ def get_db():
 def init_db():
     conn = get_db()
     cur = conn.cursor()
-    with open('schema.sql', 'r', encoding='utf-8') as f:
+    with open(os.path.join(BASE_DIR, 'schema.sql'), 'r', encoding='utf-8') as f:
         cur.execute(f.read())
     conn.commit()
     cur.close()
     conn.close()
+
+
+def split_list(value):
+    """'a, b,c' -> ['a', 'b', 'c']"""
+    return [x.strip() for x in (value or '').split(',') if x.strip()]
 
 
 def render_page(page_name, **kwargs):
@@ -67,6 +74,13 @@ def render_page(page_name, **kwargs):
         cur.execute('SELECT * FROM orders WHERE user_id = %s ORDER BY id DESC', (uid,))
         orders = cur.fetchall()
 
+    # Общие данные для шапки, подвала и оформления заказа
+    cur.execute('SELECT * FROM stores ORDER BY id ASC')
+    stores = cur.fetchall()
+
+    cur.execute('SELECT category FROM products GROUP BY category ORDER BY MIN(id)')
+    nav_categories = [r['category'] for r in cur.fetchall()]
+
     cur.close()
     conn.close()
 
@@ -78,25 +92,96 @@ def render_page(page_name, **kwargs):
         cart_count=cart_count,
         total_price=total_price,
         orders=orders,
+        stores=stores,
+        nav_categories=nav_categories,
         **kwargs
     )
 
 
+# ---------- Главная ----------
 @app.route('/')
 def index():
-    category = request.args.get('category', 'Все')
     conn = get_db()
     cur = conn.cursor()
-    if category == 'Все':
-        cur.execute('SELECT * FROM products ORDER BY id ASC')
-    else:
-        cur.execute('SELECT * FROM products WHERE category = %s ORDER BY id ASC', (category,))
+    cur.execute('''
+        SELECT category, COUNT(*) AS cnt, MIN(image_url) AS image_url
+        FROM products
+        GROUP BY category
+        ORDER BY MIN(id)
+    ''')
+    categories = cur.fetchall()
+    cur.execute('SELECT * FROM products ORDER BY id DESC LIMIT 8')
+    new_products = cur.fetchall()
+    cur.close()
+    conn.close()
+    return render_page('home', categories=categories, new_products=new_products)
+
+
+# ---------- Каталог: разделы, поиск, сортировка ----------
+@app.route('/catalog')
+def catalog():
+    category = request.args.get('category', 'Все')
+    sort = request.args.get('sort', 'new')
+    q = request.args.get('q', '').strip()
+
+    order_by = {
+        'new': 'id DESC',
+        'cheap': 'price ASC',
+        'expensive': 'price DESC',
+    }.get(sort, 'id DESC')
+
+    where, params = [], []
+    if category != 'Все':
+        where.append('category = %s')
+        params.append(category)
+    if q:
+        where.append('title ILIKE %s')
+        params.append(f'%{q}%')
+
+    sql = 'SELECT * FROM products'
+    if where:
+        sql += ' WHERE ' + ' AND '.join(where)
+    sql += f' ORDER BY {order_by}'
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(sql, params)
     products = cur.fetchall()
     cur.close()
     conn.close()
 
-    categories = ['Все', 'Верхняя одежда', 'Брюки', 'Трикотаж', 'Обувь']
-    return render_page('catalog', products=products, categories=categories, active_category=category)
+    return render_page('catalog', products=products, active_category=category, sort=sort, q=q)
+
+
+# ---------- Страница товара ----------
+@app.route('/product/<int:product_id>')
+def product(product_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM products WHERE id = %s', (product_id,))
+    item = cur.fetchone()
+    if not item:
+        cur.close()
+        conn.close()
+        abort(404)
+
+    cur.execute('SELECT store_id, size, qty FROM stock WHERE product_id = %s', (product_id,))
+    stock = {}
+    for r in cur.fetchall():
+        stock.setdefault(r['size'], {})[r['store_id']] = r['qty']
+
+    cur.execute(
+        'SELECT * FROM products WHERE category = %s AND id <> %s ORDER BY id DESC LIMIT 4',
+        (item['category'], product_id)
+    )
+    similar = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    images = [u for u in [item['image_url']] + split_list(item['gallery']) if u]
+    sizes = split_list(item['sizes'])
+
+    return render_page('product', product=item, sizes=sizes, stock=stock, images=images, similar=similar)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -170,11 +255,37 @@ def add_to_cart(product_id):
         flash('Сначала войдите или зарегистрируйтесь.', 'error')
         return redirect(url_for('login'))
 
-    size = request.form.get('size', 'Стандарт')
+    size = request.form.get('size', '').strip()
     uid = session['user_id']
 
     conn = get_db()
     cur = conn.cursor()
+
+    cur.execute('SELECT sizes FROM products WHERE id = %s', (product_id,))
+    prod = cur.fetchone()
+    if not prod:
+        cur.close()
+        conn.close()
+        abort(404)
+
+    if size not in split_list(prod['sizes']):
+        cur.close()
+        conn.close()
+        flash('Выберите размер.', 'error')
+        return redirect(url_for('product', product_id=product_id))
+
+    # Если остатки ведутся и этого размера нигде нет, в корзину не добавляем
+    cur.execute(
+        'SELECT COUNT(*) AS n, COALESCE(SUM(qty), 0) AS total FROM stock WHERE product_id = %s AND size = %s',
+        (product_id, size)
+    )
+    st = cur.fetchone()
+    if st['n'] > 0 and st['total'] == 0:
+        cur.close()
+        conn.close()
+        flash('Этого размера сейчас нет в наличии.', 'error')
+        return redirect(url_for('product', product_id=product_id))
+
     cur.execute(
         'SELECT * FROM cart WHERE user_id = %s AND product_id = %s AND size = %s',
         (uid, product_id, size)
@@ -193,7 +304,7 @@ def add_to_cart(product_id):
     conn.close()
 
     flash('Товар добавлен в корзину.', 'success')
-    return redirect(request.referrer or url_for('index'))
+    return redirect(url_for('product', product_id=product_id))
 
 
 @app.route('/cart')
