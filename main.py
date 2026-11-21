@@ -1,11 +1,19 @@
+import os
 import sqlite3
 from datetime import datetime
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
+load_dotenv()
+
+secret_key = os.environ.get('SECRET_KEY')
+if not secret_key:
+    raise RuntimeError('Не задана переменная окружения SECRET_KEY')
+
 app = Flask(__name__)
-app.secret_key = 'omar_astana_secret_key_change_me'
-DB_NAME = 'omar_store.db'
+app.secret_key = secret_key
+DB_NAME = os.environ.get('DB_PATH', 'omar_store.db')
 
 
 def get_db():
@@ -229,6 +237,9 @@ def profile():
     return render_page('profile')
 
 
+# Инициализация БД при старте (в том числе при запуске через gunicorn на Render)
+init_db()
+
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
