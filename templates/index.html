@@ -4,467 +4,704 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMAR ASTANA — Мужская одежда и обувь</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f4f5f7;
-            --surface: #ffffff;
-            --surface-soft: #fafafa;
-            --primary: #111214;
-            --primary-hover: #25272b;
-            --accent: #c59b27;
-            --accent-hover: #ab841c;
-            --text: #18191c;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --ring: rgba(197, 155, 39, 0.22);
-            --radius: 14px;
-            --shadow: 0 12px 32px rgba(17, 18, 20, 0.06);
-            --shadow-sm: 0 4px 14px rgba(17, 18, 20, 0.04);
+            --paper: #d8d8d6;
+            --tile: #cbcbc9;
+            --ink: #000000;
+            --muted: #55554f;
+            --line: rgba(0, 0, 0, 0.22);
+            --oxblood: #8a2a25;
+            --dark: #1c1b1a;
+            --pad: clamp(16px, 3.4vw, 48px);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            background: radial-gradient(circle at top, #fbfbfc 0%, var(--bg) 55%);
-            color: var(--text);
+            font-family: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            line-height: 1.5;
+            line-height: 1.45;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Шапка */
-        header {
-            background: rgba(17, 18, 20, 0.96);
-            backdrop-filter: blur(10px);
-            color: #fff;
-            padding: 16px 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        a { color: inherit; }
+        img { display: block; }
+
+        :focus-visible { outline: 2px solid var(--oxblood); outline-offset: 3px; }
+
+        /* ---------- Шапка ---------- */
+        .site-header {
             position: sticky;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .logo {
-            font-size: 1.45rem;
-            font-weight: 800;
-            letter-spacing: 3px;
-            color: #fff;
-            text-decoration: none;
-            line-height: 1.1;
-        }
-
-        .logo span {
-            color: var(--accent);
-            font-size: 0.72rem;
-            letter-spacing: 2px;
-            display: block;
-            font-weight: 600;
-            margin-top: 3px;
-        }
-
-        nav {
+            z-index: 50;
+            background: var(--paper);
             display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 24px;
+            padding: 18px var(--pad) 14px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            line-height: 1.3;
         }
 
-        nav a {
-            color: #e5e7eb;
-            text-decoration: none;
-            font-size: 0.92rem;
-            font-weight: 500;
-            transition: color 0.2s ease, opacity 0.2s ease;
-        }
+        .site-header a { text-decoration: none; }
+        .site-header a:hover { text-decoration: underline; text-underline-offset: 4px; }
 
-        nav a:hover {
-            color: var(--accent);
-        }
+        .brand-block { min-width: 150px; }
+        .brand { font-weight: 700; display: block; }
+        .clock { display: block; font-weight: 500; color: var(--muted); }
+
+        .nav-col { display: flex; flex-direction: column; }
+        .nav-cta a { display: inline-flex; align-items: center; gap: 8px; }
 
         .badge {
-            background: var(--accent);
-            color: #111214;
-            padding: 2px 8px;
-            border-radius: 999px;
-            font-size: 0.75rem;
+            background: var(--oxblood);
+            color: #fff;
+            font-size: 11px;
             font-weight: 700;
-            margin-left: 4px;
+            padding: 1px 6px;
+            margin-left: 6px;
+            vertical-align: 1px;
         }
 
-        /* Контейнер и уведомления */
-        .container {
-            width: 92%;
-            max-width: 1200px;
-            margin: 36px auto;
-            flex: 1;
-        }
+        /* ---------- Уведомления ---------- */
+        .alerts { padding: 0 var(--pad); }
 
         .alert {
-            padding: 13px 18px;
-            border-radius: 10px;
-            margin-bottom: 22px;
-            font-size: 0.92rem;
+            border-left: 3px solid var(--ink);
+            background: rgba(255, 255, 255, 0.35);
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            font-size: 14px;
             font-weight: 500;
-            box-shadow: var(--shadow-sm);
         }
 
-        .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-        .alert.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-        .alert.info { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+        .alert.error { border-left-color: var(--oxblood); color: var(--oxblood); }
+        .alert.info { border-left-color: var(--muted); }
 
-        /* Кнопки, карточки и формы */
+        /* ---------- Главный экран ---------- */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            height: calc(100svh - 76px);
+            min-height: 600px;
+        }
+
+        .wordmark {
+            position: absolute;
+            top: 1.5vh;
+            left: var(--pad);
+            right: var(--pad);
+            z-index: 1;
+            font-size: 31vw;
+            font-weight: 800;
+            letter-spacing: -0.045em;
+            line-height: 0.8;
+            white-space: nowrap;
+        }
+
+        .wordmark span { display: inline-block; margin-left: -0.04em; }
+
+        .hero-photo {
+            position: absolute;
+            left: 50%;
+            bottom: -6%;
+            height: 74%;
+            transform: translateX(-50%);
+            z-index: 2;
+            animation: rise 1.2s cubic-bezier(0.2, 0.7, 0.1, 1) both;
+        }
+
+        .hero-photo img { height: 100%; width: auto; }
+
+        @keyframes rise {
+            from { clip-path: inset(100% 0 0 0); }
+            to { clip-path: inset(0 0 0 0); }
+        }
+
+        .hero-note,
+        .hero-scroll {
+            position: absolute;
+            bottom: 26px;
+            z-index: 3;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            line-height: 1.3;
+        }
+
+        .hero-note { left: var(--pad); max-width: 24ch; }
+        .hero-scroll { right: var(--pad); text-decoration: none; }
+        .hero-scroll:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+        /* ---------- Каталог ---------- */
+        .collection { padding: clamp(48px, 8vw, 110px) var(--pad) 0; }
+
+        .coll-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 24px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        .coll-title {
+            font-size: clamp(2.6rem, 7vw, 6.5rem);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+        }
+
+        .filters {
+            display: flex;
+            gap: 6px 22px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .filters a { text-decoration: none; color: var(--muted); }
+        .filters a:hover { color: var(--ink); }
+        .filters a.on {
+            color: var(--ink);
+            text-decoration: underline;
+            text-decoration-thickness: 2px;
+            text-underline-offset: 6px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+            gap: 48px 22px;
+        }
+
+        .product { display: flex; flex-direction: column; }
+
+        .product-img {
+            aspect-ratio: 4 / 5;
+            background: var(--tile);
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .product-img img { width: 100%; height: 100%; object-fit: cover; }
+
+        .product-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 16px;
+        }
+
+        .product-top h3 { font-size: 17px; font-weight: 600; line-height: 1.25; }
+        .price { font-size: 17px; font-weight: 700; white-space: nowrap; }
+        .product-cat { font-size: 13px; color: var(--muted); margin-top: 2px; }
+        .product-desc { font-size: 14px; color: var(--muted); margin: 10px 0 18px; flex: 1; }
+
+        .buy {
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .buy select { margin: 0; }
+        .empty { color: var(--muted); padding: 40px 0; }
+
+        /* ---------- Внутренние страницы ---------- */
+        .page { flex: 1; padding: clamp(28px, 5vw, 64px) var(--pad) 0; }
+
+        .page-title {
+            font-size: clamp(3rem, 10vw, 9.5rem);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            line-height: 0.88;
+            margin-bottom: clamp(28px, 4vw, 56px);
+        }
+
+        .sub { color: var(--muted); font-size: 15px; max-width: 44ch; margin-bottom: 28px; }
+        .form-wrap { max-width: 460px; }
+        .alt-link { margin-top: 22px; font-size: 14px; color: var(--muted); }
+        .alt-link a { color: var(--ink); font-weight: 600; }
+
+        /* ---------- Кнопки и формы ---------- */
         .btn {
             display: inline-block;
-            background: var(--primary);
-            color: #fff;
-            padding: 11px 20px;
-            border: 1px solid transparent;
-            border-radius: 10px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.94rem;
+            background: var(--ink);
+            color: var(--paper);
+            border: 1px solid var(--ink);
+            padding: 15px 26px;
+            font-family: inherit;
+            font-size: 13px;
             font-weight: 600;
-            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
             text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
 
-        .btn:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-        }
+        .btn:hover { background: var(--oxblood); border-color: var(--oxblood); color: #fff; }
 
-        .btn-outline {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
+        .btn-outline { background: transparent; color: var(--ink); }
+        .btn-outline:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
-        .btn-outline:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-        }
+        .btn-accent { background: var(--oxblood); border-color: var(--oxblood); color: #fff; }
+        .btn-accent:hover { background: var(--ink); border-color: var(--ink); }
 
-        .btn-accent {
-            background: var(--accent);
-            color: #111214;
-        }
-
-        .btn-accent:hover {
-            background: var(--accent-hover);
-            color: #111214;
-        }
-
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px;
-            box-shadow: var(--shadow);
-        }
-
-        .auth-card {
-            max-width: 430px;
-            margin: 24px auto;
-            padding: 32px;
-        }
-
-        .auth-card h2 {
-            font-size: 1.55rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            margin-bottom: 6px;
-        }
-
-        .auth-subtitle {
-            color: var(--muted);
-            font-size: 0.9rem;
-            margin-bottom: 22px;
-        }
+        .btn-block { width: 100%; }
+        .btn-sm { padding: 10px 14px; }
 
         label {
             display: block;
+            font-size: 12px;
             font-weight: 600;
-            font-size: 0.86rem;
-            color: var(--text);
-            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+            margin-bottom: 2px;
         }
 
         input, select {
             width: 100%;
-            padding: 11px 14px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            margin-bottom: 18px;
-            font-size: 0.96rem;
-            color: var(--text);
-            background: var(--surface);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            padding: 12px 0;
+            border: 0;
+            border-bottom: 1px solid var(--ink);
+            border-radius: 0;
+            background: transparent;
+            font: inherit;
+            font-size: 16px;
+            color: var(--ink);
+            margin-bottom: 24px;
+            appearance: none;
+            -webkit-appearance: none;
         }
+
+        select {
+            padding-right: 24px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 2px center;
+            cursor: pointer;
+        }
+
+        input::placeholder { color: #7d7d78; }
 
         input:focus, select:focus {
             outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 4px var(--ring);
+            border-bottom: 2px solid var(--oxblood);
+            padding-bottom: 11px;
         }
 
-        .phone-input {
-            font-variant-numeric: tabular-nums;
-            letter-spacing: 0.4px;
+        .phone-input { font-variant-numeric: tabular-nums; }
+
+        /* ---------- Корзина ---------- */
+        .cart-row {
+            display: grid;
+            grid-template-columns: 96px 1fr auto;
+            gap: 20px;
+            align-items: center;
+            padding: 18px 0;
+            border-top: 1px solid var(--line);
         }
 
-        /* Подвал */
-        footer {
-            background: var(--primary);
-            color: #9ca3af;
-            padding: 36px 5%;
-            margin-top: 60px;
-            font-size: 0.86rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        .cart-row:first-child { border-top: 1px solid var(--ink); }
+        .cart-thumb { width: 96px; height: 96px; object-fit: cover; background: var(--tile); }
+        .cart-title { font-size: 17px; font-weight: 600; }
+        .cart-meta { font-size: 14px; color: var(--muted); }
+        .cart-price { font-weight: 700; margin-top: 4px; }
+
+        .qty-col { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .qty { display: flex; align-items: center; gap: 6px; }
+
+        .qty a {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--ink);
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .qty a:hover { background: var(--ink); color: var(--paper); }
+        .qty b { min-width: 30px; text-align: center; font-weight: 700; }
+        .remove { font-size: 13px; color: var(--muted); }
+        .remove:hover { color: var(--oxblood); }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--ink);
+            padding-top: 22px;
+        }
+
+        .total-label { font-size: 13px; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+        .total-sum { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+
+        /* ---------- Оформление заказа ---------- */
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: clamp(28px, 6vw, 96px);
+            align-items: start;
+        }
+
+        .note-box { border: 1px solid var(--ink); padding: 14px 16px; font-size: 14px; margin-bottom: 24px; }
+        .note-box input { margin-bottom: 16px; }
+        .note-box label { margin-top: 4px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .two-col input { margin-bottom: 0; }
+
+        .summary h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
+
+        .sum-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 0;
+            border-top: 1px solid var(--line);
+            font-size: 15px;
+        }
+
+        .sum-row strong { white-space: nowrap; }
+
+        .sum-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-top: 1px solid var(--ink);
+            padding-top: 16px;
+            font-size: 14px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .sum-total strong { font-size: 1.8rem; letter-spacing: -0.02em; text-transform: none; }
+
+        /* ---------- Кабинет ---------- */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: minmax(260px, 1fr) 2fr;
+            gap: clamp(28px, 6vw, 96px);
+            align-items: start;
+        }
+
+        .facts { margin-bottom: 24px; }
+        .facts div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 15px; }
+        .facts div:first-child { border-top: 1px solid var(--ink); }
+        .facts dt { color: var(--muted); }
+        .facts dd { font-weight: 600; text-align: right; }
+
+        .bonus { border: 1px solid var(--ink); padding: 14px 16px; font-size: 14px; margin-bottom: 22px; }
+        .section-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 700; margin-bottom: 14px; }
+
+        .order { border-top: 1px solid var(--ink); padding: 18px 0 22px; }
+        .order-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; font-weight: 600; }
+        .tag { border: 1px solid var(--ink); padding: 3px 10px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .order p { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+        .order p b { color: var(--ink); font-weight: 600; }
+        .order-sum { margin-top: 10px; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+
+        /* ---------- Подвал ---------- */
+        .site-footer {
+            background: var(--dark);
+            color: #b9b8b4;
+            margin-top: clamp(64px, 9vw, 120px);
+            padding: 48px var(--pad) 36px;
+            font-size: 14px;
         }
 
         .footer-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 24px;
-            max-width: 1200px;
-            margin: 0 auto;
+            gap: 32px;
         }
 
-        footer h4 {
-            color: #fff;
-            font-size: 0.95rem;
-            margin-bottom: 12px;
-            letter-spacing: 0.4px;
+        .site-footer h4 { color: #fff; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 14px; }
+        .site-footer p { margin-bottom: 6px; }
+
+        /* ---------- Мобильная версия ---------- */
+        @media (max-width: 720px) {
+            .site-header { flex-wrap: wrap; gap: 10px 22px; font-size: 12.5px; }
+            .brand-block { flex-basis: 100%; display: flex; justify-content: space-between; }
+            .brand-block .clock { display: inline; }
+
+            .hero { height: auto; min-height: 0; padding-bottom: 20px; }
+            .wordmark { position: relative; top: auto; left: auto; right: auto; margin: 6px var(--pad) 0; }
+            .hero-photo { position: relative; left: auto; bottom: auto; transform: none; width: 74%; height: auto; margin: -1vw auto 0; }
+            .hero-photo img { width: 100%; height: auto; }
+            .hero-note, .hero-scroll { position: static; display: inline-block; margin: 18px var(--pad) 0; font-size: 12.5px; }
+            .hero-note { max-width: 20ch; }
+            .hero-scroll { float: right; }
+
+            .checkout-grid, .profile-grid { grid-template-columns: 1fr; }
+            .cart-row { grid-template-columns: 72px 1fr; }
+            .cart-thumb { width: 72px; height: 72px; }
+            .qty-col { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
         }
 
-        footer p {
-            margin-bottom: 5px;
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .hero-photo { animation: none; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="{{ url_for('index') }}" class="logo">OMAR <span>ASTANA • MENSWEAR</span></a>
-        <nav>
+    <header class="site-header">
+        <div class="brand-block">
+            <a href="{{ url_for('index') }}" class="brand">OMAR ASTANA</a>
+            <span class="clock" id="clock"></span>
+        </div>
+
+        <nav class="nav-col" aria-label="Основное меню">
             <a href="{{ url_for('index') }}">Каталог</a>
             {% if current_user %}
-                <a href="{{ url_for('cart') }}">Корзина <span class="badge">{{ cart_count }}</span></a>
-                <a href="{{ url_for('profile') }}">Кабинет ({{ current_user['name'] }})</a>
-                <a href="{{ url_for('logout') }}" style="color: #9ca3af;">Выйти</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Войти</a>
-                <a href="{{ url_for('register') }}" class="btn btn-accent" style="padding: 8px 16px; font-size: 0.88rem;">Регистрация</a>
+                <a href="{{ url_for('cart') }}">Корзина{% if cart_count %}<span class="badge">{{ cart_count }}</span>{% endif %}</a>
             {% endif %}
         </nav>
+
+        <nav class="nav-col" aria-label="Аккаунт">
+            {% if current_user %}
+                <a href="{{ url_for('profile') }}">Кабинет ({{ current_user['name'] }})</a>
+                <a href="{{ url_for('logout') }}">Выйти</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Войти</a>
+            {% endif %}
+        </nav>
+
+        <div class="nav-cta">
+            {% if current_user %}
+                <a href="{{ url_for('index') }}#collection">Коллекция
+                    <svg width="11" height="11" viewBox="0 0 11 11" aria-hidden="true"><path d="M1 10L10 1M3 1h7v7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                </a>
+            {% else %}
+                <a href="{{ url_for('register') }}">Регистрация
+                    <svg width="11" height="11" viewBox="0 0 11 11" aria-hidden="true"><path d="M1 10L10 1M3 1h7v7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                </a>
+            {% endif %}
+        </div>
     </header>
 
-    <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alerts">
                 {% for category, message in messages %}
                     <div class="alert {{ category }}">{{ message }}</div>
                 {% endfor %}
-            {% endif %}
-        {% endwith %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
-        <!-- 1. КАТАЛОГ ТОВАРОВ -->
-        {% if page == 'catalog' %}
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 26px;">
-                <div>
-                    <h1 style="font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em;">Коллекция OMAR</h1>
-                    <p style="color: var(--muted); font-size: 0.92rem;">Мужская одежда и обувь • Астана</p>
-                </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    {% if page == 'catalog' %}
+
+        <!-- 1. ГЛАВНЫЙ ЭКРАН + КАТАЛОГ -->
+        <section class="hero">
+            <h1 class="wordmark" aria-label="OMAR ASTANA"><span id="wordmark">OMAR</span></h1>
+            <figure class="hero-photo">
+                <img src="{{ url_for('static', filename='suit.jpg') }}" alt="Чёрный двубортный костюм с красным галстуком на манекене">
+            </figure>
+            <p class="hero-note">OMAR ASTANA, мужская одежда и обувь.<br>4 филиала в Астане</p>
+            <a class="hero-scroll" href="#collection">Листайте вниз</a>
+        </section>
+
+        <section class="collection" id="collection">
+            <div class="coll-head">
+                <h2 class="coll-title">Коллекция</h2>
+                <nav class="filters" aria-label="Категории">
                     {% for cat in categories %}
-                        <a href="{{ url_for('index', category=cat) }}"
-                           class="btn {% if active_category != cat %}btn-outline{% endif %}"
-                           style="padding: 8px 15px; font-size: 0.86rem;">
-                            {{ cat }}
-                        </a>
+                        <a href="{{ url_for('index', category=cat) }}#collection" class="{% if active_category == cat %}on{% endif %}">{{ cat }}</a>
                     {% endfor %}
-                </div>
+                </nav>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+            {% if products %}
+            <div class="grid">
                 {% for product in products %}
-                <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
-                    <img src="{{ product['image_url'] }}" alt="{{ product['title'] }}" style="width: 100%; height: 280px; object-fit: cover;">
-                    <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <span style="font-size: 0.72rem; color: var(--accent-hover); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">{{ product['category'] }}</span>
-                            <h3 style="margin: 6px 0; font-size: 1.1rem; font-weight: 700;">{{ product['title'] }}</h3>
-                            <p style="font-size: 0.86rem; color: var(--muted); margin-bottom: 14px;">{{ product['description'] }}</p>
-                        </div>
-                        <div>
-                            <div style="font-size: 1.25rem; font-weight: 800; margin-bottom: 12px;">{{ "{:,}".format(product['price']).replace(',', ' ') }} ₸</div>
-                            <form action="{{ url_for('add_to_cart', product_id=product['id']) }}" method="POST" style="display: flex; gap: 8px;">
-                                <select name="size" style="margin: 0; width: 45%;">
-                                    {% for s in product['sizes'].split(',') %}
-                                        <option value="{{ s }}">Размер {{ s }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="btn" style="width: 55%;">В корзину</button>
-                            </form>
-                        </div>
+                <article class="product">
+                    <div class="product-img">
+                        <img src="{{ product['image_url'] }}" alt="{{ product['title'] }}" loading="lazy">
                     </div>
-                </div>
+                    <div class="product-top">
+                        <h3>{{ product['title'] }}</h3>
+                        <span class="price">{{ "{:,}".format(product['price']).replace(',', ' ') }} ₸</span>
+                    </div>
+                    <p class="product-cat">{{ product['category'] }}</p>
+                    <p class="product-desc">{{ product['description'] }}</p>
+                    <form class="buy" action="{{ url_for('add_to_cart', product_id=product['id']) }}" method="POST">
+                        <select name="size" aria-label="Размер">
+                            {% for s in product['sizes'].split(',') %}
+                                <option value="{{ s }}">Размер {{ s }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn">В корзину</button>
+                    </form>
+                </article>
                 {% endfor %}
             </div>
+            {% else %}
+                <p class="empty">В этой категории пока нет товаров.</p>
+            {% endif %}
+        </section>
+
+    {% else %}
+    <main class="page">
 
         <!-- 2. РЕГИСТРАЦИЯ -->
-        {% elif page == 'register' %}
-            <div class="card auth-card">
-                <h2>Регистрация</h2>
-                <p class="auth-subtitle">Создайте аккаунт для покупок и бонусов OMAR</p>
+        {% if page == 'register' %}
+            <h1 class="page-title">Регистрация</h1>
+            <div class="form-wrap">
+                <p class="sub">Аккаунт нужен для покупок и бонусов OMAR.</p>
                 <form method="POST">
-                    <label>Ваше имя</label>
-                    <input type="text" name="name" placeholder="Например, Арман" required>
+                    <label for="name">Ваше имя</label>
+                    <input id="name" type="text" name="name" placeholder="Например, Арман" required>
 
-                    <label>Номер телефона</label>
-                    <input type="tel" name="phone" class="phone-input" placeholder="+7 700 222 22-22" inputmode="numeric" required>
+                    <label for="phone">Номер телефона</label>
+                    <input id="phone" type="tel" name="phone" class="phone-input" placeholder="+7 700 222 22-22" inputmode="numeric" required>
 
-                    <label>Пароль</label>
-                    <input type="password" name="password" placeholder="Придумайте пароль" required>
+                    <label for="password">Пароль</label>
+                    <input id="password" type="password" name="password" placeholder="Придумайте пароль" required>
 
-                    <button type="submit" class="btn" style="width: 100%; padding: 12px;">Создать аккаунт</button>
+                    <button type="submit" class="btn btn-block">Создать аккаунт</button>
                 </form>
-                <p style="margin-top: 18px; font-size: 0.9rem; color: var(--muted); text-align: center;">
-                    Уже есть аккаунт? <a href="{{ url_for('login') }}" style="color: var(--text); font-weight: 600;">Войти</a>
-                </p>
+                <p class="alt-link">Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
             </div>
 
         <!-- 3. АВТОРИЗАЦИЯ -->
         {% elif page == 'login' %}
-            <div class="card auth-card">
-                <h2>Вход в личный кабинет</h2>
-                <p class="auth-subtitle">Введите номер телефона и пароль</p>
+            <h1 class="page-title">Вход</h1>
+            <div class="form-wrap">
+                <p class="sub">Введите номер телефона и пароль.</p>
                 <form method="POST">
-                    <label>Номер телефона</label>
-                    <input type="tel" name="phone" class="phone-input" placeholder="+7 700 222 22-22" inputmode="numeric" required>
+                    <label for="phone">Номер телефона</label>
+                    <input id="phone" type="tel" name="phone" class="phone-input" placeholder="+7 700 222 22-22" inputmode="numeric" required>
 
-                    <label>Пароль</label>
-                    <input type="password" name="password" placeholder="Введите пароль" required>
+                    <label for="password">Пароль</label>
+                    <input id="password" type="password" name="password" placeholder="Введите пароль" required>
 
-                    <button type="submit" class="btn" style="width: 100%; padding: 12px;">Войти</button>
+                    <button type="submit" class="btn btn-block">Войти</button>
                 </form>
-                <p style="margin-top: 18px; font-size: 0.9rem; color: var(--muted); text-align: center;">
-                    Нет аккаунта? <a href="{{ url_for('register') }}" style="color: var(--text); font-weight: 600;">Зарегистрироваться</a>
-                </p>
+                <p class="alt-link">Нет аккаунта? <a href="{{ url_for('register') }}">Зарегистрироваться</a></p>
             </div>
 
         <!-- 4. КОРЗИНА -->
         {% elif page == 'cart' %}
-            <h1 style="font-size: 1.7rem; font-weight: 800; margin-bottom: 20px;">Корзина</h1>
+            <h1 class="page-title">Корзина</h1>
             {% if cart_items %}
-            <div class="card">
-                {% for item in cart_items %}
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 16px 0; flex-wrap: wrap; gap: 15px;">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <img src="{{ item['image_url'] }}" style="width: 72px; height: 72px; object-fit: cover; border-radius: 10px;">
+                <div>
+                    {% for item in cart_items %}
+                    <div class="cart-row">
+                        <img class="cart-thumb" src="{{ item['image_url'] }}" alt="{{ item['title'] }}">
                         <div>
-                            <h4 style="font-size: 1rem;">{{ item['title'] }}</h4>
-                            <p style="font-size: 0.85rem; color: var(--muted);">Размер: <strong>{{ item['size'] }}</strong></p>
-                            <p style="font-size: 0.95rem; font-weight: 700; margin-top: 2px;">{{ "{:,}".format(item['price']).replace(',', ' ') }} ₸</p>
+                            <h4 class="cart-title">{{ item['title'] }}</h4>
+                            <p class="cart-meta">Размер {{ item['size'] }}</p>
+                            <p class="cart-price">{{ "{:,}".format(item['price']).replace(',', ' ') }} ₸</p>
+                        </div>
+                        <div class="qty-col">
+                            <div class="qty">
+                                <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='minus') }}" aria-label="Уменьшить количество">−</a>
+                                <b>{{ item['quantity'] }}</b>
+                                <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='plus') }}" aria-label="Увеличить количество">+</a>
+                            </div>
+                            <a class="remove" href="{{ url_for('update_cart', cart_id=item['cart_id'], action='delete') }}">Удалить</a>
                         </div>
                     </div>
+                    {% endfor %}
 
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='minus') }}" class="btn btn-outline" style="padding: 5px 12px;">−</a>
-                        <span style="font-weight: 700; min-width: 20px; text-align: center;">{{ item['quantity'] }}</span>
-                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='plus') }}" class="btn btn-outline" style="padding: 5px 12px;">+</a>
-                        <a href="{{ url_for('update_cart', cart_id=item['cart_id'], action='delete') }}" style="color: #dc2626; margin-left: 10px; font-size: 0.86rem; font-weight: 500; text-decoration: none;">Удалить</a>
+                    <div class="cart-total">
+                        <div>
+                            <p class="total-label">Итого</p>
+                            <p class="total-sum">{{ "{:,}".format(total_price).replace(',', ' ') }} ₸</p>
+                        </div>
+                        <a href="{{ url_for('checkout') }}" class="btn btn-accent">Перейти к оплате</a>
                     </div>
                 </div>
-                {% endfor %}
-
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 15px;">
-                    <div style="font-size: 1.3rem;">
-                        Итого: <strong>{{ "{:,}".format(total_price).replace(',', ' ') }} ₸</strong>
-                    </div>
-                    <a href="{{ url_for('checkout') }}" class="btn btn-accent" style="padding: 12px 28px; font-size: 1rem;">Перейти к оплате</a>
-                </div>
-            </div>
             {% else %}
-            <div class="card" style="text-align: center; padding: 50px;">
-                <p style="color: var(--muted); margin-bottom: 16px;">Ваша корзина пока пуста.</p>
-                <a href="{{ url_for('index') }}" class="btn">Перейти в каталог</a>
-            </div>
+                <p class="sub">Ваша корзина пока пуста.</p>
+                <a href="{{ url_for('index') }}#collection" class="btn">Перейти в каталог</a>
             {% endif %}
 
         <!-- 5. ОФОРМЛЕНИЕ И ОПЛАТА -->
         {% elif page == 'checkout' %}
-            <h1 style="font-size: 1.7rem; font-weight: 800; margin-bottom: 20px;">Оформление заказа и оплата</h1>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-                <div class="card">
-                    <form method="POST">
-                        <label>Способ получения</label>
-                        <select name="delivery_method" id="delivery_method" onchange="toggleDelivery()">
-                            <option value="Самовывоз из филиала">Самовывоз из филиала в Астане (Бесплатно)</option>
-                            <option value="Курьерская доставка">Курьерская доставка по Астане</option>
+            <h1 class="page-title">Оформление</h1>
+            <div class="checkout-grid">
+                <form method="POST">
+                    <label for="delivery_method">Способ получения</label>
+                    <select name="delivery_method" id="delivery_method" onchange="toggleDelivery()">
+                        <option value="Самовывоз из филиала">Самовывоз из филиала в Астане (бесплатно)</option>
+                        <option value="Курьерская доставка">Курьерская доставка по Астане</option>
+                    </select>
+
+                    <div id="branch_block">
+                        <label for="branch">Филиал OMAR</label>
+                        <select name="branch" id="branch">
+                            <option value="пр. Мангилик Ел, 61">пр. Мангилик Ел, 61</option>
+                            <option value="пр. Республики, 18">пр. Республики, 18</option>
+                            <option value="пр. Абая, 61">пр. Абая, 61</option>
+                            <option value="ТРЦ «Аружан», 2 этаж">ТРЦ «Аружан», 2 этаж</option>
                         </select>
+                    </div>
 
-                        <div id="branch_block">
-                            <label>Выберите филиал OMAR</label>
-                            <select name="branch">
-                                <option value="пр. Мангилик Ел, 61">пр. Мангилик Ел, 61</option>
-                                <option value="пр. Республики, 18">пр. Республики, 18</option>
-                                <option value="пр. Абая, 61">пр. Абая, 61</option>
-                                <option value="ТРЦ «Аружан», 2 этаж">ТРЦ «Аружан», 2 этаж</option>
-                            </select>
+                    <div id="address_block" style="display: none;">
+                        <label for="address">Адрес доставки в Астане</label>
+                        <input id="address" type="text" name="address" placeholder="Улица, дом, квартира / ЖК">
+                    </div>
+
+                    <label for="payment_method">Способ оплаты</label>
+                    <select name="payment_method" id="payment_method" onchange="togglePayment()">
+                        <option value="Kaspi QR / Перевод">Kaspi QR / счёт в приложении Kaspi.kz</option>
+                        <option value="Банковская карта">Банковская карта (Visa / Mastercard)</option>
+                        <option value="При получении">Картой или наличными при получении</option>
+                    </select>
+
+                    <div id="kaspi_box" class="note-box">
+                        После нажатия «Оплатить» счёт на сумму <strong>{{ "{:,}".format(total_price).replace(',', ' ') }} ₸</strong> будет выставлен на номер <strong>{{ current_user['phone'] }}</strong>.
+                    </div>
+
+                    <div id="card_box" class="note-box" style="display: none;">
+                        <label for="card_number">Номер карты</label>
+                        <input id="card_number" type="text" placeholder="4400 4301 0000 0000" maxlength="19">
+                        <div class="two-col">
+                            <input type="text" placeholder="ММ/ГГ" maxlength="5" aria-label="Срок действия">
+                            <input type="password" placeholder="CVV" maxlength="3" aria-label="CVV">
                         </div>
+                    </div>
 
-                        <div id="address_block" style="display: none;">
-                            <label>Адрес доставки в Астане</label>
-                            <input type="text" name="address" placeholder="Улица, дом, квартира / ЖК">
-                        </div>
+                    <button type="submit" class="btn btn-accent btn-block">Оплатить {{ "{:,}".format(total_price).replace(',', ' ') }} ₸</button>
+                </form>
 
-                        <label>Способ оплаты</label>
-                        <select name="payment_method" id="payment_method" onchange="togglePayment()">
-                            <option value="Kaspi QR / Перевод">Kaspi QR / Счет в приложении Kaspi.kz</option>
-                            <option value="Банковская карта">Банковская карта (Visa / Mastercard)</option>
-                            <option value="При получении">Картой или наличными при получении</option>
-                        </select>
-
-                        <div id="kaspi_box" style="background: #fffbeb; border: 1px solid #fde68a; padding: 14px; border-radius: 10px; margin-bottom: 18px; font-size: 0.9rem;">
-                            <strong>Оплата через Kaspi:</strong> после нажатия кнопки «Оплатить» счет на сумму <strong>{{ "{:,}".format(total_price).replace(',', ' ') }} ₸</strong> будет выставлен на ваш номер <strong>{{ current_user['phone'] }}</strong>.
-                        </div>
-
-                        <div id="card_box" style="display: none; background: var(--surface-soft); border: 1px solid var(--border); padding: 14px; border-radius: 10px; margin-bottom: 18px;">
-                            <label>Номер карты</label>
-                            <input type="text" placeholder="4400 4301 0000 0000" maxlength="19">
-                            <div style="display: flex; gap: 10px;">
-                                <input type="text" placeholder="ММ/ГГ" maxlength="5" style="margin-bottom: 0;">
-                                <input type="password" placeholder="CVV" maxlength="3" style="margin-bottom: 0;">
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-accent" style="width: 100%; padding: 14px; font-size: 1rem;">
-                            Подтвердить и оплатить {{ "{:,}".format(total_price).replace(',', ' ') }} ₸
-                        </button>
-                    </form>
-                </div>
-
-                <div class="card" style="height: fit-content;">
-                    <h3 style="margin-bottom: 15px; font-weight: 700;">Ваш заказ</h3>
+                <div class="summary">
+                    <h3>Ваш заказ</h3>
                     {% for item in cart_items %}
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <div class="sum-row">
                             <span>{{ item['title'] }} ({{ item['size'] }}) × {{ item['quantity'] }}</span>
                             <strong>{{ "{:,}".format(item['price'] * item['quantity']).replace(',', ' ') }} ₸</strong>
                         </div>
                     {% endfor %}
-                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; margin-top: 15px;">
-                        <span>К оплате:</span>
+                    <div class="sum-total">
+                        <span>К оплате</span>
                         <strong>{{ "{:,}".format(total_price).replace(',', ' ') }} ₸</strong>
                     </div>
                 </div>
@@ -472,56 +709,56 @@
 
         <!-- 6. ЛИЧНЫЙ КАБИНЕТ -->
         {% elif page == 'profile' %}
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
-                <div class="card" style="height: fit-content;">
-                    <h2 style="margin-bottom: 14px; font-weight: 700;">Личный кабинет</h2>
-                    <p style="margin-bottom: 8px;"><strong>Имя:</strong> {{ current_user['name'] }}</p>
-                    <p style="margin-bottom: 8px;"><strong>Телефон:</strong> {{ current_user['phone'] }}</p>
-                    <p style="margin-bottom: 16px; font-size: 0.85rem; color: var(--muted);">Дата регистрации: {{ current_user['created_at'] }}</p>
-                    <div style="background: #fdf8eb; border: 1px solid #f3e5ab; padding: 12px 14px; border-radius: 10px; font-size: 0.9rem; margin-bottom: 18px;">
-                        🎁 Бонусный статус: <strong>Участник клуба OMAR (5% кэшбэк)</strong>
-                    </div>
-                    <a href="{{ url_for('index') }}" class="btn" style="width: 100%;">Перейти к покупкам</a>
+            <h1 class="page-title">Кабинет</h1>
+            <div class="profile-grid">
+                <div>
+                    <dl class="facts">
+                        <div><dt>Имя</dt><dd>{{ current_user['name'] }}</dd></div>
+                        <div><dt>Телефон</dt><dd>{{ current_user['phone'] }}</dd></div>
+                        <div><dt>Регистрация</dt><dd>{{ current_user['created_at'] }}</dd></div>
+                    </dl>
+                    <p class="bonus">Бонусный статус: <strong>участник клуба OMAR, кэшбэк 5%</strong></p>
+                    <a href="{{ url_for('index') }}#collection" class="btn btn-block">Перейти к покупкам</a>
                 </div>
 
-                <div class="card" style="grid-column: span 2;">
-                    <h2 style="margin-bottom: 16px; font-weight: 700;">История заказов</h2>
+                <div>
+                    <h2 class="section-label">История заказов</h2>
                     {% if orders %}
                         {% for order in orders %}
-                        <div style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 15px; background: var(--surface-soft);">
-                            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
-                                <strong>Заказ №{{ order['id'] }} от {{ order['created_at'] }}</strong>
-                                <span style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 3px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 700;">
-                                    {{ order['status'] }}
-                                </span>
+                        <div class="order">
+                            <div class="order-head">
+                                <span>Заказ №{{ order['id'] }} от {{ order['created_at'] }}</span>
+                                <span class="tag">{{ order['status'] }}</span>
                             </div>
-                            <p style="font-size: 0.9rem; margin-bottom: 6px;"><strong>Состав:</strong> {{ order['items_summary'] }}</p>
-                            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 6px;"><strong>Получение:</strong> {{ order['address_or_branch'] }}</p>
-                            <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 8px;"><strong>Оплата:</strong> {{ order['payment_method'] }}</p>
-                            <div style="font-size: 1.05rem; font-weight: 800;">Сумма: {{ "{:,}".format(order['total_amount']).replace(',', ' ') }} ₸</div>
+                            <p><b>Состав:</b> {{ order['items_summary'] }}</p>
+                            <p><b>Получение:</b> {{ order['address_or_branch'] }}</p>
+                            <p><b>Оплата:</b> {{ order['payment_method'] }}</p>
+                            <div class="order-sum">{{ "{:,}".format(order['total_amount']).replace(',', ' ') }} ₸</div>
                         </div>
                         {% endfor %}
                     {% else %}
-                        <p style="color: var(--muted);">У вас пока нет оформленных заказов.</p>
+                        <p class="empty">У вас пока нет оформленных заказов.</p>
                     {% endif %}
                 </div>
             </div>
         {% endif %}
-    </div>
 
-    <footer>
+    </main>
+    {% endif %}
+
+    <footer class="site-footer">
         <div class="footer-grid">
             <div>
                 <h4>OMAR ASTANA</h4>
                 <p>Мужская одежда и обувь в стиле casual и smart casual.</p>
-                <p style="margin-top: 8px;">Instagram: @omar.astana</p>
+                <p>Instagram: @omar.astana</p>
             </div>
             <div>
                 <h4>Филиалы в Астане</h4>
-                <p>📍 пр. Мангилик Ел, 61</p>
-                <p>📍 пр. Республики, 18</p>
-                <p>📍 пр. Абая, 61</p>
-                <p>📍 ТРЦ «Аружан», 2 этаж</p>
+                <p>пр. Мангилик Ел, 61</p>
+                <p>пр. Республики, 18</p>
+                <p>пр. Абая, 61</p>
+                <p>ТРЦ «Аружан», 2 этаж</p>
             </div>
             <div>
                 <h4>Другие города</h4>
@@ -533,6 +770,36 @@
     </footer>
 
     <script>
+        // Время в Астане (в шапке)
+        (function () {
+            const el = document.getElementById('clock');
+            if (!el) return;
+            const fmt = new Intl.DateTimeFormat('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Almaty' });
+            const tick = () => { el.textContent = fmt.format(new Date()) + ', Астана'; };
+            tick();
+            setInterval(tick, 30000);
+        })();
+
+        // Огромное слово OMAR на всю ширину экрана
+        (function () {
+            const word = document.getElementById('wordmark');
+            if (!word) return;
+            const box = word.parentElement;
+            const fit = () => {
+                if (window.innerWidth <= 720) {
+                    box.style.fontSize = '';
+                }
+                box.style.fontSize = '100px';
+                const avail = box.parentElement.clientWidth - 2 * parseFloat(getComputedStyle(box).left || 0);
+                const target = window.innerWidth <= 720
+                    ? box.parentElement.clientWidth - 2 * parseFloat(getComputedStyle(box).marginLeft || 0)
+                    : avail;
+                box.style.fontSize = (100 * target / word.getBoundingClientRect().width) + 'px';
+            };
+            (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fit);
+            window.addEventListener('resize', fit);
+        })();
+
         function toggleDelivery() {
             const method = document.getElementById('delivery_method').value;
             document.getElementById('branch_block').style.display = (method === 'Самовывоз из филиала') ? 'block' : 'none';
