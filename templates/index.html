@@ -434,6 +434,9 @@
         .page-title { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: clamp(24px, 4vw, 48px); }
         .sub { color: var(--muted); font-size: 16px; max-width: 44ch; margin-bottom: 28px; }
         .form-wrap { max-width: 440px; }
+        .steps { margin: 0 0 22px 20px; color: var(--muted); font-size: 15px; }
+        .steps li { margin-bottom: 6px; }
+        .tg-open { display: block; text-align: center; text-decoration: none; }
         .alt-link { margin-top: 22px; font-size: 14px; color: var(--muted); }
         .alt-link a { color: var(--ink); font-weight: 600; }
 
@@ -1021,6 +1024,27 @@
                 <p class="alt-link">Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
             </div>
 
+        <!-- ПОДТВЕРЖДЕНИЕ НОМЕРА -->
+        {% elif page == 'register_verify' %}
+            <h1 class="page-title">Подтвердите номер</h1>
+            <div class="form-wrap">
+                <p class="sub">Мы отправим код в Telegram для номера {{ reg_phone }}.</p>
+                <ol class="steps">
+                    <li>Нажмите кнопку ниже и в боте нажмите «Начать».</li>
+                    <li>Поделитесь номером кнопкой в боте.</li>
+                    <li>Введите полученный код здесь.</li>
+                </ol>
+                <a class="btn btn-block tg-open" href="{{ bot_link }}" target="_blank" rel="noopener">Открыть Telegram-бота</a>
+
+                <form method="POST" style="margin-top: 22px">
+                    <label for="code">Код из Telegram</label>
+                    <input id="code" type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="6 цифр" required>
+                    <button type="submit" class="btn btn-block">Подтвердить и создать аккаунт</button>
+                </form>
+                <p class="sub" id="tgState" style="margin: 16px 0 0">{% if code_sent %}Код отправлен в Telegram, введите его выше.{% else %}Ждём подтверждения в боте…{% endif %}</p>
+                <p class="alt-link"><a href="{{ url_for('register') }}">Изменить данные</a></p>
+            </div>
+
         <!-- ВХОД -->
         {% elif page == 'login' %}
             <h1 class="page-title">Вход</h1>
@@ -1386,6 +1410,24 @@
             } else {
                 load();
             }
+        })();
+        {% endif %}
+
+        {% if page == 'register_verify' %}
+        // Узнаём, прислал ли бот код
+        (function () {
+            const state = document.getElementById('tgState');
+            const input = document.getElementById('code');
+            const timer = setInterval(() => {
+                fetch('{{ url_for("register_status") }}').then((r) => r.json()).then((d) => {
+                    if (d.expired) { clearInterval(timer); location.href = '{{ url_for("register") }}'; return; }
+                    if (d.sent) {
+                        state.textContent = 'Код отправлен в Telegram, введите его выше.';
+                        if (document.activeElement !== input) input.focus();
+                        clearInterval(timer);
+                    }
+                }).catch(() => {});
+            }, 3000);
         })();
         {% endif %}
 
