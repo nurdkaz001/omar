@@ -1,10 +1,12 @@
 import os
+import uuid
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
+import requests
 from psycopg2.extras import RealDictCursor
 
 load_dotenv()
@@ -25,6 +27,7 @@ app = Flask(__name__)
 app.secret_key = secret_key
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # общий лимит загрузки, 32 МБ
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -555,6 +558,64 @@ def admin_low_stock():
     return admin_page('low', low_items=items)
 
 
+# ---------- Загрузка фото ----------
+MIME_BY_EXT = {'jpg': 'image/jpeg', 'png': 'image/png', 'webp': 'image/webp', 'gif': 'image/gif'}
+SUPABASE_BUCKET = os.environ.get('SUPABASE_BUCKET', 'products')
+UPLOAD_DIR = os.path.join(BASE_DIR, 'static', 'uploads')
+
+
+def sniff_ext(data):
+    """Тип файла определяем по содержимому, а не по имени."""
+    if data[:3] == b'\xff\xd8\xff':
+        return 'jpg'
+    if data[:8] == b'\x89PNG\r\n\x1a\n':
+        return 'png'
+    if data[:4] == b'GIF8':
+        return 'gif'
+    if data[:4] == b'RIFF' and data[8:12] == b'WEBP':
+        return 'webp'
+    return None
+
+
+def save_image(file_storage):
+    """Сохраняет фото и возвращает ссылку на него. Пустое поле -> None."""
+    if not file_storage or not file_storage.filename:
+        return None
+    data = file_storage.read()
+    if not data:
+        return None
+    ext = sniff_ext(data)
+    if not ext:
+        raise ValueError(f'Файл «{file_storage.filename}» не похож на фото. Нужен JPG, PNG, WebP или GIF.')
+    name = f'{uuid.uuid4().hex}.{ext}'
+
+    if supabase_url and supabase_key:
+        base = supabase_url.rstrip('/')
+        resp = requests.post(
+            f'{base}/storage/v1/object/{SUPABASE_BUCKET}/{name}',
+            headers={
+                'Authorization': f'Bearer {supabase_key}',
+                'apikey': supabase_key,
+                'Content-Type': MIME_BY_EXT[ext],
+                'x-upsert': 'true',
+            },
+            data=data,
+            timeout=30,
+        )
+        if resp.status_code not in (200, 201):
+            raise RuntimeError(
+                f'Хранилище фото не приняло файл (код {resp.status_code}). '
+                f'Проверьте, что бакет «{SUPABASE_BUCKET}» создан и ключ SUPABASE_KEY верный.'
+            )
+        return f'{base}/storage/v1/object/public/{SUPABASE_BUCKET}/{name}'
+
+    # Запасной вариант без Supabase Storage: папка static/uploads
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    with open(os.path.join(UPLOAD_DIR, name), 'wb') as f:
+        f.write(data)
+    return url_for('static', filename=f'uploads/{name}')
+
+
 def read_product_form():
     f = request.form
     return {
@@ -564,8 +625,25 @@ def read_product_form():
         'sizes': ','.join(split_list(f.get('sizes'))),
         'description': f.get('description', '').strip(),
         'image_url': f.get('image_url', '').strip(),
-        'gallery': ','.join(split_list(f.get('gallery'))),
+        'gallery': '',
     }
+
+
+def collect_photos(d):
+    """Добавляет в d загруженные и вставленные по ссылке фото. Бросает ValueError/RuntimeError."""
+    main = save_image(request.files.get('image_file'))
+    if main:
+        d['image_url'] = main
+
+    gallery = request.form.getlist('gallery_keep') + split_list(request.form.get('gallery_urls'))
+    for fs in request.files.getlist('gallery_files'):
+        url = save_image(fs)
+        if url:
+            gallery.append(url)
+    d['gallery'] = ','.join(gallery)
+
+    if not d['image_url']:
+        raise ValueError('Добавьте главное фото товара.')
 
 
 def save_stock(cur, product_id, sizes):
@@ -583,21 +661,48 @@ def save_stock(cur, product_id, sizes):
             )
 
 
-def product_form_context(product=None):
+def stock_from_form():
+    """Введённые остатки из формы (чтобы не потерять их, если сохранение не удалось)."""
+    stock = {}
+    for key, value in request.form.items():
+        if key.startswith('qty__'):
+            try:
+                _, size, sid = key.split('__')
+                stock.setdefault(size, {})[int(sid)] = to_int(value, 0)
+            except ValueError:
+                continue
+    return stock
+
+
+def product_form_context(product=None, is_edit=False, stock=None):
     conn = get_db()
     cur = conn.cursor()
     cur.execute('SELECT * FROM stores ORDER BY id')
     stores = cur.fetchall()
     cur.execute('SELECT DISTINCT category FROM products ORDER BY category')
     categories = [r['category'] for r in cur.fetchall()]
-    stock = {}
-    if product:
-        cur.execute('SELECT store_id, size, qty FROM stock WHERE product_id = %s', (product['id'],))
-        for r in cur.fetchall():
-            stock.setdefault(r['size'], {})[r['store_id']] = r['qty']
+    if stock is None:
+        stock = {}
+        if product and is_edit:
+            cur.execute('SELECT store_id, size, qty FROM stock WHERE product_id = %s', (product['id'],))
+            for r in cur.fetchall():
+                stock.setdefault(r['size'], {})[r['store_id']] = r['qty']
     cur.close()
     conn.close()
-    return dict(product=product, stores=stores, categories=categories, stock=stock)
+    gallery_list = split_list(product['gallery']) if product and product.get('gallery') else []
+    return dict(product=product, is_edit=is_edit, stores=stores, categories=categories,
+                stock=stock, gallery_list=gallery_list)
+
+
+def form_error(message, d, product_id=None):
+    """Показывает форму снова с уже введёнными данными и сообщением об ошибке."""
+    flash(message, 'error')
+    product = dict(d)
+    if product_id:
+        product['id'] = product_id
+    # Ранее загруженные фото остаются в форме
+    product['gallery'] = ','.join(request.form.getlist('gallery_keep'))
+    return admin_page('form', **product_form_context(product, is_edit=bool(product_id), stock=stock_from_form()))
 
 
 @app.route('/admin/products/new', methods=['GET', 'POST'])
@@ -607,8 +712,12 @@ def admin_product_new():
         d = read_product_form()
         sizes = split_list(d['sizes'])
         if not d['title'] or not d['category'] or not sizes:
-            flash('Заполните название, раздел и размеры.', 'error')
-            return redirect(url_for('admin_product_new'))
+            return form_error('Заполните название, раздел и размеры.', d)
+        try:
+            collect_photos(d)
+        except (ValueError, RuntimeError, requests.RequestException) as e:
+            return form_error(str(e), d)
+
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
@@ -645,8 +754,14 @@ def admin_product_edit(product_id):
         if not d['title'] or not d['category'] or not sizes:
             cur.close()
             conn.close()
-            flash('Заполните название, раздел и размеры.', 'error')
-            return redirect(url_for('admin_product_edit', product_id=product_id))
+            return form_error('Заполните название, раздел и размеры.', d, product_id)
+        try:
+            collect_photos(d)
+        except (ValueError, RuntimeError, requests.RequestException) as e:
+            cur.close()
+            conn.close()
+            return form_error(str(e), d, product_id)
+
         d['id'] = product_id
         cur.execute(
             'UPDATE products SET title=%(title)s, category=%(category)s, price=%(price)s, sizes=%(sizes)s, '
@@ -662,7 +777,7 @@ def admin_product_edit(product_id):
 
     cur.close()
     conn.close()
-    return admin_page('form', **product_form_context(item))
+    return admin_page('form', **product_form_context(item, is_edit=True))
 
 
 @app.route('/admin/products/<int:product_id>/delete', methods=['POST'])
@@ -676,6 +791,12 @@ def admin_product_delete(product_id):
     conn.close()
     flash('Товар удалён.', 'info')
     return redirect(url_for('admin_products'))
+
+
+@app.errorhandler(413)
+def too_large(_e):
+    flash('Файлы слишком большие. Загрузите фото поменьше (до 32 МБ суммарно).', 'error')
+    return redirect(request.referrer or url_for('admin_products'))
 
 
 @app.errorhandler(403)
