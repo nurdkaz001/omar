@@ -183,6 +183,8 @@
         .btn.danger:hover { background: #a3372c; border-color: #a3372c; color: #fff; }
         .tag.bad, .tag.out { background: #f6e3e0; color: #a3372c; }
         .alert.error { border-left-color: #a3372c; color: #a3372c; }
+        .order-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        @media (max-width: 720px) { .order-actions { width: 100%; } .order-actions .status-form { flex: 1; } }
     </style>
 </head>
 <body>
@@ -235,12 +237,17 @@
             <p><b>Оплата:</b> {{ o['payment_method'] }}</p>
             <div class="order-foot">
                 <span class="sum">{{ money(o['total_amount']) }}</span>
+                <div class="order-actions">
                 <form class="status-form" method="POST" action="{{ url_for('admin_order_status', order_id=o['id']) }}">
                     <select name="status" aria-label="Статус заказа №{{ o['id'] }}">
                         {% for s in statuses %}<option value="{{ s }}" {% if s == o['status'] %}selected{% endif %}>{{ s }}</option>{% endfor %}
                     </select>
                     <button class="btn sm" type="submit">Сохранить</button>
                 </form>
+                <form method="POST" action="{{ url_for('admin_order_delete', order_id=o['id']) }}" onsubmit="return confirm('Удалить заказ №{{ o['id'] }}? Это действие нельзя отменить.');">
+                    <button class="btn sm danger" type="submit">Удалить</button>
+                </form>
+            </div>
             </div>
         </article>
         {% else %}
