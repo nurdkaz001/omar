@@ -656,6 +656,37 @@
         .wordmark { font-size: clamp(4.6rem, 23vw, 19rem); }
         .hero-sub { font-size: clamp(1rem, 3vw, 2.2rem); }
         @media (max-width: 720px) { .brand { font-size: 15px; letter-spacing: 0.08em; } .hero-sub { letter-spacing: 0.4em; margin-left: 0.4em; } }
+
+        /* ===== Декор фона ===== */
+        body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background: radial-gradient(42vw 42vw at 100% 0%, rgba(17, 17, 17, 0.05), transparent 70%), radial-gradient(36vw 36vw at 0% 72%, rgba(17, 17, 17, 0.04), transparent 70%); }
+        @media (min-width: 1100px) {
+            body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.7;
+                background: linear-gradient(var(--line), var(--line)) calc(var(--pad) - 20px) 0 / 1px 100% no-repeat, linear-gradient(var(--line), var(--line)) calc(100% - var(--pad) + 20px) 0 / 1px 100% no-repeat; }
+        }
+
+        .hero { background: transparent; border-bottom: 0; isolation: isolate; }
+        .hero::before { display: block; content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+            background-image: radial-gradient(rgba(17, 17, 17, 0.16) 1px, transparent 1.4px); background-size: 28px 28px;
+            -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 45%, #000 10%, transparent 75%); mask-image: radial-gradient(ellipse 60% 55% at 50% 45%, #000 10%, transparent 75%); }
+        .hero::after { content: ""; position: absolute; z-index: -1; pointer-events: none; left: 50%; top: 46%; width: min(120vw, 1100px); aspect-ratio: 1; border-radius: 50%; transform: translate(-50%, -50%);
+            background: repeating-radial-gradient(circle, transparent 0 58px, rgba(17, 17, 17, 0.07) 58px 59px);
+            -webkit-mask-image: radial-gradient(circle, #000 25%, transparent 70%); mask-image: radial-gradient(circle, #000 25%, transparent 70%);
+            animation: breathe 16s ease-in-out infinite; }
+        @keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.05); } }
+
+        .marquee { overflow: hidden; background: var(--ink); color: #fff; padding: 15px 0; }
+        .mq-track { display: flex; width: max-content; animation: mq 45s linear infinite; }
+        .mq-half { display: flex; align-items: center; flex: none; }
+        .mq-half span { font-size: 13px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; white-space: nowrap; }
+        .mq-half i { flex: none; width: 6px; height: 6px; margin: 0 34px; transform: rotate(45deg); border: 1px solid rgba(255, 255, 255, 0.6); }
+        @keyframes mq { to { transform: translateX(-50%); } }
+
+        .section[data-bg] { position: relative; isolation: isolate; overflow-x: clip; }
+        .section[data-bg]::before { content: attr(data-bg); position: absolute; z-index: -1; top: clamp(16px, 3vw, 48px); right: var(--pad);
+            font-size: clamp(5rem, 20vw, 18rem); font-weight: 800; letter-spacing: -0.04em; line-height: 0.9; white-space: nowrap;
+            color: transparent; -webkit-text-stroke: 1px rgba(17, 17, 17, 0.09); pointer-events: none; user-select: none; }
+        @media (prefers-reduced-motion: reduce) { .mq-track, .hero::after { animation: none; } }
     </style>
 </head>
 <body>
@@ -731,8 +762,16 @@
             <span class="scroll-hint" aria-hidden="true"></span>
         </section>
 
+        <!-- БЕГУЩАЯ ЛЕНТА -->
+        {% set mq = ["MEN'S REPUBLIC", 'Мужская одежда и обувь', 'Астана', 'Доставка по Казахстану и СНГ'] %}
+        <div class="marquee" aria-hidden="true">
+            <div class="mq-track">
+                {% for h in range(2) %}<div class="mq-half">{% for k in range(2) %}{% for t in mq %}<span>{{ t }}</span><i></i>{% endfor %}{% endfor %}</div>{% endfor %}
+            </div>
+        </div>
+
         <!-- РАЗДЕЛЫ -->
-        <section class="section" id="sections">
+        <section class="section" id="sections" data-bg="STYLE">
             <div class="section-head">
                 <h2>Разделы</h2>
                 <a class="link-more" href="{{ url_for('catalog') }}">Все товары</a>
@@ -751,7 +790,7 @@
         </section>
 
         <!-- НОВИНКИ -->
-        <section class="section">
+        <section class="section" data-bg="NEW">
             <div class="section-head">
                 <h2>Новинки</h2>
                 <a class="link-more" href="{{ url_for('catalog') }}">Весь каталог</a>
@@ -785,7 +824,7 @@
 
         <!-- МАГАЗИНЫ НА КАРТЕ -->
         {% set first_addr = (stores[0]['address'] ~ ', Астана') if stores else 'Астана' %}
-        <section class="section" id="stores">
+        <section class="section" id="stores" data-bg="ASTANA">
             <div class="section-head"><h2>Магазины в Астане</h2></div>
             <div class="map-grid">
                 <ul class="map-list">
