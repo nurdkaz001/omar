@@ -1,5 +1,6 @@
 import os
 import uuid
+import html
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
@@ -23,6 +24,10 @@ if not database_url:
 supabase_url = os.environ.get('SUPABASE_URL', '')
 supabase_key = os.environ.get('SUPABASE_KEY', '')
 
+# Telegram-бот для уведомлений о заказах (необязательно)
+telegram_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+
 app = Flask(__name__)
 app.secret_key = secret_key
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -44,6 +49,27 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
+
+
+def send_telegram(text):
+    """Отправляет сообщение в Telegram. Ошибки не ломают сайт: просто пишутся в лог."""
+    if not telegram_token or not telegram_chat_id:
+        return
+    try:
+        resp = requests.post(
+            f'https://api.telegram.org/bot{telegram_token}/sendMessage',
+            json={
+                'chat_id': telegram_chat_id,
+                'text': text,
+                'parse_mode': 'HTML',
+                'disable_web_page_preview': True,
+            },
+            timeout=5,
+        )
+        if resp.status_code != 200:
+            print('Telegram не принял сообщение:', resp.status_code, resp.text[:200])
+    except requests.RequestException as e:
+        print('Не удалось отправить в Telegram:', e)
 
 
 def split_list(value):
@@ -392,12 +418,31 @@ def checkout():
         cur.execute('''
             INSERT INTO orders (user_id, total_amount, delivery_method, address_or_branch, payment_method, status, items_summary, created_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
         ''', (uid, total_price, delivery_method, location, payment_method, status, items_summary, datetime.now().strftime('%d.%m.%Y %H:%M')))
+        order_id = cur.fetchone()['id']
+
+        cur.execute('SELECT name, phone FROM users WHERE id = %s', (uid,))
+        buyer = cur.fetchone() or {}
 
         cur.execute('DELETE FROM cart WHERE user_id = %s', (uid,))
         conn.commit()
         cur.close()
         conn.close()
+
+        esc = html.escape
+        total_text = f'{total_price:,}'.replace(',', ' ')
+        lines = '\n'.join(
+            f"• {esc(i['title'])}, размер {esc(str(i['size']))} × {i['quantity']}" for i in items
+        )
+        send_telegram(
+            f"🛍 <b>Новый заказ №{order_id}</b>\n\n"
+            f"{lines}\n\n"
+            f"💰 <b>{total_text} ₸</b>\n"
+            f"👤 {esc(buyer.get('name', ''))}, {esc(buyer.get('phone', ''))}\n"
+            f"📦 {esc(delivery_method)}: {esc(location)}\n"
+            f"💳 {esc(payment_method)}"
+        )
 
         flash('Заказ успешно оплачен и оформлен!', 'success')
         return redirect(url_for('profile'))
