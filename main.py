@@ -590,18 +590,24 @@ def sniff_ext(data):
     return None
 
 
-def save_image(file_storage):
-    """Сохраняет фото и возвращает ссылку на него. Пустое поле -> None."""
-    if not file_storage or not file_storage.filename:
-        return None
-    data = file_storage.read()
-    if not data:
-        return None
-    ext = sniff_ext(data)
-    if not ext:
-        raise ValueError(f'Файл «{file_storage.filename}» не похож на фото. Нужен JPG, PNG, WebP или GIF.')
-    name = f'{uuid.uuid4().hex}.{ext}'
+def ensure_video_column():
+    """Один раз добавляет в products колонку для видео, если её ещё нет."""
+    try:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS video_url TEXT DEFAULT ''")
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print('Не удалось добавить колонку video_url:', e)
 
+
+ensure_video_column()
+
+
+def _store_file(data, name, mime):
+    """Кладёт файл в Supabase Storage (или в static/uploads) и возвращает ссылку."""
     if supabase_url and supabase_key:
         base = supabase_url.rstrip('/')
         resp = requests.post(
@@ -609,11 +615,11 @@ def save_image(file_storage):
             headers={
                 'Authorization': f'Bearer {supabase_key}',
                 'apikey': supabase_key,
-                'Content-Type': MIME_BY_EXT[ext],
+                'Content-Type': mime,
                 'x-upsert': 'true',
             },
             data=data,
-            timeout=30,
+            timeout=120,
         )
         if resp.status_code not in (200, 201):
             raise RuntimeError(
@@ -629,6 +635,35 @@ def save_image(file_storage):
     return url_for('static', filename=f'uploads/{name}')
 
 
+def save_video(file_storage):
+    """Сохраняет видео товара (MP4 или WebM). Пустое поле -> None."""
+    if not file_storage or not file_storage.filename:
+        return None
+    data = file_storage.read()
+    if not data:
+        return None
+    if data[4:8] == b'ftyp':
+        ext, mime = 'mp4', 'video/mp4'
+    elif data[:4] == b'\x1aE\xdf\xa3':
+        ext, mime = 'webm', 'video/webm'
+    else:
+        raise ValueError(f'Файл «{file_storage.filename}» не похож на видео. Нужен MP4 или WebM.')
+    return _store_file(data, f'{uuid.uuid4().hex}.{ext}', mime)
+
+
+def save_image(file_storage):
+    """Сохраняет фото и возвращает ссылку на него. Пустое поле -> None."""
+    if not file_storage or not file_storage.filename:
+        return None
+    data = file_storage.read()
+    if not data:
+        return None
+    ext = sniff_ext(data)
+    if not ext:
+        raise ValueError(f'Файл «{file_storage.filename}» не похож на фото. Нужен JPG, PNG, WebP или GIF.')
+    return _store_file(data, f'{uuid.uuid4().hex}.{ext}', MIME_BY_EXT[ext])
+
+
 def read_product_form():
     f = request.form
     return {
@@ -639,6 +674,7 @@ def read_product_form():
         'description': f.get('description', '').strip(),
         'image_url': f.get('image_url', '').strip(),
         'gallery': '',
+        'video_url': f.get('video_url', '').strip(),
     }
 
 
@@ -654,6 +690,12 @@ def collect_photos(d):
         if url:
             gallery.append(url)
     d['gallery'] = ','.join(gallery)
+
+    video = save_video(request.files.get('video_file'))
+    if video:
+        d['video_url'] = video
+    elif request.form.get('video_remove'):
+        d['video_url'] = ''
 
     if not d['image_url']:
         raise ValueError('Добавьте главное фото товара.')
@@ -734,8 +776,8 @@ def admin_product_new():
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
-            'INSERT INTO products (title, category, price, sizes, description, image_url, gallery) '
-            'VALUES (%(title)s, %(category)s, %(price)s, %(sizes)s, %(description)s, %(image_url)s, %(gallery)s) '
+            'INSERT INTO products (title, category, price, sizes, description, image_url, gallery, video_url) '
+            'VALUES (%(title)s, %(category)s, %(price)s, %(sizes)s, %(description)s, %(image_url)s, %(gallery)s, %(video_url)s) '
             'RETURNING id',
             d
         )
@@ -778,7 +820,7 @@ def admin_product_edit(product_id):
         d['id'] = product_id
         cur.execute(
             'UPDATE products SET title=%(title)s, category=%(category)s, price=%(price)s, sizes=%(sizes)s, '
-            'description=%(description)s, image_url=%(image_url)s, gallery=%(gallery)s WHERE id=%(id)s',
+            'description=%(description)s, image_url=%(image_url)s, gallery=%(gallery)s, video_url=%(video_url)s WHERE id=%(id)s',
             d
         )
         save_stock(cur, product_id, sizes)
