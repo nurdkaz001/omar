@@ -75,6 +75,10 @@
         .tag.bad { background: var(--accent-soft); color: var(--accent); }
         .tag.low { background: var(--wait-bg); color: var(--wait); }
         .tag.out { background: var(--accent-soft); color: var(--accent); }
+        .tag.new { background: #e3eefb; color: #1f5fa8; }
+        .tag.sale { background: #fbe4e0; color: #b3321f; }
+        .btn.flag-on { background: var(--ink); color: #fff; border-color: var(--ink); }
+        .flags { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
         .order p { font-size: 14px; color: var(--muted); margin-bottom: 3px; }
         .order p b { color: var(--ink); font-weight: 500; }
         .order-foot { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
@@ -266,7 +270,7 @@
         {% if products %}
         <div class="table-wrap cards">
             <table>
-                <thead><tr><th>Товар</th><th>Раздел</th><th class="num">Цена</th><th class="num">Остаток</th><th></th></tr></thead>
+                <thead><tr><th>Товар</th><th>Раздел</th><th class="num">Цена</th><th class="num">Остаток</th><th>Метки</th><th></th></tr></thead>
                 <tbody>
                 {% for p in products %}
                 <tr>
@@ -275,12 +279,20 @@
                         <div><b>{{ p['title'] }}</b><small>Размеры: {{ p['sizes'].replace(',', ', ') }}</small></div>
                     </div></td>
                     <td data-label="Раздел">{{ p['category'] }}</td>
-                    <td class="num" data-label="Цена">{{ money(p['price']) }}</td>
+                    <td class="num" data-label="Цена">{{ money(p['price']) }}{% if p['is_sale'] and p['old_price'] and p['old_price'] > p['price'] %}<small style="display:block;color:var(--muted);text-decoration:line-through;">{{ money(p['old_price']) }}</small>{% endif %}</td>
                     <td class="num" data-label="Остаток">
                         {% if p['total'] == 0 %}<span class="tag out">Нет в наличии</span>
                         {% elif p['low_sizes'] %}<span class="tag low">Мало: {{ p['total'] }} шт.</span>
                         {% else %}{{ p['total'] }} шт.{% endif %}
                     </td>
+                    <td data-label="Метки"><div class="actions" style="justify-content:flex-start;">
+                        <form method="POST" action="{{ url_for('admin_product_flag', product_id=p['id'], kind='new') }}">
+                            <button type="submit" class="btn sm ghost {% if p['is_new'] %}flag-on{% endif %}" title="Показывать в «Новинках»">Новинка{% if p['is_new'] %} ✓{% endif %}</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin_product_flag', product_id=p['id'], kind='sale') }}">
+                            <button type="submit" class="btn sm ghost {% if p['is_sale'] %}flag-on{% endif %}" title="Показывать в «Скидках»">Скидка{% if p['is_sale'] %} ✓{% endif %}</button>
+                        </form>
+                    </div></td>
                     <td class="cell-actions"><div class="actions">
                         <a class="btn sm ghost" href="{{ url_for('product', product_id=p['id']) }}" target="_blank" rel="noopener">Открыть</a>
                         <a class="btn sm" href="{{ url_for('admin_product_edit', product_id=p['id']) }}">Изменить</a>
@@ -337,6 +349,14 @@
                             <datalist id="cats">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist></div>
                         <div class="field"><label for="price">Цена, ₸</label>
                             <input id="price" name="price" type="number" min="0" step="1" inputmode="numeric" required value="{{ product['price'] if product else '' }}"></div>
+                    </div>
+
+                    <div class="row2">
+                        <div class="field"><label for="old_price">Старая цена, ₸ (для скидки)</label>
+                            <input id="old_price" name="old_price" type="number" min="0" step="1" inputmode="numeric" placeholder="необязательно" value="{{ product['old_price'] if product and product['old_price'] else '' }}"></div>
+                        <div class="field"><label>Метки на сайте</label>
+                            <label class="check"><input type="checkbox" name="is_new" value="1" {% if product and product['is_new'] %}checked{% endif %}> Новинка</label>
+                            <label class="check"><input type="checkbox" name="is_sale" value="1" {% if product and product['is_sale'] %}checked{% endif %}> Скидка</label></div>
                     </div>
 
                     <div class="field"><label for="sizes">Размеры через запятую</label>
