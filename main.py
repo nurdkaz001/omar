@@ -458,7 +458,7 @@ def admin_page(section, **kwargs):
 
 def to_int(value, default=0, minimum=0):
     try:
-        return max(minimum, int(str(value).strip()))
+        return max(minimum, int(str(value).replace(' ', '').replace('\xa0', '').strip()))
     except (ValueError, TypeError):
         return default
 
