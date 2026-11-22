@@ -116,11 +116,13 @@ def index():
         ORDER BY MIN(id)
     ''')
     categories = cur.fetchall()
-    cur.execute('SELECT * FROM products ORDER BY id DESC LIMIT 8')
+    cur.execute('SELECT * FROM products WHERE is_new = TRUE ORDER BY id DESC LIMIT 8')
     new_products = cur.fetchall()
+    cur.execute('SELECT * FROM products WHERE is_sale = TRUE ORDER BY id DESC LIMIT 8')
+    sale_products = cur.fetchall()
     cur.close()
     conn.close()
-    return render_page('home', categories=categories, new_products=new_products)
+    return render_page('home', categories=categories, new_products=new_products, sale_products=sale_products)
 
 
 # ---------- Каталог: разделы, поиск, сортировка ----------
@@ -129,6 +131,9 @@ def catalog():
     category = request.args.get('category', 'Все')
     sort = request.args.get('sort', 'new')
     q = request.args.get('q', '').strip()
+    flag = request.args.get('flag', '')
+    if flag not in ('new', 'sale'):
+        flag = ''
 
     order_by = {
         'new': 'id DESC',
@@ -140,6 +145,10 @@ def catalog():
     if category != 'Все':
         where.append('category = %s')
         params.append(category)
+    if flag == 'new':
+        where.append('is_new = TRUE')
+    elif flag == 'sale':
+        where.append('is_sale = TRUE')
     if q:
         where.append('title ILIKE %s')
         params.append(f'%{q}%')
@@ -156,7 +165,7 @@ def catalog():
     cur.close()
     conn.close()
 
-    return render_page('catalog', products=products, active_category=category, sort=sort, q=q)
+    return render_page('catalog', products=products, active_category=category, sort=sort, q=q, flag=flag)
 
 
 # ---------- Страница товара ----------
@@ -596,6 +605,9 @@ def ensure_video_column():
         conn = get_db()
         cur = conn.cursor()
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS video_url TEXT DEFAULT ''")
+        cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new BOOLEAN NOT NULL DEFAULT FALSE")
+        cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_sale BOOLEAN NOT NULL DEFAULT FALSE")
+        cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS old_price INTEGER NOT NULL DEFAULT 0")
         conn.commit()
         cur.close()
         conn.close()
@@ -675,7 +687,17 @@ def read_product_form():
         'image_url': f.get('image_url', '').strip(),
         'gallery': '',
         'video_url': f.get('video_url', '').strip(),
+        'is_new': bool(f.get('is_new')),
+        'is_sale': bool(f.get('is_sale')),
+        'old_price': to_int(f.get('old_price')),
     }
+
+
+def check_sale(d):
+    """Если товар со скидкой и указана старая цена, она должна быть выше текущей."""
+    if d['is_sale'] and d['old_price'] and d['old_price'] <= d['price']:
+        return 'Старая цена должна быть больше текущей (или оставьте поле пустым).'
+    return None
 
 
 def collect_photos(d):
@@ -768,6 +790,8 @@ def admin_product_new():
         sizes = split_list(d['sizes'])
         if not d['title'] or not d['category'] or not sizes:
             return form_error('Заполните название, раздел и размеры.', d)
+        if check_sale(d):
+            return form_error(check_sale(d), d)
         try:
             collect_photos(d)
         except (ValueError, RuntimeError, requests.RequestException) as e:
@@ -776,8 +800,9 @@ def admin_product_new():
         conn = get_db()
         cur = conn.cursor()
         cur.execute(
-            'INSERT INTO products (title, category, price, sizes, description, image_url, gallery, video_url) '
-            'VALUES (%(title)s, %(category)s, %(price)s, %(sizes)s, %(description)s, %(image_url)s, %(gallery)s, %(video_url)s) '
+            'INSERT INTO products (title, category, price, sizes, description, image_url, gallery, video_url, is_new, is_sale, old_price) '
+            'VALUES (%(title)s, %(category)s, %(price)s, %(sizes)s, %(description)s, %(image_url)s, %(gallery)s, %(video_url)s, '
+            '%(is_new)s, %(is_sale)s, %(old_price)s) '
             'RETURNING id',
             d
         )
@@ -810,6 +835,10 @@ def admin_product_edit(product_id):
             cur.close()
             conn.close()
             return form_error('Заполните название, раздел и размеры.', d, product_id)
+        if check_sale(d):
+            cur.close()
+            conn.close()
+            return form_error(check_sale(d), d, product_id)
         try:
             collect_photos(d)
         except (ValueError, RuntimeError, requests.RequestException) as e:
@@ -820,7 +849,8 @@ def admin_product_edit(product_id):
         d['id'] = product_id
         cur.execute(
             'UPDATE products SET title=%(title)s, category=%(category)s, price=%(price)s, sizes=%(sizes)s, '
-            'description=%(description)s, image_url=%(image_url)s, gallery=%(gallery)s, video_url=%(video_url)s WHERE id=%(id)s',
+            'description=%(description)s, image_url=%(image_url)s, gallery=%(gallery)s, video_url=%(video_url)s, '
+            'is_new=%(is_new)s, is_sale=%(is_sale)s, old_price=%(old_price)s WHERE id=%(id)s',
             d
         )
         save_stock(cur, product_id, sizes)
@@ -833,6 +863,26 @@ def admin_product_edit(product_id):
     cur.close()
     conn.close()
     return admin_page('form', **product_form_context(item, is_edit=True))
+
+
+@app.route('/admin/products/<int:product_id>/flag/<kind>', methods=['POST'])
+@admin_required
+def admin_product_flag(product_id, kind):
+    column = {'new': 'is_new', 'sale': 'is_sale'}.get(kind)
+    if not column:
+        abort(400)
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(f'UPDATE products SET {column} = NOT {column} WHERE id = %s RETURNING {column} AS val, title', (product_id,))
+    row = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    if not row:
+        abort(404)
+    label = 'Новинка' if kind == 'new' else 'Скидка'
+    flash(f'«{row["title"]}»: {label} {"включена" if row["val"] else "выключена"}.', 'success')
+    return redirect(request.referrer or url_for('admin_products'))
 
 
 @app.route('/admin/products/<int:product_id>/delete', methods=['POST'])
