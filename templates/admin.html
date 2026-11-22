@@ -185,6 +185,9 @@
         .alert.error { border-left-color: #a3372c; color: #a3372c; }
         .order-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         @media (max-width: 720px) { .order-actions { width: 100%; } .order-actions .status-form { flex: 1; } }
+        .vid-preview { display: block; width: 100%; max-width: 200px; aspect-ratio: 9 / 16; object-fit: cover; border-radius: var(--r-md); background: var(--surface); margin-bottom: 8px; }
+        label.check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--ink); margin: 0 0 12px; }
+        label.check input { width: auto; margin: 0; }
     </style>
 </head>
 <body>
@@ -376,6 +379,18 @@
                             <summary>Или вставить ссылки на фото</summary>
                             <input id="gallery_urls" name="gallery_urls" placeholder="Ссылки через запятую">
                         </details>
+                    </div>
+
+                    <div class="field">
+                        <label>Видео товара</label>
+                        <input type="hidden" name="video_url" value="{{ product['video_url'] if product and product['video_url'] else '' }}">
+                        {% if product and product['video_url'] %}
+                        <video class="vid-preview" src="{{ product['video_url'] }}" muted loop playsinline controls preload="metadata"></video>
+                        <label class="check"><input type="checkbox" name="video_remove" value="1"> Убрать видео</label>
+                        {% endif %}
+                        <input id="video_file" class="sr-file" name="video_file" type="file" accept="video/mp4,video/webm" onchange="var f=this.files[0];document.getElementById('vidHint').textContent=f?('Выбрано: '+f.name+' ('+(f.size/1048576).toFixed(1)+' МБ)'+(f.size>25*1048576?'. Файл большой, лучше сжать.':'')):'';">
+                        <label class="btn ghost sm" for="video_file">{% if product and product['video_url'] %}Заменить видео{% else %}Добавить видео{% endif %}</label>
+                        <p class="hint" id="vidHint">MP4 или WebM, до 25 МБ, лучше вертикальное, 5–15 секунд. На сайте видео показывается вместо главного фото.</p>
                     </div>
                 </div>
 
