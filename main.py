@@ -1251,7 +1251,8 @@ def on_unexpected_error(e):
         return e
     tb = traceback.format_exc()
     print(f'ОШИБКА на {request.method} {request.path}:\n{tb}')
-    if os.environ.get('DEBUG_ERRORS') == '1':
+    # ВРЕМЕННО: ошибка показывается на странице, пока не поставите DEBUG_ERRORS=0
+    if os.environ.get('DEBUG_ERRORS') != '0':
         body = f'<h2>Ошибка на {html.escape(request.method)} {html.escape(request.path)}</h2><pre style="white-space:pre-wrap;">{html.escape(tb)}</pre>'
         return body, 500
     return 'Internal Server Error', 500
