@@ -629,6 +629,18 @@
         .site-footer a { text-decoration: none; }
         .site-footer a:hover { color: var(--ink); text-decoration: underline; }
         .site-footer h4 { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; }
+
+        /* ===== Появление слова OMAR ===== */
+        .wordmark .word { display: block; overflow: hidden; padding: 0.1em 0.04em; margin: -0.1em 0; animation: track 2s cubic-bezier(0.16, 0.84, 0.2, 1) 0.1s backwards; }
+        .wordmark .ch { display: inline-block; animation: chIn 1.2s cubic-bezier(0.16, 0.84, 0.2, 1) calc(0.2s + var(--i) * 0.12s) backwards; }
+        @keyframes chIn { from { transform: translateY(112%) rotate(6deg); opacity: 0; filter: blur(14px); } 55% { opacity: 1; } }
+        @keyframes track { from { letter-spacing: 0.12em; } }
+        .hero-sub { animation: subIn 1.5s cubic-bezier(0.16, 0.84, 0.2, 1) 1.1s backwards; }
+        @keyframes subIn { from { opacity: 0; letter-spacing: 1.2em; transform: translateY(14px); } }
+        .hero-line { display: block; height: 1px; width: 56px; margin: clamp(22px, 3vw, 34px) auto 0; background: var(--ink); transform-origin: center; animation: lineIn 1s cubic-bezier(0.16, 0.84, 0.2, 1) 1.6s backwards; }
+        @keyframes lineIn { from { transform: scaleX(0); } }
+        .hero-line + .hero-tag { margin-top: clamp(20px, 3vw, 30px); }
+        @media (prefers-reduced-motion: reduce) { .wordmark .word, .wordmark .ch, .hero-sub, .hero-line { animation: none; } }
     </style>
 </head>
 <body>
@@ -688,11 +700,12 @@
         <!-- ПЕРВЫЙ ЭКРАН -->
         <section class="hero">
             <h1 class="wordmark" aria-label="OMAR ASTANA">
-                <span class="rise" style="--d: 0">OMAR</span>
-                <span class="hero-sub rise" style="--d: 2">ASTANA</span>
+                <span class="word" aria-hidden="true"><span class="ch" style="--i: 0">O</span><span class="ch" style="--i: 1">M</span><span class="ch" style="--i: 2">A</span><span class="ch" style="--i: 3">R</span></span>
+                <span class="hero-sub" aria-hidden="true">ASTANA</span>
             </h1>
-            <p class="hero-tag rise" style="--d: 4">Мужская одежда и обувь на каждый день. Четыре магазина в Астане, наличие видно по каждому.</p>
-            <div class="hero-actions rise" style="--d: 5">
+            <span class="hero-line" aria-hidden="true"></span>
+            <p class="hero-tag rise" style="--d: 12">Мужская одежда и обувь на каждый день. Четыре магазина в Астане, наличие видно по каждому.</p>
+            <div class="hero-actions rise" style="--d: 14">
                 <a href="{{ url_for('catalog') }}" class="btn btn-light">Смотреть каталог</a>
                 <a href="#stores" class="btn btn-ghost">Наши магазины</a>
             </div>
