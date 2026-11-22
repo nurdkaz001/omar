@@ -203,6 +203,7 @@
         <a href="{{ url_for('admin_products') }}" class="{% if section == 'products' %}on{% endif %}">Товары</a>
         <a href="{{ url_for('admin_low_stock') }}" class="{% if section == 'low' %}on{% endif %}">Заканчивается{% if low_count %}<span class="pill">{{ low_count }}</span>{% endif %}</a>
         <a href="{{ url_for('admin_telegram_test') }}">Проверить Telegram</a>
+        <a href="{{ url_for('admin_telegram_webhook') }}">Подключить подтверждение</a>
     </nav>
     <a class="back" href="{{ url_for('index') }}">← На сайт</a>
 </header>
