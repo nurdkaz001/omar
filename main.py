@@ -327,10 +327,10 @@ def register():
             return redirect(url_for('register'))
 
         # Аккаунт пока не создаём: он появится только после подтверждения в Telegram
-        cur.execute("DELETE FROM pending_registrations WHERE created_at < NOW() - INTERVAL '1 day'")
+        cur.execute("DELETE FROM telegram_signups WHERE created_at < NOW() - INTERVAL '1 day'")
         token = secrets.token_urlsafe(16)
         cur.execute(
-            'INSERT INTO pending_registrations (token, name, phone, password_hash) VALUES (%s, %s, %s, %s)',
+            'INSERT INTO telegram_signups (token, name, phone, password_hash) VALUES (%s, %s, %s, %s)',
             (token, name, phone, generate_password_hash(password))
         )
         conn.commit()
@@ -343,7 +343,7 @@ def register():
 
 def _get_pending(cur, token):
     cur.execute(
-        "SELECT * FROM pending_registrations WHERE token = %s AND used = FALSE "
+        "SELECT * FROM telegram_signups WHERE token = %s AND used = FALSE "
         "AND created_at > NOW() - make_interval(mins => %s)",
         (token, REG_TTL_MINUTES)
     )
@@ -387,7 +387,7 @@ def register_finish(token):
         conn.close()
         flash('Подтверждение не завершено. Попробуйте ещё раз.', 'error')
         return redirect(url_for('register'))
-    cur.execute('UPDATE pending_registrations SET used = TRUE WHERE token = %s', (token,))
+    cur.execute('UPDATE telegram_signups SET used = TRUE WHERE token = %s', (token,))
     conn.commit()
     cur.close()
     conn.close()
@@ -440,7 +440,7 @@ def _handle_update(update):
             if cur.fetchone():
                 reply('Этот Telegram уже привязан к другому аккаунту.')
                 return
-            cur.execute('UPDATE pending_registrations SET tg_id = %s WHERE token = %s', (tg_id, token))
+            cur.execute('UPDATE telegram_signups SET tg_id = %s WHERE token = %s', (tg_id, token))
             conn.commit()
             reply('Почти готово. Нажмите кнопку ниже, чтобы подтвердить свой номер телефона.',
                   {'keyboard': [[{'text': '📱 Подтвердить номер', 'request_contact': True}]],
@@ -453,7 +453,7 @@ def _handle_update(update):
                 reply('Нужно отправить именно свой номер кнопкой «Подтвердить номер».')
                 return
             cur.execute(
-                "SELECT * FROM pending_registrations WHERE tg_id = %s AND used = FALSE AND user_id IS NULL "
+                "SELECT * FROM telegram_signups WHERE tg_id = %s AND used = FALSE AND user_id IS NULL "
                 "AND created_at > NOW() - make_interval(mins => %s) ORDER BY created_at DESC LIMIT 1",
                 (tg_id, REG_TTL_MINUTES)
             )
@@ -482,7 +482,7 @@ def _handle_update(update):
                  datetime.now().strftime('%d.%m.%Y %H:%M'), tg_id)
             )
             new_id = cur.fetchone()['id']
-            cur.execute('UPDATE pending_registrations SET user_id = %s WHERE token = %s',
+            cur.execute('UPDATE telegram_signups SET user_id = %s WHERE token = %s',
                         (new_id, pending['token']))
             conn.commit()
             reply('✅ Номер подтверждён! Вернитесь на сайт: регистрация завершится автоматически.',
@@ -901,7 +901,7 @@ def ensure_registration_schema():
         cur = conn.cursor()
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS tg_id BIGINT")
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS pending_registrations (
+            CREATE TABLE IF NOT EXISTS telegram_signups (
                 token TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
                 phone TEXT NOT NULL,
