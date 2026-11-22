@@ -1,10 +1,13 @@
 import os
+import re
 import uuid
 import html
+import hashlib
+import secrets
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 import requests
@@ -27,6 +30,10 @@ supabase_key = os.environ.get('SUPABASE_KEY', '')
 # Telegram-бот для уведомлений о заказах (необязательно)
 telegram_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 telegram_chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+telegram_bot_username = os.environ.get('TELEGRAM_BOT_USERNAME', '').lstrip('@')
+# Секрет, по которому сайт отличает настоящие запросы Telegram от чужих
+WEBHOOK_SECRET = hashlib.sha256((secret_key + ':tg-webhook').encode()).hexdigest()[:48]
+REG_TTL_MINUTES = 30  # сколько живёт ссылка подтверждения
 
 app = Flask(__name__)
 app.secret_key = secret_key
@@ -87,7 +94,46 @@ def send_telegram(text):
         400: 'Неверный chat_id или бот не может писать в этот чат. Нажмите Start в боте и проверьте chat_id.',
         403: 'Бот заблокирован или вы не нажали Start в боте.',
     }
-    return False, f'Telegram ответил: {desc}. ' + hints.get(resp.status_code, '')
+    hint = hints.get(resp.status_code, '')
+    if 'bot can\'t send messages to the bot' in desc:
+        hint = ('В TELEGRAM_CHAT_ID указан id бота (цифры из начала токена), а нужен ваш личный id. '
+                'Узнайте его через @userinfobot и подставьте в TELEGRAM_CHAT_ID.')
+    elif 'chat not found' in desc:
+        hint = 'Чат не найден: проверьте chat_id и нажмите Start в своём боте.'
+    return False, f'Telegram ответил: {desc}. ' + hint
+
+
+def tg_call(method, payload):
+    """Вызов метода Telegram Bot API. Возвращает (успех, данные или текст ошибки)."""
+    if not telegram_token:
+        return False, 'Не задана переменная TELEGRAM_BOT_TOKEN.'
+    try:
+        resp = requests.post(
+            f'https://api.telegram.org/bot{telegram_token.strip()}/{method}',
+            json=payload, timeout=8
+        )
+        data = resp.json()
+    except (requests.RequestException, ValueError) as e:
+        return False, str(e)
+    if data.get('ok'):
+        return True, data.get('result')
+    return False, data.get('description', 'неизвестная ошибка')
+
+
+_bot_username_cache = {'v': telegram_bot_username}
+
+
+def bot_username():
+    if not _bot_username_cache['v']:
+        ok, res = tg_call('getMe', {})
+        if ok and res.get('username'):
+            _bot_username_cache['v'] = res['username']
+    return _bot_username_cache['v']
+
+
+def phone_digits(phone):
+    """Последние 10 цифр номера: +7 707 123 45 67 и 8 707 123 45 67 считаются одним номером."""
+    return re.sub(r'\D', '', phone or '')[-10:]
 
 
 def split_list(value):
@@ -243,6 +289,9 @@ def product(product_id):
     return render_page('product', product=item, sizes=sizes, stock=stock, images=images, similar=similar)
 
 
+PHONE_TAKEN_SQL = "SELECT id FROM users WHERE right(regexp_replace(phone, '\\D', '', 'g'), 10) = %s"
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -250,33 +299,189 @@ def register():
         phone = request.form['phone'].strip()
         password = request.form['password']
 
+        if not telegram_token or not bot_username():
+            flash('Регистрация временно недоступна. Попробуйте позже.', 'error')
+            return redirect(url_for('register'))
+        if len(phone_digits(phone)) < 10:
+            flash('Введите корректный номер телефона.', 'error')
+            return redirect(url_for('register'))
+        if len(password) < 6:
+            flash('Пароль должен быть не короче 6 символов.', 'error')
+            return redirect(url_for('register'))
+
         conn = get_db()
         cur = conn.cursor()
-        cur.execute('SELECT id FROM users WHERE phone = %s', (phone,))
+        cur.execute(PHONE_TAKEN_SQL, (phone_digits(phone),))
         if cur.fetchone():
             cur.close()
             conn.close()
             flash('Пользователь с таким номером телефона уже зарегистрирован.', 'error')
             return redirect(url_for('register'))
 
+        # Аккаунт пока не создаём: он появится только после подтверждения в Telegram
+        cur.execute("DELETE FROM pending_registrations WHERE created_at < NOW() - INTERVAL '1 day'")
+        token = secrets.token_urlsafe(16)
         cur.execute(
-            '''
-            INSERT INTO users (name, phone, password_hash, created_at)
-            VALUES (%s, %s, %s, %s)
-            RETURNING id
-            ''',
-            (name, phone, generate_password_hash(password), datetime.now().strftime('%d.%m.%Y %H:%M'))
+            'INSERT INTO pending_registrations (token, name, phone, password_hash) VALUES (%s, %s, %s, %s)',
+            (token, name, phone, generate_password_hash(password))
         )
-        new_user_id = cur.fetchone()['id']
         conn.commit()
         cur.close()
         conn.close()
-
-        session['user_id'] = new_user_id
-        flash("Добро пожаловать в MEN'S REPUBLIC!", 'success')
-        return redirect(url_for('profile'))
+        return redirect(url_for('register_verify', token=token))
 
     return render_page('register')
+
+
+def _get_pending(cur, token):
+    cur.execute(
+        "SELECT * FROM pending_registrations WHERE token = %s AND used = FALSE "
+        "AND created_at > NOW() - make_interval(mins => %s)",
+        (token, REG_TTL_MINUTES)
+    )
+    return cur.fetchone()
+
+
+@app.route('/register/verify/<token>')
+def register_verify(token):
+    conn = get_db()
+    cur = conn.cursor()
+    pending = _get_pending(cur, token)
+    cur.close()
+    conn.close()
+    if not pending:
+        flash('Ссылка подтверждения устарела. Заполните форму ещё раз.', 'error')
+        return redirect(url_for('register'))
+    bot = bot_username()
+    return render_page('verify', token=token, bot_name=bot,
+                       bot_link=f'https://t.me/{bot}?start={token}', ttl=REG_TTL_MINUTES)
+
+
+@app.route('/register/status/<token>')
+def register_status(token):
+    conn = get_db()
+    cur = conn.cursor()
+    pending = _get_pending(cur, token)
+    cur.close()
+    conn.close()
+    if not pending:
+        return jsonify(status='expired')
+    return jsonify(status='confirmed' if pending['user_id'] else 'waiting')
+
+
+@app.route('/register/finish/<token>')
+def register_finish(token):
+    conn = get_db()
+    cur = conn.cursor()
+    pending = _get_pending(cur, token)
+    if not pending or not pending['user_id']:
+        cur.close()
+        conn.close()
+        flash('Подтверждение не завершено. Попробуйте ещё раз.', 'error')
+        return redirect(url_for('register'))
+    cur.execute('UPDATE pending_registrations SET used = TRUE WHERE token = %s', (token,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    session['user_id'] = pending['user_id']
+    flash("Телефон подтверждён. Добро пожаловать в MEN'S REPUBLIC!", 'success')
+    return redirect(url_for('profile'))
+
+
+@app.route('/telegram/webhook', methods=['POST'])
+def telegram_webhook():
+    """Сюда Telegram присылает сообщения пользователей боту."""
+    if request.headers.get('X-Telegram-Bot-Api-Secret-Token') != WEBHOOK_SECRET:
+        return '', 403
+    try:
+        _handle_update(request.get_json(silent=True) or {})
+    except Exception as e:
+        print('Ошибка обработки Telegram-сообщения:', e)
+    return 'ok'
+
+
+def _handle_update(update):
+    msg = update.get('message') or {}
+    chat = msg.get('chat') or {}
+    sender = msg.get('from') or {}
+    if chat.get('type') != 'private' or not sender.get('id'):
+        return
+    chat_id = chat['id']
+    tg_id = sender['id']
+    text = (msg.get('text') or '').strip()
+    contact = msg.get('contact')
+
+    def reply(t, markup=None):
+        payload = {'chat_id': chat_id, 'text': t}
+        if markup:
+            payload['reply_markup'] = markup
+        tg_call('sendMessage', payload)
+
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        # 1) Пользователь нажал «Запустить» по ссылке с сайта
+        if text.startswith('/start'):
+            parts = text.split(maxsplit=1)
+            token = parts[1].strip() if len(parts) > 1 else ''
+            pending = _get_pending(cur, token) if token else None
+            if not pending:
+                reply('Чтобы зарегистрироваться, заполните форму на сайте MEN\'S REPUBLIC и нажмите кнопку подтверждения.')
+                return
+            cur.execute('SELECT id FROM users WHERE tg_id = %s', (tg_id,))
+            if cur.fetchone():
+                reply('Этот Telegram уже привязан к другому аккаунту.')
+                return
+            cur.execute('UPDATE pending_registrations SET tg_id = %s WHERE token = %s', (tg_id, token))
+            conn.commit()
+            reply('Почти готово. Нажмите кнопку ниже, чтобы подтвердить свой номер телефона.',
+                  {'keyboard': [[{'text': '📱 Подтвердить номер', 'request_contact': True}]],
+                   'resize_keyboard': True, 'one_time_keyboard': True})
+            return
+
+        # 2) Пользователь поделился номером
+        if contact:
+            if contact.get('user_id') != tg_id:
+                reply('Нужно отправить именно свой номер кнопкой «Подтвердить номер».')
+                return
+            cur.execute(
+                "SELECT * FROM pending_registrations WHERE tg_id = %s AND used = FALSE AND user_id IS NULL "
+                "AND created_at > NOW() - make_interval(mins => %s) ORDER BY created_at DESC LIMIT 1",
+                (tg_id, REG_TTL_MINUTES)
+            )
+            pending = cur.fetchone()
+            if not pending:
+                reply('Заявка не найдена или устарела. Начните регистрацию на сайте заново.',
+                      {'remove_keyboard': True})
+                return
+            if phone_digits(contact.get('phone_number')) != phone_digits(pending['phone']):
+                reply('Номер в Telegram не совпадает с номером, который вы указали на сайте. '
+                      'Укажите на сайте номер, привязанный к этому Telegram.', {'remove_keyboard': True})
+                return
+            cur.execute(PHONE_TAKEN_SQL, (phone_digits(pending['phone']),))
+            if cur.fetchone():
+                reply('Пользователь с таким номером уже зарегистрирован.', {'remove_keyboard': True})
+                return
+            cur.execute('SELECT id FROM users WHERE tg_id = %s', (tg_id,))
+            if cur.fetchone():
+                reply('Этот Telegram уже привязан к другому аккаунту.', {'remove_keyboard': True})
+                return
+
+            cur.execute(
+                'INSERT INTO users (name, phone, password_hash, created_at, tg_id) '
+                'VALUES (%s, %s, %s, %s, %s) RETURNING id',
+                (pending['name'], pending['phone'], pending['password_hash'],
+                 datetime.now().strftime('%d.%m.%Y %H:%M'), tg_id)
+            )
+            new_id = cur.fetchone()['id']
+            cur.execute('UPDATE pending_registrations SET user_id = %s WHERE token = %s',
+                        (new_id, pending['token']))
+            conn.commit()
+            reply('✅ Номер подтверждён! Вернитесь на сайт: регистрация завершится автоматически.',
+                  {'remove_keyboard': True})
+    finally:
+        cur.close()
+        conn.close()
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -671,6 +876,19 @@ def ensure_video_column():
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_sale BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS old_price INTEGER NOT NULL DEFAULT 0")
+        cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS tg_id BIGINT")
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS pending_registrations (
+                token TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                password_hash TEXT NOT NULL,
+                tg_id BIGINT,
+                user_id INTEGER,
+                used BOOLEAN NOT NULL DEFAULT FALSE,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            )
+        """)
         conn.commit()
         cur.close()
         conn.close()
@@ -926,6 +1144,22 @@ def admin_product_edit(product_id):
     cur.close()
     conn.close()
     return admin_page('form', **product_form_context(item, is_edit=True))
+
+
+@app.route('/admin/telegram-webhook')
+@admin_required
+def admin_telegram_webhook():
+    url = url_for('telegram_webhook', _external=True).replace('http://', 'https://', 1)
+    ok, res = tg_call('setWebhook', {
+        'url': url,
+        'secret_token': WEBHOOK_SECRET,
+        'allowed_updates': ['message'],
+    })
+    if ok:
+        flash(f'Подтверждение через Telegram подключено. Адрес: {url}', 'success')
+    else:
+        flash(f'Не удалось подключить: {res}. Адрес был: {url}', 'error')
+    return redirect(url_for('admin_products'))
 
 
 @app.route('/admin/telegram-test')
