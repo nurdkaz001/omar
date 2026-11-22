@@ -641,6 +641,11 @@
         @keyframes lineIn { from { transform: scaleX(0); } }
         .hero-line + .hero-tag { margin-top: clamp(20px, 3vw, 30px); }
         @media (prefers-reduced-motion: reduce) { .wordmark .word, .wordmark .ch, .hero-sub, .hero-line { animation: none; } }
+
+        /* Видео товаров */
+        .reels { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-left: var(--pad); margin: 0 calc(var(--pad) * -1); padding: 0 var(--pad) 14px; scrollbar-width: thin; }
+        .reel { flex: 0 0 min(340px, 86vw); scroll-snap-align: start; }
+        .reel .instagram-media { min-width: 0 !important; max-width: 100% !important; margin: 0 !important; border: 1px solid var(--line) !important; border-radius: var(--r-lg) !important; box-shadow: none !important; overflow: hidden; }
     </style>
 </head>
 <body>
@@ -740,6 +745,26 @@
             <div class="grid">
                 {% for p in new_products %}{{ product_card(p) }}{% endfor %}
             </div>
+        </section>
+
+        <!-- ВИДЕО ТОВАРОВ (Instagram) -->
+        {# Чтобы добавить рилс, впишите его код из ссылки instagram.com/reel/КОД/ #}
+        {% set reels = ['Df7kIr8KX0z', 'Df7jXOrKKQa', 'Df7Gu6tKm3_', 'Df2NBvVNgOg'] %}
+        <section class="section" id="instagram">
+            <div class="section-head">
+                <h2>Товары в видео</h2>
+                <a class="link-more" href="https://www.instagram.com/omar.astana/" target="_blank" rel="noopener">@omar.astana</a>
+            </div>
+            <div class="reels">
+                {% for code in reels %}
+                <div class="reel">
+                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/{{ code }}/" data-instgrm-version="14" style="background:#fff; border:0; margin:1px; max-width:540px; min-width:326px; padding:0; width:calc(100% - 2px);">
+                        <a href="https://www.instagram.com/reel/{{ code }}/" target="_blank" rel="noopener">Смотреть в Instagram</a>
+                    </blockquote>
+                </div>
+                {% endfor %}
+            </div>
+            <script async src="https://www.instagram.com/embed.js"></script>
         </section>
 
         <!-- ПРЕИМУЩЕСТВА -->
