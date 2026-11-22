@@ -52,24 +52,42 @@ def init_db():
 
 
 def send_telegram(text):
-    """Отправляет сообщение в Telegram. Ошибки не ломают сайт: просто пишутся в лог."""
-    if not telegram_token or not telegram_chat_id:
-        return
+    """Отправляет сообщение в Telegram. Возвращает (успех, пояснение).
+    Ошибки не ломают сайт: пишутся в лог и в пояснение."""
+    if not telegram_token:
+        return False, 'Не задана переменная TELEGRAM_BOT_TOKEN.'
+    if not telegram_chat_id:
+        return False, 'Не задана переменная TELEGRAM_CHAT_ID.'
     try:
         resp = requests.post(
-            f'https://api.telegram.org/bot{telegram_token}/sendMessage',
+            f'https://api.telegram.org/bot{telegram_token.strip()}/sendMessage',
             json={
-                'chat_id': telegram_chat_id,
+                'chat_id': telegram_chat_id.strip(),
                 'text': text,
                 'parse_mode': 'HTML',
                 'disable_web_page_preview': True,
             },
-            timeout=5,
+            timeout=8,
         )
-        if resp.status_code != 200:
-            print('Telegram не принял сообщение:', resp.status_code, resp.text[:200])
     except requests.RequestException as e:
         print('Не удалось отправить в Telegram:', e)
+        return False, f'Сервер не смог связаться с Telegram: {e}'
+
+    if resp.status_code == 200:
+        return True, 'Сообщение отправлено.'
+
+    try:
+        desc = resp.json().get('description', resp.text[:200])
+    except ValueError:
+        desc = resp.text[:200]
+    print('Telegram не принял сообщение:', resp.status_code, desc)
+    hints = {
+        401: 'Токен неверный. Скопируйте его из BotFather заново, целиком.',
+        404: 'Токен неверный или с лишними символами.',
+        400: 'Неверный chat_id или бот не может писать в этот чат. Нажмите Start в боте и проверьте chat_id.',
+        403: 'Бот заблокирован или вы не нажали Start в боте.',
+    }
+    return False, f'Telegram ответил: {desc}. ' + hints.get(resp.status_code, '')
 
 
 def split_list(value):
@@ -908,6 +926,14 @@ def admin_product_edit(product_id):
     cur.close()
     conn.close()
     return admin_page('form', **product_form_context(item, is_edit=True))
+
+
+@app.route('/admin/telegram-test')
+@admin_required
+def admin_telegram_test():
+    ok, info = send_telegram('✅ Проверка связи: сайт MEN\'S REPUBLIC подключён к Telegram.')
+    flash(('Telegram работает. ' if ok else 'Telegram не работает. ') + info, 'success' if ok else 'error')
+    return redirect(url_for('admin_products'))
 
 
 @app.route('/admin/products/<int:product_id>/flag/<kind>', methods=['POST'])
