@@ -424,7 +424,7 @@
         .profile-hello h1 { font-size: clamp(1.8rem, 4.5vw, 3rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.1; }
         .profile-hello p { color: var(--muted); font-size: 15px; margin-top: 6px; }
 
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: clamp(32px, 5vw, 56px); }
+        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: clamp(32px, 5vw, 56px); }
         .stat { background: var(--surface); border-radius: var(--r-md); padding: 22px 24px; }
         .stat-num { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
         .stat-label { font-size: 13px; color: var(--muted); margin-top: 6px; }
@@ -1027,7 +1027,7 @@
         {% if page == 'register' %}
             <h1 class="page-title">Регистрация</h1>
             <div class="form-wrap">
-                <p class="sub">Аккаунт нужен для покупок и бонусов MEN'S REPUBLIC.</p>
+                <p class="sub">Аккаунт нужен для покупок в MEN'S REPUBLIC.</p>
                 <form method="POST">
                     <label for="name">Ваше имя</label>
                     <input id="name" type="text" name="name" placeholder="Например, Арман" required>
@@ -1163,7 +1163,6 @@
         <!-- ЛИЧНЫЙ КАБИНЕТ -->
         {% elif page == 'profile' %}
             {% set spent = orders|sum(attribute='total_amount') %}
-            {% set cashback = (spent * 0.05)|int %}
 
             <div class="profile-hero">
                 <div class="avatar" aria-hidden="true">{{ current_user['name'][:1]|upper }}</div>
@@ -1181,10 +1180,6 @@
                 <div class="stat">
                     <div class="stat-num">{{ "{:,}".format(spent).replace(',', ' ') }} ₸</div>
                     <div class="stat-label">Покупок на сумму</div>
-                </div>
-                <div class="stat club">
-                    <div class="stat-num">{{ "{:,}".format(cashback).replace(',', ' ') }} ₸</div>
-                    <div class="stat-label">Кэшбэк 5% в клубе MEN'S REPUBLIC</div>
                 </div>
             </div>
 
