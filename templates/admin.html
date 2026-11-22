@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Админка — OMAR ASTANA</title>
+    <title>Админка — MEN'S REPUBLIC</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -193,7 +193,7 @@
 <body>
 
 <header class="top">
-    <b>OMAR · Админка</b>
+    <b>MEN'S REPUBLIC · Админка</b>
     <nav aria-label="Разделы админки">
         <a href="{{ url_for('admin_orders') }}" class="{% if section == 'orders' %}on{% endif %}">Заказы{% if new_orders %}<span class="pill">{{ new_orders }}</span>{% endif %}</a>
         <a href="{{ url_for('admin_products') }}" class="{% if section == 'products' %}on{% endif %}">Товары</a>
