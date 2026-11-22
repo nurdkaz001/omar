@@ -1,19 +1,13 @@
-import hashlib
-import hmac
 import os
-import re
-import secrets
-import time
 import uuid
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, g, has_app_context
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 import requests
 from psycopg2.extras import RealDictCursor
-from psycopg2.pool import ThreadedConnectionPool
 
 load_dotenv()
 
@@ -38,119 +32,8 @@ app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024  # общий лимит з�
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-# ---------- Подключение к базе ----------
-# Раньше на КАЖДЫЙ запрос открывалось новое соединение с Supabase (рукопожатие + SSL
-# = 200-800 мс), а на главной — даже два. Теперь соединения живут в пуле и
-# переиспользуются, а внутри одного запроса используется одно и то же соединение.
-_pool = None
-_last_used = {}
-
-
-def _get_pool():
-    global _pool
-    if _pool is None:
-        _pool = ThreadedConnectionPool(
-            1, int(os.environ.get('DB_POOL_MAX', 6)), database_url,
-            cursor_factory=RealDictCursor,
-            connect_timeout=10,
-            keepalives=1, keepalives_idle=30, keepalives_interval=10, keepalives_count=3,
-        )
-    return _pool
-
-
-def _checkout():
-    pool = _get_pool()
-    conn = pool.getconn()
-    # Если соединение простаивало, проверяем, что сервер его не закрыл
-    if conn.closed or time.time() - _last_used.get(id(conn), 0) > 30:
-        try:
-            if conn.closed:
-                raise psycopg2.OperationalError('closed')
-            cur = conn.cursor()
-            cur.execute('SELECT 1')
-            cur.close()
-            conn.rollback()
-        except Exception:
-            pool.putconn(conn, close=True)
-            conn = pool.getconn()
-    return conn
-
-
-class _RequestConn:
-    """Обёртка: код может по-прежнему вызывать conn.close() — соединение
-    вернётся в пул само, когда запрос закончится."""
-
-    def __init__(self, conn):
-        self._conn = conn
-
-    def cursor(self, *args, **kwargs):
-        return self._conn.cursor(*args, **kwargs)
-
-    def commit(self):
-        self._conn.commit()
-
-    def rollback(self):
-        self._conn.rollback()
-
-    def close(self):
-        pass
-
-
 def get_db():
-    if not has_app_context():
-        # запуск вне запроса (init_db при старте) — обычное соединение
-        return psycopg2.connect(database_url, cursor_factory=RealDictCursor)
-    if 'db_conn' not in g:
-        g.db_conn = _checkout()
-    return _RequestConn(g.db_conn)
-
-
-@app.teardown_appcontext
-def _release_db(_exc):
-    conn = g.pop('db_conn', None)
-    if conn is not None:
-        broken = bool(conn.closed)
-        _last_used[id(conn)] = time.time()
-        try:
-            _get_pool().putconn(conn, close=broken)  # незавершённая транзакция откатится
-        except Exception:
-            pass
-
-
-# ---------- Мини-кэш для данных, которые почти не меняются ----------
-_cache = {}
-
-
-def cached(key, ttl, loader):
-    hit = _cache.get(key)
-    now = time.time()
-    if hit and now - hit[0] < ttl:
-        return hit[1]
-    value = loader()
-    _cache[key] = (now, value)
-    return value
-
-
-def clear_cache():
-    _cache.clear()
-
-
-# Контакты для блока «Контакты» на главной. Меняйте здесь.
-CONTACTS = {
-    'whatsapp': '77081477426',          # только цифры, с кодом страны
-    'phone': '+7 708 147 74-26',
-    'instagram': 'omar.astana',
-    'cities': [
-        {'name': 'Кокшетау', 'instagram': 'omar.kokshetau'},
-        {'name': 'Караганда', 'instagram': 'omar.qaragandy'},
-        {'name': 'Петропавловск', 'instagram': 'omar.petropavl'},
-    ],
-}
-
-
-@app.context_processor
-def inject_contacts():
-    return {'contacts': CONTACTS}
+    return psycopg2.connect(database_url, cursor_factory=RealDictCursor)
 
 
 def init_db():
@@ -197,26 +80,15 @@ def render_page(page_name, **kwargs):
         cur.execute('SELECT * FROM orders WHERE user_id = %s ORDER BY id DESC', (uid,))
         orders = cur.fetchall()
 
+    # Общие данные для шапки, подвала и оформления заказа
+    cur.execute('SELECT * FROM stores ORDER BY id ASC')
+    stores = cur.fetchall()
+
+    cur.execute('SELECT category FROM products GROUP BY category ORDER BY MIN(id)')
+    nav_categories = [r['category'] for r in cur.fetchall()]
+
     cur.close()
     conn.close()
-
-    # Общие данные для шапки, подвала и оформления заказа (кэш на 30 секунд)
-    def load_stores():
-        c = get_db().cursor()
-        c.execute('SELECT * FROM stores ORDER BY id ASC')
-        rows = c.fetchall()
-        c.close()
-        return rows
-
-    def load_categories():
-        c = get_db().cursor()
-        c.execute('SELECT category FROM products GROUP BY category ORDER BY MIN(id)')
-        rows = [r['category'] for r in c.fetchall()]
-        c.close()
-        return rows
-
-    stores = cached('stores', 30, load_stores)
-    nav_categories = cached('nav_categories', 30, load_categories)
 
     return render_template(
         'index.html',
@@ -316,6 +188,42 @@ def product(product_id):
     sizes = split_list(item['sizes'])
 
     return render_page('product', product=item, sizes=sizes, stock=stock, images=images, similar=similar)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        name = request.form['name'].strip()
+        phone = request.form['phone'].strip()
+        password = request.form['password']
+
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute('SELECT id FROM users WHERE phone = %s', (phone,))
+        if cur.fetchone():
+            cur.close()
+            conn.close()
+            flash('Пользователь с таким номером телефона уже зарегистрирован.', 'error')
+            return redirect(url_for('register'))
+
+        cur.execute(
+            '''
+            INSERT INTO users (name, phone, password_hash, created_at)
+            VALUES (%s, %s, %s, %s)
+            RETURNING id
+            ''',
+            (name, phone, generate_password_hash(password), datetime.now().strftime('%d.%m.%Y %H:%M'))
+        )
+        new_user_id = cur.fetchone()['id']
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        session['user_id'] = new_user_id
+        flash('Добро пожаловать в OMAR ASTANA!', 'success')
+        return redirect(url_for('profile'))
+
+    return render_page('register')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -611,6 +519,19 @@ def admin_order_status(order_id):
     return redirect(request.referrer or url_for('admin_orders'))
 
 
+@app.route('/admin/orders/<int:order_id>/delete', methods=['POST'])
+@admin_required
+def admin_order_delete(order_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('DELETE FROM orders WHERE id = %s', (order_id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+    flash(f'Заказ №{order_id} удалён.', 'info')
+    return redirect(request.referrer or url_for('admin_orders'))
+
+
 # ---------- Товары ----------
 @app.route('/admin/products')
 @admin_required
@@ -823,7 +744,6 @@ def admin_product_new():
         conn.commit()
         cur.close()
         conn.close()
-        clear_cache()
         flash('Товар добавлен.', 'success')
         return redirect(url_for('admin_products'))
     return admin_page('form', **product_form_context())
@@ -865,7 +785,6 @@ def admin_product_edit(product_id):
         conn.commit()
         cur.close()
         conn.close()
-        clear_cache()
         flash('Изменения сохранены.', 'success')
         return redirect(url_for('admin_products'))
 
@@ -883,310 +802,8 @@ def admin_product_delete(product_id):
     conn.commit()
     cur.close()
     conn.close()
-    clear_cache()
     flash('Товар удалён.', 'info')
     return redirect(url_for('admin_products'))
-
-
-# =====================================================================
-#        РЕГИСТРАЦИЯ С ПОДТВЕРЖДЕНИЕМ НОМЕРА ЧЕРЕЗ TELEGRAM-БОТА
-# =====================================================================
-# Как это работает:
-#  1. Человек заполняет имя, номер и пароль -> создаётся «ожидающая регистрация».
-#  2. Он открывает бота по кнопке, жмёт «Начать» и делится своим контактом.
-#  3. Бот сверяет номер Telegram-аккаунта с номером, который человек ввёл на сайте.
-#     Если совпало, бот присылает 6-значный код.
-#  4. Человек вводит код на сайте -> аккаунт создаётся с тем паролем, что он придумал.
-#  Дальше вход обычный: номер + пароль, без кода.
-TG_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-TG_BOT_USERNAME = os.environ.get('TELEGRAM_BOT_USERNAME', '').lstrip('@')
-TG_WEBHOOK_SECRET = os.environ.get('TELEGRAM_WEBHOOK_SECRET', '')
-REG_TTL_MIN = 10        # сколько минут живёт регистрация и код
-CODE_MAX_ATTEMPTS = 5   # неверных попыток ввода кода
-
-
-def init_registration_tables():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS pending_registrations (
-            token TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            phone TEXT NOT NULL,
-            phone_digits TEXT NOT NULL,
-            password_hash TEXT NOT NULL,
-            chat_id BIGINT,
-            tg_user_id BIGINT,
-            phone_ok BOOLEAN NOT NULL DEFAULT FALSE,
-            code_hash TEXT,
-            attempts INTEGER NOT NULL DEFAULT 0,
-            expires_at TIMESTAMPTZ NOT NULL
-        );
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_id BIGINT;
-    ''')
-    conn.commit()
-    cur.close()
-    conn.close()
-
-
-def phone_digits(value):
-    """'+7 700 222 22-22' -> '7002222222' (последние 10 цифр, чтобы 8 и +7 считались одним номером)"""
-    return re.sub(r'\D', '', value or '')[-10:]
-
-
-def tg_call(method, **payload):
-    try:
-        r = requests.post(f'https://api.telegram.org/bot{TG_TOKEN}/{method}', json=payload, timeout=10)
-        return r.json()
-    except requests.RequestException as e:
-        print(f'Telegram API error ({method}): {e}')
-        return {}
-
-
-def tg_send(chat_id, text, **extra):
-    return tg_call('sendMessage', chat_id=chat_id, text=text, **extra)
-
-
-def make_code_hash(token, code):
-    return hashlib.sha256(f'{token}:{code}:{secret_key}'.encode()).hexdigest()
-
-
-def get_pending(cur, token):
-    if not token:
-        return None
-    cur.execute('SELECT * FROM pending_registrations WHERE token = %s AND expires_at > NOW()', (token,))
-    return cur.fetchone()
-
-
-def issue_code(cur, conn, pending):
-    code = f'{secrets.randbelow(10 ** 6):06d}'
-    cur.execute(
-        'UPDATE pending_registrations SET code_hash = %s, attempts = 0, '
-        "expires_at = NOW() + (%s || ' minutes')::interval WHERE token = %s",
-        (make_code_hash(pending['token'], code), str(REG_TTL_MIN), pending['token'])
-    )
-    conn.commit()
-    tg_send(
-        pending['chat_id'],
-        f'Код для регистрации в OMAR ASTANA: {code}\n\n'
-        f'Действует {REG_TTL_MIN} минут. Никому его не сообщайте.',
-        reply_markup={'remove_keyboard': True}
-    )
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        name = request.form.get('name', '').strip()
-        phone = request.form.get('phone', '').strip()
-        password = request.form.get('password', '')
-
-        if not name or not password:
-            flash('Заполните имя и пароль.', 'error')
-            return redirect(url_for('register'))
-        if len(phone_digits(phone)) != 10:
-            flash('Введите номер полностью, например +7 700 222 22-22.', 'error')
-            return redirect(url_for('register'))
-        if not (TG_TOKEN and TG_BOT_USERNAME):
-            flash('Регистрация временно недоступна: не подключён Telegram-бот.', 'error')
-            return redirect(url_for('register'))
-
-        conn = get_db()
-        cur = conn.cursor()
-        cur.execute('SELECT id FROM users WHERE phone = %s', (phone,))
-        if cur.fetchone():
-            cur.close()
-            conn.close()
-            flash('Пользователь с таким номером телефона уже зарегистрирован.', 'error')
-            return redirect(url_for('register'))
-
-        token = secrets.token_urlsafe(16)
-        digits = phone_digits(phone)
-        cur.execute('DELETE FROM pending_registrations WHERE phone_digits = %s OR expires_at < NOW()', (digits,))
-        cur.execute(
-            'INSERT INTO pending_registrations (token, name, phone, phone_digits, password_hash, expires_at) '
-            "VALUES (%s, %s, %s, %s, %s, NOW() + (%s || ' minutes')::interval)",
-            (token, name, phone, digits, generate_password_hash(password), str(REG_TTL_MIN))
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        session['reg_token'] = token
-        return redirect(url_for('register_verify'))
-
-    return render_page('register')
-
-
-@app.route('/register/verify', methods=['GET', 'POST'])
-def register_verify():
-    token = session.get('reg_token')
-    conn = get_db()
-    cur = conn.cursor()
-    pending = get_pending(cur, token)
-    if not pending:
-        cur.close()
-        conn.close()
-        session.pop('reg_token', None)
-        flash('Время регистрации вышло. Заполните форму ещё раз.', 'info')
-        return redirect(url_for('register'))
-
-    if request.method == 'POST':
-        code = re.sub(r'\D', '', request.form.get('code', ''))
-
-        if not pending['code_hash']:
-            cur.close()
-            conn.close()
-            flash('Код ещё не отправлен. Откройте бота и поделитесь номером.', 'error')
-            return redirect(url_for('register_verify'))
-
-        if pending['attempts'] >= CODE_MAX_ATTEMPTS:
-            cur.execute('DELETE FROM pending_registrations WHERE token = %s', (token,))
-            conn.commit()
-            cur.close()
-            conn.close()
-            session.pop('reg_token', None)
-            flash('Слишком много неверных попыток. Начните регистрацию заново.', 'error')
-            return redirect(url_for('register'))
-
-        if not hmac.compare_digest(make_code_hash(token, code), pending['code_hash']):
-            cur.execute('UPDATE pending_registrations SET attempts = attempts + 1 WHERE token = %s', (token,))
-            conn.commit()
-            cur.close()
-            conn.close()
-            flash('Неверный код. Проверьте сообщение от бота.', 'error')
-            return redirect(url_for('register_verify'))
-
-        cur.execute('SELECT id FROM users WHERE phone = %s', (pending['phone'],))
-        if cur.fetchone():
-            cur.execute('DELETE FROM pending_registrations WHERE token = %s', (token,))
-            conn.commit()
-            cur.close()
-            conn.close()
-            session.pop('reg_token', None)
-            flash('Пользователь с таким номером телефона уже зарегистрирован.', 'error')
-            return redirect(url_for('login'))
-
-        cur.execute(
-            'INSERT INTO users (name, phone, password_hash, created_at, telegram_id) '
-            'VALUES (%s, %s, %s, %s, %s) RETURNING id',
-            (pending['name'], pending['phone'], pending['password_hash'],
-             datetime.now().strftime('%d.%m.%Y %H:%M'), pending['tg_user_id'])
-        )
-        new_user_id = cur.fetchone()['id']
-        cur.execute('DELETE FROM pending_registrations WHERE token = %s', (token,))
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        session.pop('reg_token', None)
-        session['user_id'] = new_user_id
-        flash('Номер подтверждён. Добро пожаловать в OMAR ASTANA!', 'success')
-        return redirect(url_for('profile'))
-
-    cur.close()
-    conn.close()
-    return render_page(
-        'register_verify',
-        reg_phone=pending['phone'],
-        bot_link=f'https://t.me/{TG_BOT_USERNAME}?start={token}',
-        code_sent=bool(pending['code_hash']),
-    )
-
-
-@app.route('/register/status')
-def register_status():
-    """Страница регистрации спрашивает это раз в несколько секунд: бот уже прислал код?"""
-    conn = get_db()
-    cur = conn.cursor()
-    pending = get_pending(cur, session.get('reg_token'))
-    cur.close()
-    conn.close()
-    if not pending:
-        return {'expired': True}
-    return {'expired': False, 'sent': bool(pending['code_hash'])}
-
-
-@app.route('/telegram/webhook', methods=['POST'])
-def telegram_webhook():
-    # Telegram присылает наш секрет в заголовке; чужие запросы отбрасываем
-    sent = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
-    if not TG_WEBHOOK_SECRET or not hmac.compare_digest(sent, TG_WEBHOOK_SECRET):
-        abort(404)
-
-    update = request.get_json(silent=True) or {}
-    msg = update.get('message') or {}
-    chat_id = (msg.get('chat') or {}).get('id')
-    from_id = (msg.get('from') or {}).get('id')
-    if not chat_id or not from_id:
-        return 'ok'
-
-    conn = get_db()
-    cur = conn.cursor()
-    try:
-        text = (msg.get('text') or '').strip()
-        contact = msg.get('contact')
-
-        if text.startswith('/start'):
-            parts = text.split(maxsplit=1)
-            pending = get_pending(cur, parts[1].strip() if len(parts) > 1 else '')
-            if not pending:
-                tg_send(chat_id, 'Откройте бота по кнопке на странице регистрации сайта OMAR ASTANA.')
-                return 'ok'
-            cur.execute('UPDATE pending_registrations SET chat_id = %s, tg_user_id = %s WHERE token = %s',
-                        (chat_id, from_id, pending['token']))
-            conn.commit()
-            pending = get_pending(cur, pending['token'])
-            if pending['phone_ok'] and pending['tg_user_id'] == from_id:
-                issue_code(cur, conn, pending)  # повторное нажатие «Начать» = новый код
-            else:
-                tg_send(
-                    chat_id,
-                    'Чтобы подтвердить номер, нажмите кнопку ниже и поделитесь контактом.',
-                    reply_markup={
-                        'keyboard': [[{'text': 'Поделиться номером', 'request_contact': True}]],
-                        'resize_keyboard': True,
-                        'one_time_keyboard': True,
-                    }
-                )
-
-        elif contact:
-            cur.execute(
-                'SELECT * FROM pending_registrations WHERE chat_id = %s AND tg_user_id = %s AND expires_at > NOW() '
-                'ORDER BY expires_at DESC LIMIT 1', (chat_id, from_id))
-            pending = cur.fetchone()
-            if not pending:
-                tg_send(chat_id, 'Регистрация не найдена или время вышло. Начните заново на сайте.',
-                        reply_markup={'remove_keyboard': True})
-            elif contact.get('user_id') != from_id:
-                tg_send(chat_id, 'Нужен именно ваш номер: нажмите кнопку «Поделиться номером».')
-            elif phone_digits(contact.get('phone_number')) != pending['phone_digits']:
-                tg_send(chat_id, 'Этот номер не совпадает с тем, что вы ввели на сайте. '
-                                 'Вернитесь на сайт и укажите номер, привязанный к этому Telegram.',
-                        reply_markup={'remove_keyboard': True})
-            else:
-                cur.execute('UPDATE pending_registrations SET phone_ok = TRUE WHERE token = %s', (pending['token'],))
-                conn.commit()
-                issue_code(cur, conn, pending)
-
-        else:
-            tg_send(chat_id, 'Это бот OMAR ASTANA для подтверждения номера. '
-                             'Начните регистрацию на сайте и откройте бота по кнопке.')
-    finally:
-        cur.close()
-        conn.close()
-    return 'ok'
-
-
-@app.route('/admin/telegram/setup')
-@admin_required
-def admin_telegram_setup():
-    """Один раз откройте под админом, чтобы подключить бота к сайту (нужен https)."""
-    if not (TG_TOKEN and TG_WEBHOOK_SECRET):
-        return 'Задайте TELEGRAM_BOT_TOKEN и TELEGRAM_WEBHOOK_SECRET в переменных окружения.', 400
-    url = url_for('telegram_webhook', _external=True, _scheme='https')
-    res = tg_call('setWebhook', url=url, secret_token=TG_WEBHOOK_SECRET, allowed_updates=['message'])
-    return {'webhook_url': url, 'telegram_answer': res}
 
 
 @app.errorhandler(413)
@@ -1205,11 +822,6 @@ try:
     init_db()
 except Exception as e:
     print(f'Предупреждение при инициализации БД: {e}')
-
-try:
-    init_registration_tables()
-except Exception as e:
-    print(f'Предупреждение: не созданы таблицы регистрации: {e}')
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
