@@ -220,7 +220,7 @@ def register():
         conn.close()
 
         session['user_id'] = new_user_id
-        flash('Добро пожаловать в OMAR ASTANA!', 'success')
+        flash("Добро пожаловать в MEN'S REPUBLIC!", 'success')
         return redirect(url_for('profile'))
 
     return render_page('register')
@@ -376,7 +376,7 @@ def checkout():
         address = request.form.get('address', '').strip()
         payment_method = request.form['payment_method']
 
-        location = branch if delivery_method == 'Самовывоз из филиала' else f"Доставка по Астане: {address}"
+        location = branch if delivery_method == 'Самовывоз из филиала' else f"Доставка: {address}"
         items_summary = ', '.join([f"{i['title']} (размер {i['size']}) x{i['quantity']}" for i in items])
         status = 'Оплачен онлайн' if payment_method != 'При получении' else 'Ожидает оплаты при получении'
 
