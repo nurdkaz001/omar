@@ -309,6 +309,12 @@ def register():
             flash('Пароль должен быть не короче 6 символов.', 'error')
             return redirect(url_for('register'))
 
+        try:
+            ensure_registration_schema()
+        except Exception as e:
+            flash(f'Ошибка базы данных: {e}', 'error')
+            return redirect(url_for('register'))
+
         conn = get_db()
         cur = conn.cursor()
         cur.execute(PHONE_TAKEN_SQL, (phone_digits(phone),))
@@ -876,6 +882,21 @@ def ensure_video_column():
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_new BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_sale BOOLEAN NOT NULL DEFAULT FALSE")
         cur.execute("ALTER TABLE products ADD COLUMN IF NOT EXISTS old_price INTEGER NOT NULL DEFAULT 0")
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print('Не удалось добавить колонку video_url:', e)
+
+
+ensure_video_column()
+
+
+def ensure_registration_schema():
+    """Таблица подтверждений регистрации и колонка tg_id у пользователей (в своей транзакции)."""
+    conn = get_db()
+    try:
+        cur = conn.cursor()
         cur.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS tg_id BIGINT")
         cur.execute("""
             CREATE TABLE IF NOT EXISTS pending_registrations (
@@ -891,12 +912,18 @@ def ensure_video_column():
         """)
         conn.commit()
         cur.close()
-        conn.close()
     except Exception as e:
-        print('Не удалось добавить колонку video_url:', e)
+        conn.rollback()
+        print('Не удалось подготовить таблицы регистрации:', e)
+        raise
+    finally:
+        conn.close()
 
 
-ensure_video_column()
+try:
+    ensure_registration_schema()
+except Exception:
+    pass
 
 
 def _store_file(data, name, mime):
