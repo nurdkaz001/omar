@@ -6,17 +6,17 @@
     <title>OMAR ASTANA — Мужская одежда и обувь</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f7f4ef;
-            --surface: #ece7df;
-            --ink: #2a2622;
-            --muted: #7d766c;
-            --line: #e3ddd2;
-            --accent: #a8453b;
-            --accent-soft: #f3e1dd;
-            --dark: #2b2521;
+            --bg: #f6f2ea;
+            --surface: #ebe4d6;
+            --ink: #1f1b17;
+            --muted: #7a7164;
+            --line: #ded6c6;
+            --accent: #86683c;
+            --accent-soft: #efe5d2;
+            --dark: #1c1916;
             --ok: #3a7a58;
             --ok-bg: #e3f0e8;
             --wait: #9a6416;
@@ -124,7 +124,7 @@
             padding-top: 0.04em;
         }
 
-        .hero-sub, .hero-tag, .hero-actions { display: block; }
+        .wordmark span, .hero-sub, .hero-tag, .hero-actions { display: block; }
 
         .hero-sub {
             font-size: clamp(1rem, 3.2vw, 2.4rem);
@@ -139,10 +139,10 @@
         .hero-actions { margin-top: 32px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
         .hero-actions .btn { min-width: 190px; }
 
-        .hero-actions .btn-light { background: #f7f4ef; color: var(--dark); border-color: #f7f4ef; }
-        .hero-actions .btn-light:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-        .hero-actions .btn-ghost { background: transparent; color: #f2f1ee; border-color: rgba(242, 241, 238, 0.4); }
-        .hero-actions .btn-ghost:hover { background: #f2f1ee; color: var(--dark); border-color: #f2f1ee; }
+        .btn-light { background: #f6f2ea; color: var(--dark); border-color: #f6f2ea; }
+        .btn-light:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .btn-ghost { background: transparent; color: #f2f1ee; border-color: rgba(242, 241, 238, 0.4); }
+        .btn-ghost:hover { background: #f2f1ee; color: var(--dark); border-color: #f2f1ee; }
 
         .scroll-hint {
             position: absolute !important;
@@ -160,120 +160,6 @@
         /* Единственная анимация загрузки: строки поднимаются по очереди */
         .rise { animation: rise 1s cubic-bezier(0.2, 0.7, 0.1, 1) both; animation-delay: calc(var(--d, 0) * 130ms); }
         @keyframes rise { from { opacity: 0; transform: translateY(36px); } to { opacity: 1; transform: none; } }
-
-        /* ---------- Первый экран: анимация слова OMAR ---------- */
-        /* Буквы выезжают из-под маски, расфокус пропадает, затем по буквам проходит блик.
-           Фон-подсветка слегка следует за курсором (только на компьютере). */
-        .hero::before {
-            background: radial-gradient(ellipse 62% 58% at var(--mx, 50%) var(--my, 42%), rgba(200, 110, 90, 0.30), transparent 70%);
-            opacity: 0;
-            animation: glow 1.8s ease-out 0.1s forwards;
-        }
-        @keyframes glow { to { opacity: 1; } }
-
-        .wm-mask { display: block; overflow: hidden; padding: 0.07em 0.12em 0.03em; margin: -0.07em -0.12em -0.03em; }
-
-        .ch {
-            display: inline-block;
-            padding: 0 0.09em;   /* запас под выступы букв: иначе градиент обрезает края */
-            margin: 0 -0.09em;
-            color: #f2f1ee;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            animation: chIn 1.2s cubic-bezier(0.16, 0.84, 0.24, 1) backwards, chShine 1.4s ease-in-out backwards;
-            animation-delay: calc(var(--i) * 110ms + 150ms), calc(1.45s + var(--i) * 170ms);
-        }
-        .ch:hover { transform: translateY(-3%); }
-
-        @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-            .ch {
-                background-image: linear-gradient(105deg, #f2f1ee 0%, #f2f1ee 36%, #f3bfae 46%, #ffffff 50%, #f3bfae 54%, #f2f1ee 64%, #f2f1ee 100%);
-                background-size: 250% 100%;
-                background-position: 0% 0;
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-                color: transparent;
-            }
-        }
-
-        @keyframes chIn {
-            from { transform: translateY(125%) rotate(7deg) scale(0.94); filter: blur(12px); opacity: 0; }
-            55% { filter: blur(0); opacity: 1; }
-            to { transform: none; filter: blur(0); opacity: 1; }
-        }
-        @keyframes chShine { from { background-position: 0% 0; } to { background-position: 100% 0; } }
-
-        .hero-sub { animation: track 1.7s cubic-bezier(0.2, 0.7, 0.1, 1) 0.9s backwards; }
-        @keyframes track {
-            from { letter-spacing: 0.12em; margin-left: 0.12em; opacity: 0; }
-            to { letter-spacing: 0.7em; margin-left: 0.7em; opacity: 1; }
-        }
-
-        /* ---------- Магазины: карта ---------- */
-        .store-map { display: grid; grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.7fr); gap: 20px; align-items: stretch; }
-        .store-side { display: flex; flex-direction: column; gap: 10px; }
-
-        .store-item {
-            display: grid; grid-template-columns: 36px 1fr; gap: 14px; align-items: center;
-            width: 100%; padding: 16px 18px; text-align: left; font: inherit; color: inherit;
-            border: 1px solid var(--line); border-radius: var(--r-md); background: #fffdf9; cursor: pointer;
-            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-        }
-        .store-item:hover { border-color: var(--ink); }
-        .store-item.on { border-color: var(--ink); background: #fff; box-shadow: var(--shadow); }
-        .store-num { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); font-weight: 600; font-size: 14px; transition: background 0.2s, color 0.2s; }
-        .store-item.on .store-num { background: var(--accent); color: #fff; }
-        .store-item b { display: block; font-size: 16px; font-weight: 600; line-height: 1.25; }
-        .store-item .addr { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
-
-        .map-box { position: relative; isolation: isolate; min-height: 440px; border-radius: var(--r-lg); overflow: hidden; background: var(--surface); border: 1px solid var(--line); }
-        #map { position: absolute; inset: 0; background: var(--surface); }
-        .map-ph { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 14px; }
-
-        .pin { position: relative; width: 36px; height: 36px; }
-        .pin i {
-            position: absolute; inset: 0; display: grid; place-items: center; font-style: normal;
-            background: var(--dark); color: #fff; border: 2px solid #f7f4ef; border-radius: 50% 50% 50% 0;
-            transform: rotate(-45deg); box-shadow: 0 4px 12px rgba(40, 25, 10, 0.35); transition: background 0.2s, transform 0.25s;
-        }
-        .pin i b { display: block; transform: rotate(45deg); font-size: 14px; font-weight: 700; }
-        .pin.on i { background: var(--accent); transform: rotate(-45deg) scale(1.14); }
-
-        .leaflet-container { font-family: inherit; }
-        .leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 10px 30px rgba(40, 25, 10, 0.2); }
-        .leaflet-popup-content { margin: 14px 16px; }
-        .pop b { display: block; font-size: 15px; font-weight: 600; }
-        .pop .a { display: block; color: var(--muted); font-size: 13px; margin: 2px 0 10px; }
-        .pop-actions { display: flex; gap: 8px; }
-        .pop-actions a { padding: 7px 14px; border-radius: 99px; font-size: 13px; font-weight: 500; text-decoration: none; background: var(--ink); color: #fff !important; }
-        .pop-actions a.alt { background: var(--surface); color: var(--ink) !important; }
-
-        /* ---------- Контакты ---------- */
-        .contact-panel { position: relative; overflow: hidden; background: var(--dark); color: #f2f1ee; border-radius: var(--r-lg); padding: clamp(28px, 5vw, 64px); }
-        .contact-panel::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse 50% 70% at 100% 0%, rgba(200, 110, 90, 0.28), transparent 70%); pointer-events: none; }
-        .contact-panel > * { position: relative; }
-        .contact-panel h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; }
-        .contact-panel .lead { color: #a8a7a2; margin-top: 10px; max-width: 42ch; }
-
-        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 14px; margin-top: clamp(24px, 4vw, 44px); }
-        .contact {
-            display: flex; flex-direction: column; gap: 26px; padding: 22px; text-decoration: none; color: inherit;
-            border: 1px solid rgba(242, 241, 238, 0.16); border-radius: var(--r-md); background: rgba(255, 255, 255, 0.04);
-            transition: background 0.25s, border-color 0.25s, transform 0.25s;
-        }
-        .contact:hover { background: rgba(255, 255, 255, 0.09); border-color: rgba(242, 241, 238, 0.45); transform: translateY(-3px); }
-        .contact-ico { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: rgba(242, 241, 238, 0.09); transition: background 0.25s; }
-        .contact:hover .contact-ico { background: var(--accent); }
-        .contact-ico svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-        .contact small { display: block; color: #a8a7a2; font-size: 13px; }
-        .contact strong { display: block; font-size: clamp(1.05rem, 2vw, 1.3rem); font-weight: 600; letter-spacing: -0.01em; margin-top: 2px; word-break: break-word; }
-
-        .cities { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 28px; padding-top: 22px; border-top: 1px solid rgba(242, 241, 238, 0.14); }
-        .cities > span { color: #a8a7a2; font-size: 14px; margin-right: 6px; }
-        .cities a { padding: 8px 16px; border: 1px solid rgba(242, 241, 238, 0.22); border-radius: 99px; font-size: 14px; text-decoration: none; transition: background 0.2s, color 0.2s; }
-        .cities a:hover { background: #f2f1ee; color: var(--dark); }
-        .cities a em { font-style: normal; color: #a8a7a2; margin-left: 6px; }
-        .cities a:hover em { color: var(--muted); }
 
         /* ---------- Секции главной ---------- */
         .section { padding: clamp(56px, 8vw, 104px) var(--pad) 0; }
@@ -434,9 +320,6 @@
         .page-title { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: clamp(24px, 4vw, 48px); }
         .sub { color: var(--muted); font-size: 16px; max-width: 44ch; margin-bottom: 28px; }
         .form-wrap { max-width: 440px; }
-        .steps { margin: 0 0 22px 20px; color: var(--muted); font-size: 15px; }
-        .steps li { margin-bottom: 6px; }
-        .tg-open { display: block; text-align: center; text-decoration: none; }
         .alt-link { margin-top: 22px; font-size: 14px; color: var(--muted); }
         .alt-link a { color: var(--ink); font-weight: 600; }
 
@@ -636,12 +519,6 @@
             .tile-name { font-size: 1.15rem; }
             .perks { gap: 22px; }
 
-            /* Карта и контакты */
-            .store-map { grid-template-columns: 1fr; }
-            .map-box { order: -1; min-height: 330px; border-radius: var(--r-md); }
-            .contact { flex-direction: row; align-items: center; gap: 16px; padding: 16px; }
-            .contact-panel { border-radius: var(--r-md); }
-
             /* Каталог */
             .catalog-head { padding-top: 24px; }
             .toolbar { gap: 12px; padding-top: 16px; }
@@ -700,9 +577,69 @@
 
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            .rise, .scroll-hint, .ch, .hero-sub { animation: none; }
-            .hero::before { animation: none; opacity: 1; }
+            .rise, .scroll-hint { animation: none; }
         }
+
+        /* ===== Элегантная тема: слоновая кость, графит, одна нота латуни ===== */
+        :root { --serif: "Cormorant Garamond", "Playfair Display", Georgia, serif; --gold: #c9a96e; --shadow: 0 10px 30px rgba(40, 30, 15, 0.06); }
+        ::selection { background: var(--accent-soft); }
+        .site-header { background: rgba(246, 242, 234, 0.88); backdrop-filter: blur(12px); }
+        .brand { font-family: var(--serif); font-size: 24px; font-weight: 700; letter-spacing: 0.2em; }
+        .nav a { font-size: 14px; letter-spacing: 0.03em; }
+        .nav a.on { box-shadow: 0 1px 0 var(--accent); }
+        .badge { background: var(--ink); }
+
+        .wordmark, .section-head h2, .catalog-head h1, .page-title, .pdp-title, .profile-hello h1, .tile-name,
+        .total-sum, .stat-num, .sum-total strong, .section-title, .site-footer h4, .avatar, .pdp-price, .stores-title, .perk h3, .store-card b { font-family: var(--serif); }
+        .section-head h2, .catalog-head h1, .page-title, .pdp-title { font-size: clamp(2.3rem, 4.8vw, 3.5rem); font-weight: 500; letter-spacing: -0.01em; }
+        .profile-hello h1 { font-size: clamp(2.3rem, 5vw, 3.5rem); font-weight: 500; }
+        .section-title { font-size: 1.7rem; font-weight: 600; }
+        .stat-num, .total-sum, .sum-total strong { font-weight: 600; }
+        .pdp-price { font-size: 2rem; font-weight: 600; }
+        .stores-title, .perk h3, .store-card b { font-size: 1.4rem; font-weight: 600; }
+        @media (min-width: 721px) { .tile-name { font-size: 1.9rem; } }
+        .tile-name { font-weight: 600; }
+
+        /* Первый экран */
+        .hero { background: radial-gradient(ellipse at 50% 35%, #2a241d 0%, var(--dark) 72%); }
+        .hero::before { background: radial-gradient(ellipse at 50% 45%, rgba(201, 169, 110, 0.16), transparent 60%); }
+        .hero::after { content: ""; position: absolute; inset: clamp(10px, 1.8vw, 22px); border: 1px solid rgba(201, 169, 110, 0.28); border-radius: var(--r-lg); pointer-events: none; }
+        .wordmark { font-weight: 500; letter-spacing: 0.04em; line-height: 0.9; font-size: clamp(5.5rem, 25vw, 22rem); color: #f4eee3; }
+        .hero-sub { color: var(--gold); font-weight: 500; }
+        .hero-tag { color: #b3aa9b; }
+        .scroll-hint { background: linear-gradient(var(--gold), transparent); }
+        .btn-light { background: #f4eee3; border-color: #f4eee3; }
+        .btn-light:hover { background: var(--gold); border-color: var(--gold); color: var(--dark); }
+        .btn-ghost { color: #f4eee3; border-color: rgba(201, 169, 110, 0.55); }
+        .btn-ghost:hover { background: #f4eee3; border-color: #f4eee3; color: var(--dark); }
+
+        /* Кнопки и фильтры */
+        .btn { font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 15px 30px; }
+        .chip { font-size: 13px; letter-spacing: 0.03em; }
+
+        /* Карточки */
+        .product-img { box-shadow: var(--shadow); }
+        .product-top h3 { font-size: 15.5px; }
+        .price { font-weight: 500; font-variant-numeric: tabular-nums; }
+        .product-cat, .pdp-cat { text-transform: uppercase; letter-spacing: 0.14em; font-size: 11.5px; }
+        .perks { border-top: 0; padding-top: 0; gap: 16px; }
+        .perk { padding: 28px; border: 1px solid var(--line); border-radius: var(--r-md); background: #fbf8f2; }
+        .stores { border-top-color: var(--line); }
+        .store-card { background: #fbf8f2; box-shadow: none; }
+
+        /* Кабинет */
+        .stat { background: #fbf8f2; border: 1px solid var(--line); }
+        .stat.club { background: var(--dark); border-color: var(--dark); }
+        .stat.club .stat-num { color: var(--gold); }
+        .avatar { background: var(--dark); color: var(--gold); font-weight: 600; font-size: 2.4rem; }
+        .tag.bad { background: #f3e1dd; color: #8f3a30; }
+        .alert.error, .remove:hover { color: #9b3d33; }
+        .alert.error { border-left-color: #9b3d33; }
+
+        /* Подвал */
+        .site-footer { background: var(--dark); color: #a39a8b; border: 0; }
+        .site-footer h4 { color: var(--gold); font-size: 19px; font-weight: 600; letter-spacing: 0.06em; }
+        .lightbox { background: rgba(246, 242, 234, 0.98); }
     </style>
 </head>
 <body>
@@ -762,11 +699,11 @@
         <!-- ПЕРВЫЙ ЭКРАН -->
         <section class="hero">
             <h1 class="wordmark" aria-label="OMAR ASTANA">
-                <span class="wm-mask" aria-hidden="true"><span class="ch" style="--i: 0">O</span><span class="ch" style="--i: 1">M</span><span class="ch" style="--i: 2">A</span><span class="ch" style="--i: 3">R</span></span>
-                <span class="hero-sub" aria-hidden="true">ASTANA</span>
+                <span class="rise" style="--d: 0">OMAR</span>
+                <span class="hero-sub rise" style="--d: 2">ASTANA</span>
             </h1>
-            <p class="hero-tag rise" style="--d: 6">Мужская одежда и обувь на каждый день. Четыре магазина в Астане, наличие видно по каждому.</p>
-            <div class="hero-actions rise" style="--d: 7">
+            <p class="hero-tag rise" style="--d: 4">Мужская одежда и обувь на каждый день. Четыре магазина в Астане, наличие видно по каждому.</p>
+            <div class="hero-actions rise" style="--d: 5">
                 <a href="{{ url_for('catalog') }}" class="btn btn-light">Смотреть каталог</a>
                 <a href="#stores" class="btn btn-ghost">Наши магазины</a>
             </div>
@@ -821,60 +758,16 @@
             </div>
         </section>
 
-        <!-- МАГАЗИНЫ И КАРТА -->
+        <!-- МАГАЗИНЫ -->
         <section class="section" id="stores">
             <div class="section-head"><h2>Магазины в Астане</h2></div>
-            <div class="store-map">
-                <div class="store-side">
-                    {% for s in stores %}
-                    <button type="button" class="store-item" data-id="{{ s['id'] }}">
-                        <span class="store-num">{{ loop.index }}</span>
-                        <span><b>{{ s['name'] }}</b><span class="addr">{{ s['address'] }}</span></span>
-                    </button>
-                    {% endfor %}
+            <div class="store-list">
+                {% for s in stores %}
+                <div class="store-card">
+                    <b>{{ s['name'] }}</b>
+                    <span>{{ s['address'] }}</span>
                 </div>
-                <div class="map-box" id="storeMap">
-                    <div class="map-ph" id="mapPh">Карта загружается…</div>
-                    <div id="map"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- КОНТАКТЫ -->
-        <section class="section" id="contacts">
-            <div class="contact-panel">
-                <h2>Контакты</h2>
-                <p class="lead">Напишите нам: подскажем по размерам и наличию в магазинах.</p>
-
-                <div class="contact-grid">
-                    <a class="contact" href="https://wa.me/{{ contacts.whatsapp }}?text={{ 'Здравствуйте! Пишу с сайта OMAR ASTANA'|urlencode }}" target="_blank" rel="noopener">
-                        <span class="contact-ico">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><g transform="translate(7.4 7.4) scale(0.38)" stroke-width="3.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></g></svg>
-                        </span>
-                        <span><small>WhatsApp</small><strong>{{ contacts.phone }}</strong></span>
-                    </a>
-
-                    <a class="contact" href="tel:+{{ contacts.whatsapp }}">
-                        <span class="contact-ico">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                        </span>
-                        <span><small>Позвонить</small><strong>{{ contacts.phone }}</strong></span>
-                    </a>
-
-                    <a class="contact" href="https://instagram.com/{{ contacts.instagram }}" target="_blank" rel="noopener">
-                        <span class="contact-ico">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                        </span>
-                        <span><small>Instagram</small><strong>@{{ contacts.instagram }}</strong></span>
-                    </a>
-                </div>
-
-                <div class="cities">
-                    <span>Мы есть и в других городах:</span>
-                    {% for c in contacts.cities %}
-                        <a href="https://instagram.com/{{ c.instagram }}" target="_blank" rel="noopener">{{ c.name }}<em>@{{ c.instagram }}</em></a>
-                    {% endfor %}
-                </div>
+                {% endfor %}
             </div>
         </section>
 
@@ -1022,27 +915,6 @@
                     <button type="submit" class="btn btn-block">Создать аккаунт</button>
                 </form>
                 <p class="alt-link">Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
-            </div>
-
-        <!-- ПОДТВЕРЖДЕНИЕ НОМЕРА -->
-        {% elif page == 'register_verify' %}
-            <h1 class="page-title">Подтвердите номер</h1>
-            <div class="form-wrap">
-                <p class="sub">Мы отправим код в Telegram для номера {{ reg_phone }}.</p>
-                <ol class="steps">
-                    <li>Нажмите кнопку ниже и в боте нажмите «Начать».</li>
-                    <li>Поделитесь номером кнопкой в боте.</li>
-                    <li>Введите полученный код здесь.</li>
-                </ol>
-                <a class="btn btn-block tg-open" href="{{ bot_link }}" target="_blank" rel="noopener">Открыть Telegram-бота</a>
-
-                <form method="POST" style="margin-top: 22px">
-                    <label for="code">Код из Telegram</label>
-                    <input id="code" type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="6 цифр" required>
-                    <button type="submit" class="btn btn-block">Подтвердить и создать аккаунт</button>
-                </form>
-                <p class="sub" id="tgState" style="margin: 16px 0 0">{% if code_sent %}Код отправлен в Telegram, введите его выше.{% else %}Ждём подтверждения в боте…{% endif %}</p>
-                <p class="alt-link"><a href="{{ url_for('register') }}">Изменить данные</a></p>
             </div>
 
         <!-- ВХОД -->
@@ -1279,158 +1151,6 @@
     </nav>
 
     <script>
-        {% if page == 'home' %}
-        // Подсветка за курсором на первом экране (только на компьютере)
-        (function () {
-            const hero = document.querySelector('.hero');
-            if (!hero || matchMedia('(pointer: coarse)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            let raf = 0;
-            hero.addEventListener('pointermove', (e) => {
-                if (raf) return;
-                raf = requestAnimationFrame(() => {
-                    raf = 0;
-                    const r = hero.getBoundingClientRect();
-                    hero.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-                    hero.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
-                });
-            });
-        })();
-
-        // Карта магазинов. Подгружается только когда блок почти виден — на скорость первого экрана не влияет.
-        (function () {
-            const box = document.getElementById('storeMap');
-            if (!box) return;
-
-            const STORES = [{% for s in stores %}{ id: {{ s['id'] }}, name: {{ s['name']|tojson }}, address: {{ s['address']|tojson }}, lat: {{ s.get('lat')|tojson }}, lng: {{ s.get('lng')|tojson }} }{% if not loop.last %},{% endif %}{% endfor %}];
-            const items = Array.from(document.querySelectorAll('.store-item'));
-            const ph = document.getElementById('mapPh');
-            const ASTANA = [51.1282, 71.4304];
-            const markers = {};
-            let map, userMoved = false;
-
-            function setActive(id, fly) {
-                items.forEach((el) => el.classList.toggle('on', +el.dataset.id === id));
-                Object.keys(markers).forEach((k) => markers[k].getElement()?.firstChild?.classList.toggle('on', +k === id));
-                const m = markers[id];
-                if (m && fly && map) {
-                    map.flyTo(m.getLatLng(), Math.max(map.getZoom(), 15), { duration: 0.8 });
-                    m.openPopup();
-                }
-            }
-
-            function popup(s, ll) {
-                const el = document.createElement('div');
-                el.className = 'pop';
-                const b = document.createElement('b'); b.textContent = s.name;
-                const a = document.createElement('span'); a.className = 'a'; a.textContent = s.address;
-                const act = document.createElement('div'); act.className = 'pop-actions';
-                const g = document.createElement('a');
-                g.href = 'https://www.google.com/maps/dir/?api=1&destination=' + ll[0] + ',' + ll[1];
-                g.target = '_blank'; g.rel = 'noopener'; g.textContent = 'Маршрут';
-                const d = document.createElement('a'); d.className = 'alt';
-                d.href = 'https://2gis.kz/astana/search/' + encodeURIComponent(s.address);
-                d.target = '_blank'; d.rel = 'noopener'; d.textContent = '2ГИС';
-                act.append(g, d);
-                el.append(b, a, act);
-                return el;
-            }
-
-            function addMarker(s, ll, index) {
-                const icon = L.divIcon({ className: '', html: '<div class="pin"><i><b>' + (index + 1) + '</b></i></div>', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -34] });
-                const m = L.marker(ll, { icon, title: s.name }).addTo(map).bindPopup(popup(s, ll), { closeButton: false });
-                m.on('click', () => setActive(s.id, false));
-                markers[s.id] = m;
-                if (!userMoved) {
-                    const pts = Object.values(markers).map((x) => x.getLatLng());
-                    if (pts.length > 1) map.fitBounds(L.latLngBounds(pts), { padding: [56, 56], maxZoom: 15 });
-                    else map.setView(ll, 14);
-                }
-            }
-
-            // Если координат в базе нет, ищем по адресу (OpenStreetMap) и запоминаем в браузере
-            function geocode(s) {
-                const key = 'omar_geo_v1:' + s.address;
-                try { const c = localStorage.getItem(key); if (c) return Promise.resolve({ ll: JSON.parse(c), cached: true }); } catch (e) {}
-                const q = 'Астана, ' + s.address.replace(/[«»"]/g, '').replace(/,?\s*\d+\s*этаж/i, '').replace(/^пр\.\s*/i, 'проспект ').replace(/^ул\.\s*/i, 'улица ');
-                const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ru&bounded=1&viewbox=71.2,51.3,71.7,51.0&q=' + encodeURIComponent(q);
-                return fetch(url).then((r) => r.json()).then((a) => {
-                    if (!a.length) return { ll: null };
-                    const ll = [+a[0].lat, +a[0].lon];
-                    try { localStorage.setItem(key, JSON.stringify(ll)); } catch (e) {}
-                    return { ll };
-                }).catch(() => ({ ll: null }));
-            }
-
-            async function placeMarkers() {
-                for (let i = 0; i < STORES.length; i++) {
-                    const s = STORES[i];
-                    if (s.lat != null && s.lng != null) { addMarker(s, [s.lat, s.lng], i); continue; }
-                    const r = await geocode(s);
-                    if (r.ll) addMarker(s, r.ll, i);
-                    if (!r.cached) await new Promise((res) => setTimeout(res, 1100));
-                }
-            }
-
-            function init() {
-                map = L.map('map', { scrollWheelZoom: false, dragging: !L.Browser.mobile, zoomControl: true, attributionControl: true }).setView(ASTANA, 12);
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                    maxZoom: 19, subdomains: 'abcd',
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                }).addTo(map);
-                map.on('click', () => map.scrollWheelZoom.enable());
-                map.on('mouseout', () => map.scrollWheelZoom.disable());
-                map.on('dragstart zoomstart', () => { userMoved = true; });
-                ph.remove();
-                placeMarkers();
-                items.forEach((el) => el.addEventListener('click', () => {
-                    userMoved = true;
-                    setActive(+el.dataset.id, true);
-                    if (innerWidth <= 720) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }));
-            }
-
-            function load() {
-                if (window.L) return init();
-                const css = document.createElement('link');
-                css.rel = 'stylesheet';
-                css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
-                document.head.appendChild(css);
-                const js = document.createElement('script');
-                js.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-                js.onload = init;
-                js.onerror = () => { ph.textContent = 'Не удалось загрузить карту. Адреса магазинов указаны слева.'; };
-                document.head.appendChild(js);
-            }
-
-            if ('IntersectionObserver' in window) {
-                const io = new IntersectionObserver((entries) => {
-                    if (entries.some((e) => e.isIntersecting)) { io.disconnect(); load(); }
-                }, { rootMargin: '400px' });
-                io.observe(box);
-            } else {
-                load();
-            }
-        })();
-        {% endif %}
-
-        {% if page == 'register_verify' %}
-        // Узнаём, прислал ли бот код
-        (function () {
-            const state = document.getElementById('tgState');
-            const input = document.getElementById('code');
-            const timer = setInterval(() => {
-                fetch('{{ url_for("register_status") }}').then((r) => r.json()).then((d) => {
-                    if (d.expired) { clearInterval(timer); location.href = '{{ url_for("register") }}'; return; }
-                    if (d.sent) {
-                        state.textContent = 'Код отправлен в Telegram, введите его выше.';
-                        if (document.activeElement !== input) input.focus();
-                        clearInterval(timer);
-                    }
-                }).catch(() => {});
-            }, 3000);
-        })();
-        {% endif %}
-
         function toggleDelivery() {
             const method = document.getElementById('delivery_method').value;
             document.getElementById('branch_block').style.display = (method === 'Самовывоз из филиала') ? 'block' : 'none';
