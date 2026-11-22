@@ -642,10 +642,15 @@
         .hero-line + .hero-tag { margin-top: clamp(20px, 3vw, 30px); }
         @media (prefers-reduced-motion: reduce) { .wordmark .word, .wordmark .ch, .hero-sub, .hero-line { animation: none; } }
 
+
         /* Видео товаров */
-        .reels { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-left: var(--pad); margin: 0 calc(var(--pad) * -1); padding: 0 var(--pad) 14px; scrollbar-width: thin; }
-        .reel { flex: 0 0 min(340px, 86vw); scroll-snap-align: start; }
-        .reel .instagram-media { min-width: 0 !important; max-width: 100% !important; margin: 0 !important; border: 1px solid var(--line) !important; border-radius: var(--r-lg) !important; box-shadow: none !important; overflow: hidden; }
+        .product-img video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+        .main-img[hidden] { display: none; }
+        .vmain { cursor: default; display: grid; place-items: center; aspect-ratio: auto; background: var(--surface); }
+        .vmain video { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; }
+        .vthumb { position: relative; }
+        .vthumb .play { position: absolute; inset: 0; margin: auto; width: 26px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); }
+        .vthumb .play::after { content: ""; position: absolute; left: 10px; top: 7px; border-left: 9px solid var(--ink); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
     </style>
 </head>
 <body>
@@ -688,8 +693,12 @@
         {% set extra = (p['gallery'] or '').split(',') | map('trim') | select | list %}
         <a class="product" href="{{ url_for('product', product_id=p['id']) }}">
             <div class="product-img">
+                {% if p['video_url'] %}
+                <video class="autov" src="{{ p['video_url'] }}" poster="{{ p['image_url'] }}" muted loop playsinline preload="none" aria-label="{{ p['title'] }}"></video>
+                {% else %}
                 <img src="{{ p['image_url'] }}" alt="{{ p['title'] }}" loading="lazy">
                 {% if extra %}<img class="alt" src="{{ extra[0] }}" alt="" loading="lazy">{% endif %}
+                {% endif %}
             </div>
             <div class="product-top">
                 <h3>{{ p['title'] }}</h3>
@@ -745,26 +754,6 @@
             <div class="grid">
                 {% for p in new_products %}{{ product_card(p) }}{% endfor %}
             </div>
-        </section>
-
-        <!-- ВИДЕО ТОВАРОВ (Instagram) -->
-        {# Чтобы добавить рилс, впишите его код из ссылки instagram.com/reel/КОД/ #}
-        {% set reels = ['Df7kIr8KX0z', 'Df7jXOrKKQa', 'Df7Gu6tKm3_', 'Df2NBvVNgOg'] %}
-        <section class="section" id="instagram">
-            <div class="section-head">
-                <h2>Товары в видео</h2>
-                <a class="link-more" href="https://www.instagram.com/omar.astana/" target="_blank" rel="noopener">@omar.astana</a>
-            </div>
-            <div class="reels">
-                {% for code in reels %}
-                <div class="reel">
-                    <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/reel/{{ code }}/" data-instgrm-version="14" style="background:#fff; border:0; margin:1px; max-width:540px; min-width:326px; padding:0; width:calc(100% - 2px);">
-                        <a href="https://www.instagram.com/reel/{{ code }}/" target="_blank" rel="noopener">Смотреть в Instagram</a>
-                    </blockquote>
-                </div>
-                {% endfor %}
-            </div>
-            <script async src="https://www.instagram.com/embed.js"></script>
         </section>
 
         <!-- ПРЕИМУЩЕСТВА -->
@@ -855,17 +844,27 @@
         </nav>
 
         <section class="pdp">
-            <div class="gallery {% if images|length < 2 %}single{% endif %}">
-                {% if images|length > 1 %}
+            <div class="gallery {% if images|length < 2 and not product['video_url'] %}single{% endif %}">
+                {% if images|length > 1 or product['video_url'] %}
                 <div class="thumbs">
+                    {% if product['video_url'] %}
+                    <button type="button" class="thumb vthumb on" data-video="1" aria-label="Видео">
+                        <img src="{{ images[0] if images else '' }}" alt=""><span class="play" aria-hidden="true"></span>
+                    </button>
+                    {% endif %}
                     {% for img in images %}
-                    <button type="button" class="thumb {% if loop.first %}on{% endif %}" data-src="{{ img }}" aria-label="Фото {{ loop.index }}">
+                    <button type="button" class="thumb {% if loop.first and not product['video_url'] %}on{% endif %}" data-src="{{ img }}" aria-label="Фото {{ loop.index }}">
                         <img src="{{ img }}" alt="">
                     </button>
                     {% endfor %}
                 </div>
                 {% endif %}
-                <button type="button" class="main-img" id="mainBtn" aria-label="Открыть фото на весь экран">
+                {% if product['video_url'] %}
+                <div class="main-img vmain" id="mainVid">
+                    <video src="{{ product['video_url'] }}" poster="{{ images[0] if images else '' }}" autoplay muted loop playsinline controls preload="metadata"></video>
+                </div>
+                {% endif %}
+                <button type="button" class="main-img" id="mainBtn" {% if product['video_url'] %}hidden{% endif %} aria-label="Открыть фото на весь экран">
                     <img id="mainImg" src="{{ images[0] if images else '' }}" alt="{{ product['title'] }}">
                 </button>
             </div>
@@ -1253,6 +1252,18 @@
             }));
         })();
 
+        (function () {
+            // Видео в карточках играют только когда попали на экран
+            const vids = Array.from(document.querySelectorAll('video.autov'));
+            if (!vids.length || !('IntersectionObserver' in window)) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+                if (e.isIntersecting) { e.target.muted = true; const p = e.target.play(); if (p && p.catch) p.catch(() => {}); }
+                else e.target.pause();
+            }), { threshold: 0.35 });
+            vids.forEach((v) => io.observe(v));
+        })();
+
         {% if page == 'product' %}
         // Страница товара: фото, размеры, наличие по магазинам
         (function () {
@@ -1261,8 +1272,19 @@
 
             const mainImg = document.getElementById('mainImg');
             const thumbs = Array.from(document.querySelectorAll('.thumb'));
+            const mainBtn = document.getElementById('mainBtn');
+            const mainVid = document.getElementById('mainVid');
+            const vid = mainVid ? mainVid.querySelector('video') : null;
             thumbs.forEach((t) => t.addEventListener('click', () => {
-                mainImg.src = t.dataset.src;
+                if (t.dataset.video) {
+                    mainVid.hidden = false;
+                    mainBtn.hidden = true;
+                    vid.play().catch(() => {});
+                } else {
+                    if (mainVid) { mainVid.hidden = true; vid.pause(); }
+                    mainBtn.hidden = false;
+                    mainImg.src = t.dataset.src;
+                }
                 thumbs.forEach((x) => x.classList.toggle('on', x === t));
             }));
 
