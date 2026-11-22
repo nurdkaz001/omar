@@ -336,7 +336,7 @@
                             <input id="category" name="category" list="cats" required value="{{ product['category'] if product else '' }}">
                             <datalist id="cats">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist></div>
                         <div class="field"><label for="price">Цена, ₸</label>
-                            <input id="price" name="price" type="number" min="0" step="100" required value="{{ product['price'] if product else '' }}"></div>
+                            <input id="price" name="price" type="number" min="0" step="1" inputmode="numeric" required value="{{ product['price'] if product else '' }}"></div>
                     </div>
 
                     <div class="field"><label for="sizes">Размеры через запятую</label>
