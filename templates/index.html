@@ -231,6 +231,16 @@
         .product-sizes { font-size: 13px; color: var(--muted); margin-top: 6px; }
         .empty { color: var(--muted); padding: 40px 0; }
 
+        .flags { position: absolute; top: 10px; left: 10px; z-index: 2; display: flex; gap: 6px; flex-wrap: wrap; }
+        .flag { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; padding: 4px 10px; border-radius: 99px; background: #fff; color: var(--ink); }
+        .flag.sale { background: #c8372d; color: #fff; }
+        .old-price { font-size: 13px; color: var(--muted); text-decoration: line-through; font-weight: 400; margin-right: 6px; }
+        .price.is-sale { color: #c8372d; }
+        .pdp-flags { display: flex; gap: 6px; margin-bottom: 10px; }
+        .pdp-flags .flag { background: var(--surface); }
+        .pdp-flags .flag.sale { background: #c8372d; }
+        .nav a.hot { color: #c8372d; }
+
         /* ---------- Страница товара ---------- */
         .pdp {
             display: grid;
@@ -695,10 +705,12 @@
         <a href="{{ url_for('index') }}" class="brand">MEN'S REPUBLIC</a>
 
         <nav class="nav nav-cats" aria-label="Разделы">
-            <a href="{{ url_for('catalog') }}" class="{% if page == 'catalog' and active_category == 'Все' %}on{% endif %}">Все товары</a>
+            <a href="{{ url_for('catalog') }}" class="{% if page == 'catalog' and active_category == 'Все' and not flag %}on{% endif %}">Все товары</a>
             {% for cat in nav_categories %}
-                <a href="{{ url_for('catalog', category=cat) }}" class="{% if page == 'catalog' and active_category == cat %}on{% endif %}">{{ cat }}</a>
+                <a href="{{ url_for('catalog', category=cat) }}" class="{% if page == 'catalog' and active_category == cat and not flag %}on{% endif %}">{{ cat }}</a>
             {% endfor %}
+            <a href="{{ url_for('catalog', flag='new') }}" class="{% if page == 'catalog' and flag == 'new' %}on{% endif %}">Новинки</a>
+            <a href="{{ url_for('catalog', flag='sale') }}" class="hot {% if page == 'catalog' and flag == 'sale' %}on{% endif %}">Скидки</a>
         </nav>
 
         <nav class="nav" aria-label="Аккаунт">
@@ -729,6 +741,12 @@
         {% set extra = (p['gallery'] or '').split(',') | map('trim') | select | list %}
         <a class="product" href="{{ url_for('product', product_id=p['id']) }}">
             <div class="product-img">
+                {% if p['is_new'] or p['is_sale'] %}
+                <div class="flags">
+                    {% if p['is_new'] %}<span class="flag">Новинка</span>{% endif %}
+                    {% if p['is_sale'] %}<span class="flag sale">Скидка</span>{% endif %}
+                </div>
+                {% endif %}
                 {% if p['video_url'] %}
                 <video class="autov" src="{{ p['video_url'] }}" poster="{{ p['image_url'] }}" muted loop playsinline preload="none" aria-label="{{ p['title'] }}"></video>
                 {% else %}
@@ -738,7 +756,7 @@
             </div>
             <div class="product-top">
                 <h3>{{ p['title'] }}</h3>
-                <span class="price">{{ "{:,}".format(p['price']).replace(',', ' ') }} ₸</span>
+                <span class="price {% if p['is_sale'] and p['old_price'] and p['old_price'] > p['price'] %}is-sale{% endif %}">{% if p['is_sale'] and p['old_price'] and p['old_price'] > p['price'] %}<span class="old-price">{{ "{:,}".format(p['old_price']).replace(',', ' ') }}</span>{% endif %}{{ "{:,}".format(p['price']).replace(',', ' ') }} ₸</span>
             </div>
             <p class="product-cat">{{ p['category'] }}</p>
             <p class="product-sizes">Размеры: {{ p['sizes'].replace(',', ', ') }}</p>
@@ -790,15 +808,30 @@
         </section>
 
         <!-- НОВИНКИ -->
+        {% if new_products %}
         <section class="section" data-bg="NEW">
             <div class="section-head">
                 <h2>Новинки</h2>
-                <a class="link-more" href="{{ url_for('catalog') }}">Весь каталог</a>
+                <a class="link-more" href="{{ url_for('catalog', flag='new') }}">Все новинки</a>
             </div>
             <div class="grid">
                 {% for p in new_products %}{{ product_card(p) }}{% endfor %}
             </div>
         </section>
+        {% endif %}
+
+        <!-- СКИДКИ -->
+        {% if sale_products %}
+        <section class="section" data-bg="SALE">
+            <div class="section-head">
+                <h2>Скидки</h2>
+                <a class="link-more" href="{{ url_for('catalog', flag='sale') }}">Все скидки</a>
+            </div>
+            <div class="grid">
+                {% for p in sale_products %}{{ product_card(p) }}{% endfor %}
+            </div>
+        </section>
+        {% endif %}
 
         <!-- ПРЕИМУЩЕСТВА -->
         <section class="section">
@@ -849,20 +882,23 @@
 
         <!-- КАТАЛОГ -->
         <div class="catalog-head">
-            <h1>{% if active_category != 'Все' %}{{ active_category }}{% else %}Все товары{% endif %}</h1>
+            <h1>{% if flag == 'new' %}Новинки{% elif flag == 'sale' %}Скидки{% elif active_category != 'Все' %}{{ active_category }}{% else %}Все товары{% endif %}{% if flag and active_category != 'Все' %} · {{ active_category }}{% endif %}</h1>
             <p class="count">{% if q %}По запросу «{{ q }}»: {% endif %}найдено {{ products|length }}</p>
         </div>
 
         <div class="toolbar">
             <nav class="filters" aria-label="Разделы">
-                <a class="chip {% if active_category == 'Все' %}on{% endif %}" href="{{ url_for('catalog', sort=sort, q=q or None) }}">Все</a>
+                <a class="chip {% if active_category == 'Все' and not flag %}on{% endif %}" href="{{ url_for('catalog', sort=sort, q=q or None) }}">Все</a>
+                <a class="chip {% if flag == 'new' %}on{% endif %}" href="{{ url_for('catalog', flag='new', category=active_category if active_category != 'Все' else None, sort=sort, q=q or None) }}">Новинки</a>
+                <a class="chip {% if flag == 'sale' %}on{% endif %}" href="{{ url_for('catalog', flag='sale', category=active_category if active_category != 'Все' else None, sort=sort, q=q or None) }}">Скидки</a>
                 {% for cat in nav_categories %}
-                    <a class="chip {% if active_category == cat %}on{% endif %}" href="{{ url_for('catalog', category=cat, sort=sort, q=q or None) }}">{{ cat }}</a>
+                    <a class="chip {% if active_category == cat %}on{% endif %}" href="{{ url_for('catalog', category=cat, sort=sort, q=q or None, flag=flag or None) }}">{{ cat }}</a>
                 {% endfor %}
             </nav>
 
             <form class="tools" method="GET" action="{{ url_for('catalog') }}">
                 {% if active_category != 'Все' %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+                {% if flag %}<input type="hidden" name="flag" value="{{ flag }}">{% endif %}
                 <input type="search" name="q" value="{{ q }}" placeholder="Поиск по названию" aria-label="Поиск">
                 <select name="sort" aria-label="Сортировка" onchange="this.form.submit()">
                     <option value="new" {% if sort == 'new' %}selected{% endif %}>Сначала новые</option>
@@ -918,9 +954,15 @@
             </div>
 
             <div class="pdp-info">
+                {% if product['is_new'] or product['is_sale'] %}
+                <div class="pdp-flags">
+                    {% if product['is_new'] %}<span class="flag">Новинка</span>{% endif %}
+                    {% if product['is_sale'] %}<span class="flag sale">Скидка</span>{% endif %}
+                </div>
+                {% endif %}
                 <p class="pdp-cat">{{ product['category'] }}</p>
                 <h1 class="pdp-title">{{ product['title'] }}</h1>
-                <p class="pdp-price">{{ "{:,}".format(product['price']).replace(',', ' ') }} ₸</p>
+                <p class="pdp-price">{% if product['is_sale'] and product['old_price'] and product['old_price'] > product['price'] %}<span class="old-price" style="font-size:1.1rem;">{{ "{:,}".format(product['old_price']).replace(',', ' ') }} ₸</span>{% endif %}{{ "{:,}".format(product['price']).replace(',', ' ') }} ₸</p>
                 <p class="pdp-desc">{{ product['description'] }}</p>
 
                 <form id="buyForm" action="{{ url_for('add_to_cart', product_id=product['id']) }}" method="POST">
