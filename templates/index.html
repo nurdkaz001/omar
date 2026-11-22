@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>OMAR ASTANA — Мужская одежда и обувь</title>
+    <title>MEN'S REPUBLIC — Мужская одежда и обувь | Астана</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -630,7 +630,7 @@
         .site-footer a:hover { color: var(--ink); text-decoration: underline; }
         .site-footer h4 { text-transform: uppercase; letter-spacing: 0.12em; font-size: 12px; }
 
-        /* ===== Появление слова OMAR ===== */
+        /* ===== Появление слова MEN'S ===== */
         .wordmark .word { display: block; overflow: hidden; padding: 0.1em 0.04em; margin: -0.1em 0; animation: track 2s cubic-bezier(0.16, 0.84, 0.2, 1) 0.1s backwards; }
         .wordmark .ch { display: inline-block; animation: chIn 1.2s cubic-bezier(0.16, 0.84, 0.2, 1) calc(0.2s + var(--i) * 0.12s) backwards; }
         @keyframes chIn { from { transform: translateY(112%) rotate(6deg); opacity: 0; filter: blur(14px); } 55% { opacity: 1; } }
@@ -651,12 +651,17 @@
         .vthumb { position: relative; }
         .vthumb .play { position: absolute; inset: 0; margin: auto; width: 26px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.92); }
         .vthumb .play::after { content: ""; position: absolute; left: 10px; top: 7px; border-left: 9px solid var(--ink); border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+
+        /* MEN'S REPUBLIC */
+        .wordmark { font-size: clamp(4.6rem, 23vw, 19rem); }
+        .hero-sub { font-size: clamp(1rem, 3vw, 2.2rem); }
+        @media (max-width: 720px) { .brand { font-size: 15px; letter-spacing: 0.08em; } .hero-sub { letter-spacing: 0.4em; margin-left: 0.4em; } }
     </style>
 </head>
 <body>
 
     <header class="site-header">
-        <a href="{{ url_for('index') }}" class="brand">OMAR ASTANA</a>
+        <a href="{{ url_for('index') }}" class="brand">MEN'S REPUBLIC</a>
 
         <nav class="nav nav-cats" aria-label="Разделы">
             <a href="{{ url_for('catalog') }}" class="{% if page == 'catalog' and active_category == 'Все' %}on{% endif %}">Все товары</a>
@@ -713,12 +718,12 @@
 
         <!-- ПЕРВЫЙ ЭКРАН -->
         <section class="hero">
-            <h1 class="wordmark" aria-label="OMAR ASTANA">
-                <span class="word" aria-hidden="true"><span class="ch" style="--i: 0">O</span><span class="ch" style="--i: 1">M</span><span class="ch" style="--i: 2">A</span><span class="ch" style="--i: 3">R</span></span>
-                <span class="hero-sub" aria-hidden="true">ASTANA</span>
+            <h1 class="wordmark" aria-label="MEN'S REPUBLIC">
+                <span class="word" aria-hidden="true"><span class="ch" style="--i: 0">M</span><span class="ch" style="--i: 1">E</span><span class="ch" style="--i: 2">N</span><span class="ch" style="--i: 3">'</span><span class="ch" style="--i: 4">S</span></span>
+                <span class="hero-sub" aria-hidden="true">REPUBLIC</span>
             </h1>
             <span class="hero-line" aria-hidden="true"></span>
-            <p class="hero-tag rise" style="--d: 12">Мужская одежда и обувь на каждый день. Четыре магазина в Астане, наличие видно по каждому.</p>
+            <p class="hero-tag rise" style="--d: 12">Мужская одежда и обувь. Три магазина в Астане, доставка по Казахстану и СНГ.</p>
             <div class="hero-actions rise" style="--d: 14">
                 <a href="{{ url_for('catalog') }}" class="btn btn-light">Смотреть каталог</a>
                 <a href="#stores" class="btn btn-ghost">Наши магазины</a>
@@ -768,8 +773,12 @@
                     <p>Выберите удобный магазин в Астане и заберите заказ без доплаты.</p>
                 </div>
                 <div class="perk">
-                    <h3>Доставка по Астане</h3>
-                    <p>Курьер привезёт заказ по вашему адресу.</p>
+                    <h3>Доставка по Казахстану и СНГ</h3>
+                    <p>Привезём заказ по вашему адресу.</p>
+                </div>
+                <div class="perk">
+                    <h3>Рассрочка Kaspi Red 0·0·12</h3>
+                    <p>Оплатите покупку в рассрочку через Kaspi.</p>
                 </div>
             </div>
         </section>
@@ -791,7 +800,7 @@
                     {% endfor %}
                 </ul>
                 <div class="map-frame">
-                    <iframe id="storeMap" title="Карта магазинов OMAR ASTANA" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                    <iframe id="storeMap" title="Карта магазинов MEN'S REPUBLIC" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
                         src="https://maps.google.com/maps?q={{ first_addr|urlencode }}&hl=ru&z=16&output=embed"></iframe>
                 </div>
             </div>
@@ -906,7 +915,7 @@
                 <div class="more">
                     <details>
                         <summary>Получение и доставка</summary>
-                        <p>Самовывоз из магазина в Астане бесплатный. Курьерская доставка возможна по Астане, способ выбирается при оформлении заказа.</p>
+                        <p>Самовывоз из магазина в Астане бесплатный. Доставка возможна по Казахстану и СНГ, способ выбирается при оформлении заказа.</p>
                     </details>
                     <details>
                         <summary>Как выбрать размер</summary>
@@ -937,7 +946,7 @@
         {% if page == 'register' %}
             <h1 class="page-title">Регистрация</h1>
             <div class="form-wrap">
-                <p class="sub">Аккаунт нужен для покупок и бонусов OMAR.</p>
+                <p class="sub">Аккаунт нужен для покупок и бонусов MEN'S REPUBLIC.</p>
                 <form method="POST">
                     <label for="name">Ваше имя</label>
                     <input id="name" type="text" name="name" placeholder="Например, Арман" required>
@@ -1015,11 +1024,11 @@
                     <label for="delivery_method">Способ получения</label>
                     <select name="delivery_method" id="delivery_method" onchange="toggleDelivery()">
                         <option value="Самовывоз из филиала">Самовывоз из филиала в Астане (бесплатно)</option>
-                        <option value="Курьерская доставка">Курьерская доставка по Астане</option>
+                        <option value="Курьерская доставка">Доставка по Казахстану и СНГ</option>
                     </select>
 
                     <div id="branch_block">
-                        <label for="branch">Филиал OMAR</label>
+                        <label for="branch">Магазин MEN'S REPUBLIC</label>
                         <select name="branch" id="branch">
                             {% for s in stores %}
                             <option value="{{ s['address'] }}">{{ s['address'] }}</option>
@@ -1028,7 +1037,7 @@
                     </div>
 
                     <div id="address_block" style="display: none;">
-                        <label for="address">Адрес доставки в Астане</label>
+                        <label for="address">Адрес доставки (город, улица, дом)</label>
                         <input id="address" type="text" name="address" placeholder="Улица, дом, квартира / ЖК">
                     </div>
 
@@ -1079,7 +1088,7 @@
                 <div class="avatar" aria-hidden="true">{{ current_user['name'][:1]|upper }}</div>
                 <div class="profile-hello">
                     <h1>Здравствуйте, {{ (current_user['name'].split() or [''])[0] }}</h1>
-                    <p>В клубе OMAR с {{ current_user['created_at'][:10] }}</p>
+                    <p>В клубе MEN'S REPUBLIC с {{ current_user['created_at'][:10] }}</p>
                 </div>
             </div>
 
@@ -1094,7 +1103,7 @@
                 </div>
                 <div class="stat club">
                     <div class="stat-num">{{ "{:,}".format(cashback).replace(',', ' ') }} ₸</div>
-                    <div class="stat-label">Кэшбэк 5% в клубе OMAR</div>
+                    <div class="stat-label">Кэшбэк 5% в клубе MEN'S REPUBLIC</div>
                 </div>
             </div>
 
@@ -1144,16 +1153,15 @@
         {% set contact_phone = '' %}
         <div class="footer-grid">
             <div>
-                <h4>OMAR ASTANA</h4>
-                <p>Мужская одежда и обувь в стиле casual и smart casual.</p>
+                <h4>MEN'S REPUBLIC</h4>
+                <p>Мужская одежда и обувь. Астана.</p>
+                <p>Доставка по Казахстану и СНГ.</p>
             </div>
             <div>
                 <h4>Контакты</h4>
                 {% if contact_phone %}<p><a href="tel:{{ contact_phone|replace(' ', '')|replace('-', '') }}">{{ contact_phone }}</a></p>{% endif %}
-                <p><a href="https://instagram.com/omar.astana" target="_blank" rel="noopener">Instagram @omar.astana</a></p>
-                <p><a href="https://instagram.com/omar.kokshetau" target="_blank" rel="noopener">Кокшетау @omar.kokshetau</a></p>
-                <p><a href="https://instagram.com/omar.qaragandy" target="_blank" rel="noopener">Караганда @omar.qaragandy</a></p>
-                <p><a href="https://instagram.com/omar.petropavl" target="_blank" rel="noopener">Петропавловск @omar.petropavl</a></p>
+                <p><a href="https://instagram.com/mensrepublic_astana" target="_blank" rel="noopener">Instagram @mensrepublic_astana</a></p>
+                <p>Рассрочка Kaspi Red 0·0·12</p>
             </div>
             <div>
                 <h4>Адреса в Астане</h4>
