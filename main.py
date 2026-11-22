@@ -4,10 +4,12 @@ import uuid
 import html
 import hashlib
 import secrets
+import traceback
 from datetime import datetime
 from functools import wraps
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort, jsonify
+from werkzeug.exceptions import HTTPException
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
 import requests
@@ -1240,6 +1242,19 @@ def too_large(_e):
 def forbidden(_e):
     flash('Нет доступа к админ-панели.', 'error')
     return redirect(url_for('index'))
+
+
+@app.errorhandler(Exception)
+def on_unexpected_error(e):
+    """Пишет полную ошибку в лог. При DEBUG_ERRORS=1 показывает её на странице (для отладки)."""
+    if isinstance(e, HTTPException):
+        return e
+    tb = traceback.format_exc()
+    print(f'ОШИБКА на {request.method} {request.path}:\n{tb}')
+    if os.environ.get('DEBUG_ERRORS') == '1':
+        body = f'<h2>Ошибка на {html.escape(request.method)} {html.escape(request.path)}</h2><pre style="white-space:pre-wrap;">{html.escape(tb)}</pre>'
+        return body, 500
+    return 'Internal Server Error', 500
 
 
 try:
