@@ -6,11 +6,11 @@
     <title>Админка — OMAR ASTANA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f6f2ea; --surface: #ebe4d6; --card: #fffdf9; --ink: #1f1b17; --muted: #7a7164;
-            --line: #ded6c6; --accent: #86683c; --accent-soft: #efe5d2;
+            --bg: #ffffff; --surface: #f4f4f2; --card: #ffffff; --ink: #111111; --muted: #777777;
+            --line: #e8e8e6; --accent: #2b2b2b; --accent-soft: #efefed;
             --ok: #3a7a58; --ok-bg: #e3f0e8; --wait: #9a6416; --wait-bg: #f8ecd3;
             --r-sm: 10px; --r-md: 16px; --shadow: 0 6px 24px rgba(60, 40, 20, 0.07);
             --pad: clamp(16px, 4vw, 48px);
@@ -175,19 +175,14 @@
             .save-bar .btn { flex: 1; }
         }
 
-        /* ===== Элегантная тема (как на сайте) ===== */
-        :root { --serif: "Cormorant Garamond", Georgia, serif; }
-        .top { background: rgba(255, 253, 249, 0.92); backdrop-filter: blur(12px); }
-        .top b { font-family: var(--serif); font-size: 22px; letter-spacing: 0.16em; font-weight: 700; }
-        h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 4vw, 2.7rem); }
-        .stat { background: var(--card); border: 1px solid var(--line); }
-        .stat b { font-family: var(--serif); font-size: 2.1rem; font-weight: 600; }
+        /* ===== Минимализм (как на сайте) ===== */
+        .stat { background: #fff; border: 1px solid var(--line); }
         .stat.warn { background: var(--wait-bg); border-color: transparent; }
         .btn { font-weight: 600; letter-spacing: 0.04em; }
-        .btn.danger { color: #9b3d33; border-color: #e3c3be; }
-        .btn.danger:hover { background: #9b3d33; border-color: #9b3d33; color: #fff; }
-        .tag.bad, .tag.out { background: #f3e1dd; color: #8f3a30; }
-        .alert.error { border-left-color: #9b3d33; color: #9b3d33; }
+        .btn.danger { color: #a3372c; border-color: #e6c5c0; }
+        .btn.danger:hover { background: #a3372c; border-color: #a3372c; color: #fff; }
+        .tag.bad, .tag.out { background: #f6e3e0; color: #a3372c; }
+        .alert.error { border-left-color: #a3372c; color: #a3372c; }
     </style>
 </head>
 <body>
