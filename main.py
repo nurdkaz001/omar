@@ -623,8 +623,8 @@ def _store_file(data, name, mime):
         )
         if resp.status_code not in (200, 201):
             raise RuntimeError(
-                f'Хранилище фото не приняло файл (код {resp.status_code}). '
-                f'Проверьте, что бакет «{SUPABASE_BUCKET}» создан и ключ SUPABASE_KEY верный.'
+                f'Хранилище не приняло файл (код {resp.status_code}): {resp.text[:200]}. '
+                f'Проверьте бакет «{SUPABASE_BUCKET}»: разрешённые типы файлов, лимит размера и ключ SUPABASE_KEY.'
             )
         return f'{base}/storage/v1/object/public/{SUPABASE_BUCKET}/{name}'
 
