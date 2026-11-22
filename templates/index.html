@@ -1043,6 +1043,41 @@
                 <p class="alt-link">Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
             </div>
 
+        <!-- ПОДТВЕРЖДЕНИЕ ЧЕРЕЗ TELEGRAM -->
+        {% elif page == 'verify' %}
+            <h1 class="page-title">Подтвердите номер</h1>
+            <div class="form-wrap">
+                <p class="sub">Чтобы создать аккаунт, подтвердите номер телефона в Telegram. Это защита от автоматических регистраций.</p>
+                <ol style="padding-left:20px;margin-bottom:24px;line-height:1.7;">
+                    <li>Нажмите кнопку ниже и в Telegram нажмите «Запустить» (Start).</li>
+                    <li>Нажмите «Подтвердить номер» в чате с ботом.</li>
+                    <li>Вернитесь сюда: регистрация завершится сама.</li>
+                </ol>
+                <a class="btn btn-block" href="{{ bot_link }}" target="_blank" rel="noopener">Открыть Telegram</a>
+                <p class="sub" id="verifyState" style="margin-top:20px;" aria-live="polite">Ждём подтверждения…</p>
+                <p class="alt-link">Ссылка действует {{ ttl }} минут. <a href="{{ url_for('register') }}">Начать заново</a></p>
+            </div>
+            <script>
+                (function () {
+                    var state = document.getElementById('verifyState');
+                    var timer = setInterval(function () {
+                        fetch("{{ url_for('register_status', token=token) }}", { cache: 'no-store' })
+                            .then(function (r) { return r.json(); })
+                            .then(function (d) {
+                                if (d.status === 'confirmed') {
+                                    clearInterval(timer);
+                                    state.textContent = 'Номер подтверждён, входим…';
+                                    window.location = "{{ url_for('register_finish', token=token) }}";
+                                } else if (d.status === 'expired') {
+                                    clearInterval(timer);
+                                    state.textContent = 'Время вышло. Начните регистрацию заново.';
+                                }
+                            })
+                            .catch(function () {});
+                    }, 3000);
+                })();
+            </script>
+
         <!-- ВХОД -->
         {% elif page == 'login' %}
             <h1 class="page-title">Вход</h1>
